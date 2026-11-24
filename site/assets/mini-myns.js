@@ -101,6 +101,7 @@
   }
   window.MynMyns = { iniciar };
   document.addEventListener('DOMContentLoaded', function () {
+    if (location.search.includes('print')) return; // captura de print sem canvas animado
     iniciar(document.getElementById('mynsCeu'), 16);
     iniciar(document.getElementById('mynsFundo'), 9);
   });
