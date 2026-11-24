@@ -29,10 +29,17 @@ export async function carregarMapaModelos() {
 }
 
 /** Rotas que atendem às capacidades, já ordenadas pelo scoreboard (circuitos abertos ficam por último). */
-export async function escolherPara(tarefa, max = 3) {
+export async function escolherPara(tarefa, max = 3, rapido = false) {
   const caps = classificarTarefa(tarefa);
   const mapa = await carregarMapaModelos();
-  const candidatos = mapa.filter((r) => r.capacidades.some((c) => caps.includes(c)) && !r.confirmacao);
+  let candidatos = mapa.filter((r) => r.capacidades.some((c) => caps.includes(c)) && !r.confirmacao);
+  if (rapido) {
+    const plugins = JSON.parse(await readFile(path.join(RAIZ, 'config/plugins.json'), 'utf8')).plugins;
+    const ids = new Set(plugins.filter((p) => p.acao === 'api' || p.acao === 'local').map((p) => p.id));
+    const rapidos = mapa.filter((r) => ids.has(r.id) && !r.confirmacao);
+    const casados = candidatos.filter((r) => ids.has(r.id));
+    candidatos = casados.length >= 2 ? casados : [...casados, ...rapidos.filter((r) => !casados.includes(r))];
+  }
   const saudaveis = escolherRotas(candidatos.map((r) => r.id));
   const ordem = new Map(saudaveis.map((id, i) => [id, i]));
   return candidatos.sort((a, b) => (ordem.get(a.id) ?? 999) - (ordem.get(b.id) ?? 999)).slice(0, max).map((r) => ({ ...r, capacidadesMatch: r.capacidades.filter((c) => caps.includes(c)) }));
@@ -47,9 +54,9 @@ function avaliar(texto) {
 }
 
 /** Roda as rotas em paralelo com Promise.all e escolhe a melhor resposta. */
-export async function orquestrar({ tarefa, gateway, trava, plugins, max = 3, log = () => {} }) {
+export async function orquestrar({ tarefa, gateway, trava, plugins, max = 3, rapido = false, log = () => {} }) {
   const inicio = Date.now();
-  const rotas = await escolherPara(tarefa, max);
+  const rotas = await escolherPara(tarefa, max, rapido);
   log({ etapa: 'classificar', capacidades: classificarTarefa(tarefa), rotas: rotas.map((r) => r.id) });
   const promessas = rotas.map(async (rota) => {
     const t = Date.now();

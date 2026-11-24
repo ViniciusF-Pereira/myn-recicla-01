@@ -16,6 +16,9 @@ import { contextoPara } from '../src/rag.mjs';
 import { carregarRotasGoogle, sondarGoogle, rodarRotaGoogle } from '../src/google.mjs';
 import { registrar as registrarSaude, relatorio as relatorioSaude, escolherRotas } from '../src/saude.mjs';
 import { orquestrar, classificarTarefa } from '../src/orquestrar-modelos.mjs';
+import { planejar } from '../src/planejador.mjs';
+import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
+import { handleMcp } from '../src/mcp.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = path.join(raiz, 'site');
@@ -33,6 +36,23 @@ const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  if (url.pathname === '/mcp' && req.method === 'POST') {
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const requisicao = JSON.parse(corpo || '{}');
+      requisicao._ip = String(req.socket.remoteAddress || 'local').replace(/^::ffff:/, '');
+      const resposta = await handleMcp(requisicao, 'http://127.0.0.1:' + PORTA);
+      if (!resposta) { res.writeHead(202); res.end(); return; }
+      const bytes = JSON.stringify(resposta);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'content-length': Buffer.byteLength(bytes) });
+      res.end(bytes);
+    } catch (erro) {
+      const bytes = JSON.stringify({ jsonrpc: '2.0', id: null, error: { code: -32700, message: String(erro.message).slice(0, 160) } });
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'content-length': Buffer.byteLength(bytes) });
+      res.end(bytes);
+    }
+    return;
+  }
   if (url.pathname === '/api/chat/stream' && req.method === 'GET') {
     res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', 'connection': 'keep-alive', 'x-accel-buffering': 'no' });
     const mensagem = String(url.searchParams.get('message') || '').slice(0, 6000);
@@ -79,6 +99,27 @@ const servidor = http.createServer(async (req, res) => {
       const { message, rota: id, arquivos = [] } = JSON.parse(corpo);
       if (!message || message.length > 8000) throw new Error('mensagem inválida');
       const emitido = Date.now();
+      const comandoTopo = /^\/(plan|goal|loop)\s+([\s\S]+)$/i.exec(String(message).trim());
+      if (comandoTopo) {
+        const acao = comandoTopo[1].toLowerCase(), alvo = comandoTopo[2].slice(0, 2000);
+        let resposta;
+        if (acao === 'plan') {
+          const p = await planejar(alvo);
+          resposta = '**Plano** (' + p.via + ')\n' + p.passos.map((s) => s.n + '. ' + s.acao + ' → ' + s.alvo + ' · ' + s.criterio).join('\n');
+        } else if (acao === 'goal') {
+          const g = await criarGoal({ objetivo: alvo, intervaloMs: 300000, maxExecucoes: 10 });
+          resposta = '**Goal agendado** `' + g.id + '` · ' + g.objetivo + '\n' + (g.execucoes.at(-1)?.passos || []).map((s) => s.acao + ': ' + (s.ok ? 'ok' : 'falha') + ' ' + s.detalhe).join('\n');
+        } else {
+          const p = await planejar(alvo);
+          const g = { objetivo: alvo, execucoes: [] };
+          const r = await executarCiclo(g);
+          resposta = '**Loop** ' + r.sucessos + '/' + r.total + ' em ' + r.ms + 'ms\n' + r.passos.map((s) => s.n + '. ' + s.acao + ' → ' + (s.ok ? 'ok' : 'falha') + ' ' + s.detalhe).join('\n');
+        }
+        await registrar('comando', { input: String(message).slice(0, 300), output: resposta.slice(0, 600) });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ reply: resposta, rota: acao, cache: false }));
+        return;
+      }
       const comando = extrairComando(message, plugins);
       if (comando) {
         const { plugin, entrada } = comando;
@@ -298,12 +339,56 @@ const servidor = http.createServer(async (req, res) => {
     } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
     return;
   }
+  if (req.method === 'POST' && url.pathname === '/api/plan') {
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const { objetivo, maxPassos } = JSON.parse(corpo);
+      if (!objetivo) throw new Error('objetivo ausente');
+      const plano = await planejar(String(objetivo).slice(0, 2000), { maxPassos: Math.min(6, Number(maxPassos) || 4) });
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(plano));
+    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+    return;
+  }
+  if (url.pathname === '/api/goal' && req.method === 'GET') {
+    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ goals: listarGoals() }));
+    return;
+  }
+  if (req.method === 'POST' && url.pathname === '/api/goal') {
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const b = JSON.parse(corpo);
+      const g = await criarGoal(b);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ id: g.id, objetivo: g.objetivo, intervaloMs: g.intervaloMs, maxExecucoes: g.maxExecucoes, ultima: g.execucoes.at(-1) || null }));
+    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+    return;
+  }
+  if (req.method === 'DELETE' && url.pathname === '/api/goal') {
+    const ok = await removerGoal(url.searchParams.get('id'));
+    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ ok }));
+    return;
+  }
+  if (req.method === 'POST' && url.pathname === '/api/goal/rodar') {
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const { id } = JSON.parse(corpo);
+      const g = listarGoals().find((x) => x.id === id);
+      if (!g) throw new Error('goal não encontrado');
+      const r = await executarCiclo(g);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(r));
+    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+    return;
+  }
   if (req.method === 'POST' && url.pathname === '/api/orquestrar') {
     try {
       let corpo = ''; for await (const p of req) corpo += p;
-      const { tarefa, max } = JSON.parse(corpo);
+      const { tarefa, max, rapido } = JSON.parse(corpo);
       if (!tarefa || String(tarefa).length > 3000) throw new Error('tarefa inválida');
-      const d = await orquestrar({ tarefa: String(tarefa), gateway, trava, plugins, max: Math.min(5, Math.max(1, Number(max) || 3)), log: (x) => console.log('[orq]', JSON.stringify(x)) });
+      const d = await orquestrar({ tarefa: String(tarefa), gateway, trava, plugins, max: Math.min(5, Math.max(1, Number(max) || 3)), rapido: Boolean(rapido), log: (x) => console.log('[orq]', JSON.stringify(x)) });
       await registrar('orquestracao', { input: String(tarefa).slice(0, 500), output: { vencedor: d.vencedor?.rota, notas: d.resultados.map((r) => r.rota + ':' + r.nota) } });
       res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify(d));
