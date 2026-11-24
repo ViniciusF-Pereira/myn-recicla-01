@@ -1,0 +1,9 @@
+node_modules/
+dados/
+outputs/
+.playground-workspace/
+outputs-*.json
+*.tmp
+.env
+.env.*
+.DS_Store

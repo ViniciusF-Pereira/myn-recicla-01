@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Myn Recyla/01 · Evidências do mapeamento</title>
+<style>
+:root{--myn:#176b4a;--papel:#f3efe3;--tinta:#1a241e;--mut:#65736a;--linha:#d2ccb8;--card:#fffdf6;--ambar:#e2a03c}
+*{box-sizing:border-box}body{margin:0;background:var(--papel);color:var(--tinta);font:15px/1.6 "IBM Plex Sans",system-ui,sans-serif;background-image:repeating-linear-gradient(0deg,rgba(23,107,74,.02) 0 1px,transparent 1px 5px)}
+.wrap{max-width:1100px;margin:auto;padding:0 20px 60px}
+header{display:flex;align-items:center;gap:10px;padding:16px 0;border-bottom:1px solid var(--linha)}
+.logo{width:32px;height:32px;border-radius:8px;background:var(--myn);color:#fff;display:grid;place-items:center;font:700 .75rem monospace}
+h1{font:500 2rem Georgia,serif;margin:26px 0 4px}
+.sub{color:var(--mut);margin:0 0 22px}
+.card{background:var(--card);border:1px solid var(--linha);border-radius:10px;padding:14px;margin:10px 0}
+.linha{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.badge{font:600 .65rem monospace;border:1px solid var(--linha);border-radius:99px;padding:2px 8px}
+.badge.ok{border-color:var(--myn);color:var(--myn)}.badge.erro{border-color:#b4512e;color:#b4512e}
+details{border:1px solid var(--linha);border-radius:8px;margin-top:8px}
+summary{cursor:pointer;padding:8px 10px;font-weight:600;list-style:none}
+summary:before{content:"▸ ";color:var(--myn)}
+pre{background:#111a14;color:#dfe9e1;padding:10px;border-radius:6px;overflow:auto;font:12px/1.5 monospace;max-height:240px;white-space:pre-wrap}
+img{width:160px;border:1px solid var(--linha);border-radius:6px;margin:6px 6px 0 0}
+.meta{font:600 .7rem monospace;color:var(--mut)}
+</style>
+</head>
+<body><div class="wrap">
+<header><span class="logo">MYN</span><b>Recyla/01 · evidências do mapeamento</b><a style="margin-left:auto" href="index.html">← site</a></header>
+<h1>Mapa de provedores</h1>
+<p class="sub" id="info">carregando evidências...</p>
+<div id="lista"></div>
+</div>
+<script>
+const esc = s => String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+fetch('mapeamento.json').then(r=>r.json()).then(d=>{
+ document.getElementById('info').textContent=`Mapeado em ${d.em} · gateway ${d.gateway} · sonda: "${d.probe}" · ${d.resultados.length} provedores`;
+ document.getElementById('lista').innerHTML=d.resultados.map((p,i)=>`
+ <div class="card">
+  <div class="linha"><b>${i+1}. ${esc(p.nome)}</b><span class="badge ${p.estado==='utilizavel'?'ok':'erro'}">${esc(p.estado)}</span>
+   <span class="meta">${esc(p.id)} · ${esc(p.idioma)} · ${p.ms}ms · ${p.eventos.length} eventos</span></div>
+  <div class="meta">${esc(p.url)} · login detectado: ${p.loginDetectado} · composer: ${p.composer} · ferramentas: ${esc((p.ferramentas||[]).join(', '))}</div>
+  <details><summary>Input / output de cada etapa (${p.eventos.length})</summary>
+   ${p.eventos.map(e=>`<div style="border-top:1px solid #eee;padding:6px 0"><div class="meta">${e.t} · ${esc(e.etapa)}</div><div><b>INPUT</b></div><pre>${esc(typeof e.input==='string'?e.input:JSON.stringify(e.input,null,1))}</pre><div><b>OUTPUT</b></div><pre>${esc(typeof e.output==='string'?e.output:JSON.stringify(e.output,null,1))}</pre></div>`).join('')}
+  </details>
+  ${(p.prints||[]).length?`<details><summary>Prints (${p.prints.length})</summary>${p.prints.map(f=>`<a href="${esc(f.replace(/^\.\.\//,''))}" target="_blank"><img src="${esc(f.replace(/^\.\.\//,''))}"></a>`).join('')}</details>`:''}
+ </div>`).join('');
+}).catch(e=>document.getElementById('info').textContent='Erro ao carregar: '+e.message);
+</script>
+</body></html>

@@ -1,0 +1,13 @@
+{
+  "name": "myn-portable",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Myn mínimo, portátil, somente com rotas Browser (gateway mediado). Sem chaves de API.",
+  "scripts": {
+    "smoke": "node scripts/smoke.mjs",
+    "tarefa": "node scripts/tarefa-longa.mjs",
+    "orquestrar": "node scripts/orquestrar.mjs"
+  },
+  "engines": { "node": ">=20" }
+}

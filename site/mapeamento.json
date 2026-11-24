@@ -1,0 +1,460 @@
+{
+  "em": "2026-11-24T02:12:40.693Z",
+  "gateway": "http://127.0.0.1:36877",
+  "probe": "MYN_MAP responda apenas: OK",
+  "resultados": [
+    {
+      "id": "brave-leo",
+      "nome": "Brave Leo",
+      "url": "brave://leo-ai",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "upload de arquivo",
+        "abrir abas",
+        "seletor de modelos"
+      ],
+      "envio": "type+Enter",
+      "limite": "taxa de respostas",
+      "fonte": "docs.brave.com",
+      "mapeadoEm": "2026-11-24T02:11:20.466Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10057,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:11:20.467Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:11:30.523Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "zai",
+      "nome": "Z.ai / GLM",
+      "url": "https://chat.z.ai/",
+      "idioma": "zh",
+      "login": false,
+      "ferramentas": [
+        "web search",
+        "visão",
+        "coding",
+        "MCP"
+      ],
+      "envio": "clique no botão",
+      "limite": "generoso",
+      "fonte": "docs.z.ai",
+      "mapeadoEm": "2026-11-24T02:11:30.523Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10024,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:11:30.523Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:11:40.547Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "hugging",
+      "nome": "HuggingChat",
+      "url": "https://huggingface.co/chat",
+      "idioma": "multi",
+      "login": false,
+      "ferramentas": [
+        "web search",
+        "upload PDF/DOCX",
+        "community tools"
+      ],
+      "envio": "type+Enter",
+      "limite": "comunitário",
+      "fonte": "huggingface.co/blog/community-tools",
+      "mapeadoEm": "2026-11-24T02:11:40.548Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10005,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:11:40.548Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:11:50.553Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "openrouter",
+      "nome": "OpenRouter Chat",
+      "url": "https://openrouter.ai/chat",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "600+ modelos",
+        ":free"
+      ],
+      "envio": "type+Enter",
+      "limite": "conforme modelo",
+      "fonte": "openrouter.ai",
+      "mapeadoEm": "2026-11-24T02:11:50.553Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10017,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:11:50.553Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:00.570Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "chatgpt",
+      "nome": "ChatGPT Web",
+      "url": "https://chatgpt.com/",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "voz",
+        "busca",
+        "ferramentas"
+      ],
+      "envio": "type+Enter",
+      "limite": "guest limitado",
+      "fonte": "chatgpt.com",
+      "mapeadoEm": "2026-11-24T02:12:00.570Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10010,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:00.570Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:10.580Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "claude",
+      "nome": "Claude Web",
+      "url": "https://claude.ai/",
+      "idioma": "en",
+      "login": true,
+      "ferramentas": [
+        "artifacts",
+        "ferramentas"
+      ],
+      "envio": "type+Enter",
+      "limite": "por demanda",
+      "fonte": "support.claude.com",
+      "mapeadoEm": "2026-11-24T02:12:10.580Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10011,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:10.580Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:20.591Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "kimi",
+      "nome": "Kimi",
+      "url": "https://www.kimi.com/",
+      "idioma": "zh",
+      "login": false,
+      "ferramentas": [
+        "busca web",
+        "upload de imagem",
+        "Responses API"
+      ],
+      "envio": "type+Enter",
+      "limite": "parcial",
+      "fonte": "platform.kimi.ai/docs/features",
+      "mapeadoEm": "2026-11-24T02:12:20.591Z",
+      "estado": "erro",
+      "erro": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}",
+      "ms": 2,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:20.591Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:20.593Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}"
+        }
+      ]
+    },
+    {
+      "id": "mistral",
+      "nome": "Mistral Le Chat",
+      "url": "https://chat.mistral.ai/",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "web search",
+        "upload PDF",
+        "image gen"
+      ],
+      "envio": "type+Enter",
+      "limite": "10 msg/24h",
+      "fonte": "docs.mistral.ai",
+      "mapeadoEm": "2026-11-24T02:12:20.593Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10023,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:20.593Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:30.616Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "deepseek",
+      "nome": "DeepSeek",
+      "url": "https://chat.deepseek.com/",
+      "idioma": "zh",
+      "login": true,
+      "ferramentas": [
+        "raciocínio",
+        "código"
+      ],
+      "envio": "type+Enter",
+      "limite": "20-30k tokens",
+      "fonte": "chat.deepseek.com",
+      "mapeadoEm": "2026-11-24T02:12:30.616Z",
+      "estado": "erro",
+      "erro": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}",
+      "ms": 10013,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:30.616Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:40.629Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 502 {\"ok\":false,\"error\":\"Error: CDP timeout: Page.navigate\"}"
+        }
+      ]
+    },
+    {
+      "id": "grok",
+      "nome": "Grok",
+      "url": "https://grok.com/chat",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "web/X search",
+        "voz"
+      ],
+      "envio": "type+Enter",
+      "limite": "3 msg/2h",
+      "fonte": "grok.com",
+      "mapeadoEm": "2026-11-24T02:12:40.629Z",
+      "estado": "erro",
+      "erro": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}",
+      "ms": 3,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:40.629Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:40.632Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}"
+        }
+      ]
+    },
+    {
+      "id": "perplexity",
+      "nome": "Perplexity",
+      "url": "https://perplexity.ai",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "busca com fontes"
+      ],
+      "envio": "type+Enter",
+      "limite": "3 pro/dia",
+      "fonte": "perplexity.ai",
+      "mapeadoEm": "2026-11-24T02:12:40.632Z",
+      "estado": "erro",
+      "erro": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}",
+      "ms": 13,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:40.632Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:40.645Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}"
+        }
+      ]
+    },
+    {
+      "id": "lmarena",
+      "nome": "LM Arena",
+      "url": "https://lmarena.ai/",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "40+ modelos",
+        "comparação"
+      ],
+      "envio": "type+Enter",
+      "limite": "ilimitado",
+      "fonte": "lmarena.ai",
+      "mapeadoEm": "2026-11-24T02:12:40.645Z",
+      "estado": "erro",
+      "erro": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}",
+      "ms": 16,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:40.645Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:40.661Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}"
+        }
+      ]
+    },
+    {
+      "id": "duck",
+      "nome": "Duck.ai",
+      "url": "https://duckduckgo.com/?q=DuckDuckGo+AI+Chat&ia=chat",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "chat simples"
+      ],
+      "envio": "type+Enter",
+      "limite": "generoso",
+      "fonte": "duckduckgo.com",
+      "mapeadoEm": "2026-11-24T02:12:40.661Z",
+      "estado": "erro",
+      "erro": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}",
+      "ms": 16,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:40.661Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:40.677Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}"
+        }
+      ]
+    },
+    {
+      "id": "pollinations",
+      "nome": "Pollinations",
+      "url": "https://sur.pollinations.ai/",
+      "idioma": "en",
+      "login": false,
+      "ferramentas": [
+        "vários modelos",
+        "imagem"
+      ],
+      "envio": "type+Enter",
+      "limite": "ilimitado",
+      "fonte": "pollinations.ai",
+      "mapeadoEm": "2026-11-24T02:12:40.677Z",
+      "estado": "erro",
+      "erro": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}",
+      "ms": 16,
+      "eventos": [
+        {
+          "t": "2026-11-24T02:12:40.677Z",
+          "etapa": "navigate:input",
+          "input": "[object Object]",
+          "output": ""
+        },
+        {
+          "t": "2026-11-24T02:12:40.693Z",
+          "etapa": "erro",
+          "input": "[object Object]",
+          "output": "navigate 400 {\"ok\":false,\"error\":\"url_not_allowed\"}"
+        }
+      ]
+    }
+  ]
+}

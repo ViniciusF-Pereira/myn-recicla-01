@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Painel único — agentes, SLM, juízes e rotas web</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#111614;--panel:#181e1a;--card:#1e2520;--line:#2f3a33;--txt:#eaf0ea;--mut:#98a49b;
+--a:#e2a86b;--g:#7fd6a3;--r:#e08b7a;--b:#8fc7d9;
+--sans:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;--serif:"Newsreader",Georgia,serif;
+--r8:9px;--sh:0 8px 24px rgba(0,0,0,.2)
+}
+html[data-theme="light"]{--bg:#f1eee6;--panel:#fbf9f4;--card:#fff;--line:#d8d3c7;--txt:#1b1f1d;--mut:#667068;--a:#a65728;--g:#1f6f6b;--r:#b4512e;--b:#1f6f6b;--sh:0 8px 24px rgba(27,31,29,.07)}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--txt);font:15px/1.55 var(--sans);-webkit-font-smoothing:antialiased}
+a{color:var(--b);text-underline-offset:3px}
+code{font:500 .86em var(--mono);color:var(--a)}
+#barra{position:sticky;top:0;z-index:50;background:color-mix(in srgb,var(--bg) 92%,transparent);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{display:flex;align-items:center;gap:14px;padding:11px clamp(14px,3vw,30px);max-width:1400px;margin:auto}
+.logo{font:600 1.05rem var(--serif);letter-spacing:-.02em;white-space:nowrap}
+.logo em{font-style:italic;color:var(--a)}
+.ent{font:500 .65rem var(--mono);color:var(--mut);letter-spacing:.08em;text-transform:uppercase;border-left:1px solid var(--line);padding-left:12px;white-space:nowrap}
+.spacer{flex:1}
+.busca{position:relative;display:flex;align-items:center}
+.busca input{width:190px;padding:7px 9px 7px 28px;border-radius:8px;border:1px solid var(--line);background:var(--panel);color:var(--txt);font:500 .8rem var(--sans);outline:none}
+.busca input:focus{border-color:var(--a);width:230px}
+.busca svg{position:absolute;left:8px;stroke:var(--mut)}
+.btn{height:32px;min-width:32px;padding:0 10px;border:1px solid var(--line);background:var(--panel);color:var(--txt);border-radius:8px;cursor:pointer;font:600 .72rem var(--mono);display:inline-flex;align-items:center;justify-content:center;gap:6px}
+.btn:hover{border-color:var(--a);color:var(--a)}
+.btn.ativa{background:color-mix(in srgb,var(--a) 16%,transparent);border-color:var(--a);color:var(--a)}
+#progresso{height:2px;background:var(--a);width:0;transition:width .1s linear}
+.tabs{display:flex;gap:4px;overflow-x:auto;padding:0 clamp(14px,3vw,30px) 8px;max-width:1400px;margin:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{border:1px solid transparent;background:transparent;color:var(--mut);padding:7px 13px;border-radius:99px;cursor:pointer;font:600 .76rem var(--sans);white-space:nowrap;display:flex;align-items:center;gap:7px}
+.tab:hover{color:var(--txt);background:var(--panel)}
+.tab.on{color:var(--bg);background:var(--a);border-color:var(--a)}
+html[data-theme="light"] .tab.on{color:#fff}
+.tab i{font:600 .65rem var(--mono);opacity:.75;font-style:normal}
+main{max-width:1400px;margin:auto;padding:20px clamp(14px,3vw,30px) 80px}
+.painel{display:none;animation:entra .22s ease}
+.painel.on{display:block}
+@keyframes entra{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.cab{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin:6px 0 18px;flex-wrap:wrap}
+h1{font:500 clamp(1.9rem,3.4vw,2.9rem)/1.05 var(--serif);letter-spacing:-.03em;margin:0}
+h1 em{font-style:italic;color:var(--a)}
+h2{font:600 .95rem var(--sans);margin:0 0 10px;letter-spacing:.01em}
+h3{font:600 .82rem var(--mono);color:var(--mut);text-transform:uppercase;letter-spacing:.08em;margin:18px 0 8px}
+.sub{color:var(--mut);max-width:78ch;margin:4px 0 0}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(165px,1fr));gap:10px;margin-bottom:16px}
+.kpi{background:var(--card);border:1px solid var(--line);border-radius:var(--r8);padding:13px 15px;box-shadow:var(--sh)}
+.kpi b{display:block;font:600 1.5rem/1.1 var(--mono);color:var(--g);letter-spacing:-.04em}
+.kpi small{display:block;color:var(--mut);font:500 .68rem var(--mono);text-transform:uppercase;letter-spacing:.07em;margin-top:6px}
+.kpi p{margin:6px 0 0;font-size:.8rem;color:var(--mut)}
+.col{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r8);padding:15px 17px;box-shadow:var(--sh)}
+.card.comp{max-height:340px;overflow:auto}
+.card h4{margin:0 0 7px;font:600 .9rem var(--sans)}
+.card p{margin:.4em 0;font-size:.86rem;color:var(--mut)}
+.card ul{margin:.4em 0;padding-left:18px;font-size:.86rem;color:var(--mut)}
+.card li{margin:3px 0}
+.tbl{width:100%;border-collapse:collapse;font-size:.82rem}
+.tbl th,.tbl td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+.tbl th{font:600 .65rem var(--mono);color:var(--mut);text-transform:uppercase;letter-spacing:.07em}
+.tbl tr:last-child td{border-bottom:0}
+.ok{color:var(--g)} .bad{color:var(--r)}
+.bar{height:7px;background:var(--panel);border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;border-radius:99px;background:var(--g)}
+.bar.a i{background:var(--a)} .bar.b i{background:var(--b)}
+.linha{display:grid;grid-template-columns:150px 1fr 70px;gap:10px;align-items:center;margin:8px 0;font:500 .78rem var(--mono)}
+.cmd{display:flex;align-items:center;gap:8px;background:#0d100e;color:#dfe9e1;border:1px solid var(--line);border-radius:var(--r8);padding:9px 12px;font:500 .76rem var(--mono);overflow:auto}
+.cmd span{flex:1;white-space:pre}
+.copy{border:1px solid #56625a;color:#dfe9e1;background:transparent;border-radius:6px;padding:3px 7px;cursor:pointer;font:600 .66rem var(--mono)}
+.copy:hover{border-color:var(--g)}
+details{border:1px solid var(--line);border-radius:var(--r8);background:var(--card);margin:8px 0;padding:0 13px}
+summary{cursor:pointer;padding:10px 0;font:600 .84rem var(--sans);list-style:none}
+summary::-webkit-details-marker{display:none}
+summary:before{content:"▸";color:var(--a);margin-right:8px}
+details[open] summary:before{content:"▾"}
+details .in{padding-bottom:11px;font-size:.83rem;color:var(--mut)}
+.pildora{display:inline-block;border:1px solid var(--line);border-radius:99px;padding:2px 8px;font:600 .64rem var(--mono);color:var(--mut);margin:2px}
+.pildora.ok{border-color:var(--g);color:var(--g)} .pildora.a{border-color:var(--a);color:var(--a)}
+.nota{border-left:3px solid var(--a);background:color-mix(in srgb,var(--a) 8%,transparent);padding:10px 14px;border-radius:0 var(--r8) var(--r8) 0;font-size:.85rem;margin:12px 0}
+.nota.ok{border-left-color:var(--g);background:color-mix(in srgb,var(--g) 8%,transparent)}
+footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:var(--mut);font:.74rem var(--mono)}
+.topbtn{position:fixed;right:18px;bottom:18px;width:38px;height:38px;border-radius:50%;border:0;background:var(--txt);color:var(--bg);cursor:pointer;opacity:0;pointer-events:none;transition:opacity .2s}
+.topbtn.show{opacity:1;pointer-events:auto}
+::-webkit-scrollbar{width:8px;height:8px}::-webkit-scrollbar-thumb{background:var(--line);border-radius:99px}
+@media(max-width:700px){.ent{display:none}.busca input{width:130px}.linha{grid-template-columns:95px 1fr 50px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+@media print{.tabs,.btn,.busca,.topbtn{display:none}.painel{display:block!important;page-break-before:always}}
+</style>
+</head>
+<body>
+<div id="barra">
+ <div class="top">
+  <div class="logo">Myn <em>/</em> painel único</div>
+  <div class="ent">22–23 nov 2026</div>
+  <div class="spacer"></div>
+  <div class="busca"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="filtro" placeholder="buscar..."></div>
+  <button class="btn" id="tema" title="Tema">◐</button>
+  <button class="btn" id="print" title="Imprimir">⎙</button>
+  <button class="btn" id="expandir" title="Expandir tudo">⇕</button>
+ </div>
+ <div class="tabs" id="tabs">
+  <button class="tab on" data-p="sintese"><i>00</i> Síntese</button>
+  <button class="tab" data-p="pesquisa"><i>01</i> Pesquisa</button>
+  <button class="tab" data-p="engenharia"><i>02</i> Engenharia</button>
+  <button class="tab" data-p="juizes"><i>03</i> SLM + juízes</button>
+  <button class="tab" data-p="rotas"><i>04</i> Rotas web</button>
+  <button class="tab" data-p="provas"><i>05</i> Provas</button>
+  <button class="tab" data-p="tarefa"><i>06</i> Tarefa longa</button>
+  <button class="tab" data-p="fontes"><i>07</i> Fontes</button>
+ </div>
+ <div id="progresso"></div>
+</div>
+
+<main>
+<!-- SÍNTESE -->
+<section class="painel on" id="sintese">
+ <div class="cab"><div><h1>Menos tools.<br><em>Mais entrega.</em></h1><p class="sub">Consolidação de uma semana de pesquisa, engenharia e provas ao vivo. Sem chaves expostas e com as lacunas declaradas.</p></div></div>
+ <div class="kpis">
+  <div class="kpi"><b>150k→2k</b><small>Tokens · Anthropic</small><p>Fluxo Drive→Salesforce; mede dados intermediários.</p></div>
+  <div class="kpi"><b>1,17mi→1k</b><small>Schemas · Cloudflare</small><p>Footprint de 2.500 definições de tools.</p></div>
+  <div class="kpi"><b>−47%</b><small>Tokens · GPT-5.4</small><p>36 servidores MCP, mesma acurácia.</p></div>
+  <div class="kpi"><b>646 ms</b><small>SLM de reparo real</small><p>groq-fast corrigiu tool call quebrada.</p></div>
+  <div class="kpi"><b>3/3</b><small>Matriz de juízes</small><p>Casos correto, errado e injeção.</p></div>
+  <div class="kpi"><b>6/6</b><small>Tarefa longa</small><p>Z.ai decidiu, Myn executou 15 passos.</p></div>
+ </div>
+ <div class="col">
+  <div class="card"><h4>O que ficou provado</h4><ul>
+   <li>Cartão 1030 entregue por rota do Myn, aceite + commit <code>b82ddda1</code>.</li>
+   <li>Painel de juízes com maioria e divergência registrada.</li>
+   <li>SLM de reparo ativo no loop e como ferramenta.</li>
+   <li>Chats web integrados como rotas free, sem Gemini.</li>
+  </ul></div>
+  <div class="card"><h4>Progresso das frentes</h4>
+   <div class="linha"><span>Pesquisa web</span><div class="bar"><i style="width:100%"></i></div><span>100%</span></div>
+   <div class="linha"><span>OpenCode V2</span><div class="bar"><i style="width:92%"></i></div><span>92%</span></div>
+   <div class="linha"><span>SLM + juízes</span><div class="bar"><i style="width:96%"></i></div><span>96%</span></div>
+   <div class="linha"><span>Rotas web</span><div class="bar a"><i style="width:78%"></i></div><span>78%</span></div>
+   <div class="linha"><span>Leitura do Leo</span><div class="bar b"><i style="width:55%"></i></div><span>55%</span></div>
+  </div>
+  <div class="card"><h4>Regra de ouro</h4><p>Reduzir <b>número de chamadas</b>, <b>tokens por chamada</b> e <b>latência</b> são três coisas distintas. Meça as três no seu workflow — não há benchmark independente que as trate como métrica de primeira classe.</p><span class="pildora ok">sem chaves</span><span class="pildora ok">rotas free</span><span class="pildora a">OCR declarado</span></div>
+ </div>
+</section>
+
+<!-- PESQUISA -->
+<section class="painel" id="pesquisa">
+ <div class="cab"><div><h2>Pesquisa: ferramentas que cortam chamadas</h2><p class="sub">Decisão rápida antes de abrir qualquer tabela.</p></div></div>
+ <div class="card"><ul>
+  <li><b>Descoberta ampla</b> → Brave LLM Context (US$5/1k, P90 &lt;500 ms) ou Parallel Fast (US$1/1k).</li>
+  <li><b>Relatório citado</b> → Tavily Research, Exa Deep/Agent, Brave Answers.</li>
+  <li><b>URL conhecida</b> → <code>r.jina.ai</code> com seletor CSS ou trafilatura/Crawl4AI.</li>
+  <li><b>Interação</b> → Stagehand + Browserbase; Browser Use V4 com REPL persistente.</li>
+  <li><b>Coding agent enxuto</b> → Playwright CLI + SKILLs, não MCP cheio de schemas.</li>
+ </ul></div>
+ <h3>Comparativo rápido</h3>
+ <div class="card comp"><table class="tbl"><thead><tr><th>Camada</th><th>Ferramenta</th><th>O que corta</th><th>Preço</th></tr></thead><tbody>
+  <tr><td>Browser</td><td>Stagehand v4</td><td><code>act/extract/observe</code>, Agents</td><td>US$0,10–0,12/h</td></tr>
+  <tr><td>Browser</td><td>Browser Use V4</td><td>REPL persistente</td><td>US$0,06/h</td></tr>
+  <tr><td>Browser</td><td>Playwright MCP</td><td>accessibility tree</td><td>grátis</td></tr>
+  <tr><td>Browser</td><td>Steel / Skyvern / Hyperbrowser / AgentQL</td><td>lote, self-healing, query semântica</td><td>vários</td></tr>
+  <tr><td>Busca</td><td>Brave LLM Context</td><td>trechos pré-extraídos</td><td>US$5/1k</td></tr>
+  <tr><td>Busca</td><td>Tavily / Exa / Firecrawl</td><td>conteúdo na resposta</td><td>créditos</td></tr>
+  <tr><td>Leitura</td><td>Jina / trafilatura / Crawl4AI</td><td>Markdown limpo</td><td>keyless/self-host</td></tr>
+  <tr><td>Dados</td><td>SerpApi / Apify / Diffbot</td><td>schemas, Actors, entidades</td><td>planos</td></tr>
+ </tbody></table></div>
+ <div class="nota"><b>Armadilha:</b> <code>s.jina.ai</code> cobra 10.000 tokens fixos por request. Search barato + Extract seletivo pode sair mais barato.</div>
+</section>
+
+<!-- ENGENHARIA -->
+<section class="painel" id="engenharia">
+ <div class="cab"><div><h2>Engenharia: técnicas + OpenCode V2</h2><p class="sub">Code Mode virou padrão; tool search é complementar, não substituto.</p></div></div>
+ <div class="col">
+  <div class="card"><h4>Técnicas por impacto</h4><div class="linha"><span>Code Mode</span><div class="bar"><i style="width:98%"></i></div><span>98%</span></div><div class="linha"><span>Tool search</span><div class="bar"><i style="width:85%"></i></div><span>85%</span></div><div class="linha"><span>Arquivos + rg</span><div class="bar"><i style="width:47%"></i></div><span>47%</span></div><div class="linha"><span>Respostas concise</span><div class="bar"><i style="width:33%"></i></div><span>33%</span></div><p style="font-size:.8rem;color:var(--mut)">Percentuais auto-reportados por fornecedores, com denominadores diferentes.</p></div>
+  <div class="card"><h4>OpenCode V2</h4><ul><li><code>execute</code> roda JS num runtime sem filesystem/imports/timers; <code>fetch</code> disponível.</li><li><code>search()</code> descobre ferramentas dentro da mesma chamada — catálogo é parcial.</li><li>Compactação mantém ~15k tokens recentes; warming preserva cache.</li><li>MCP V2: <code>mcp.servers</code>, <code>disabled</code>, <code>codemode:true</code>, OAuth, pooling.</li><li>Negar <code>execute</code> traz schemas completos de volta em toda requisição.</li></ul></div>
+ </div>
+ <h3>Composição em uma chamada</h3>
+ <div class="cmd"><span>const r = await Promise.allSettled([ tools.opencode.models({}), tools.browser.tabs.list({}), fetch(url).then(x=&gt;x.text()) ]);</span><button class="copy">copiar</button></div>
+ <details><summary>Mecanismos e armadilhas do runtime</summary><div class="in">Erro de tool inexistente virou promise rejeitada (v2.3.1); VM bytecode experimental em <code>experimental.codemode_vm</code>; call IDs por ferramenta em hooks; namespace chamado como tool sugere até três reais; <code>fetch</code> checa redirects contra regras de webfetch. Algoritmo de <code>search()</code> e tipo exato do sandbox não são documentados publicamente.</div></details>
+</section>
+
+<!-- SLM + JUÍZES -->
+<section class="painel" id="juizes">
+ <div class="cab"><div><h2>SLM de reparo + painel de juízes</h2><p class="sub">Determinístico primeiro, modelo rápido no fallback, maioria decide.</p></div></div>
+ <div class="col">
+  <div class="card"><h4>Reparo em 3 camadas</h4><ol style="font-size:.84rem;color:var(--mut);padding-left:20px"><li><b>Determinístico:</b> cercas, aspas, vírgulas, argumentos em string.</li><li><b>SLM:</b> groq-fast, 256 tokens, 8 s, timeout oportunista.</li><li><b>Filtro:</b> resposta volta pelo reparo e pelo allowlist de nomes.</li></ol><p class="ok" style="font-size:.82rem">Prova real: 646 ms.</p></div>
+  <div class="card"><h4>Painel</h4><p><code>MYNCELLIUM_JUDGE_PANEL=1</code> → todos os revisores em paralelo; maioria decide; empate vira <code>unverified</code>; divergência em <code>findings</code>. Classificador de injeção só aceita SIM/NAO exatos.</p><span class="pildora ok">3/3 casos</span><span class="pildora a">divergência registrada</span></div>
+ </div>
+ <h3>Matriz ao vivo</h3>
+ <div class="card comp"><table class="tbl"><thead><tr><th>caso</th><th>esperado</th><th>painel</th><th>consenso</th></tr></thead><tbody>
+  <tr><td>arquivo-correto</td><td>working</td><td class="ok">working ✓</td><td>unanimous</td></tr>
+  <tr><td>arquivo-errado</td><td>not_working</td><td class="ok">not_working ✓</td><td>unanimous</td></tr>
+  <tr><td>instrução escondida</td><td>not_working</td><td class="ok">not_working ✓</td><td>majority</td></tr>
+ </tbody></table></div>
+ <div class="cmd"><span>node scripts/avaliar-painel.ts</span><button class="copy">copiar</button></div>
+</section>
+
+<!-- ROTAS -->
+<section class="painel" id="rotas">
+ <div class="cab"><div><h2>Rotas de navegador</h2><p class="sub">Gateway mediado, token curto, allowlist. Gemini Web removido como rota.</p></div></div>
+ <div class="col">
+  <div class="card"><h4>Brave Leo</h4><p><code>brave://leo-ai</code> no Brave real, gateway 36877. Envio provado (PONG), leitura por OCR. Tem tools de UI (upload/open tabs), mas não é tool calling do harness.</p><span class="pildora a">OCR</span></div>
+  <div class="card"><h4>Z.ai · Guest</h4><p><code>chat.z.ai</code> sem login. Decisor da tarefa longa, sem limite de taxa. Mistral exige termos/login; GLM-ai.chat é FAQ — o chat é Z.ai.</p><span class="pildora ok">sem login</span></div>
+  <div class="card"><h4>Outras rotas descobertas</h4><p>HuggingChat, OpenRouter, ChatGPT e Claude em <code>&lt;state&gt;/rotas-extra.json</code>, todas free, <code>candidata</code>, <code>tools:false</code>.</p></div>
+  <div class="card"><h4>Providers em outros idiomas (pesquisa)</h4><p><b>China:</b> Kimi (busca web, upload de imagem, Responses API com function tools), Z.ai/GLM (Web Search MCP, Web Reader, visão), Qwen, Doubao. <b>Japão:</b> gpt.chat, bota.chat, ainologin.com, notrack.ai. <b>Coreia:</b> gpt.chat/ko, freegpt.ai/ko, chatg.org. <b>Rússia:</b> rugpt.io, aibro.io, GigaChat (exige Sber ID). <b>HuggingChat:</b> web search, upload PDF/DOCX, Community Tools (sem code execution nativo).</p></div>
+ </div>
+ <h3>Comandos</h3>
+ <div class="cmd"><span>MYNCELLIUM_GATEWAY_REAL_CHROME=1 node scripts/gateway-vm.mjs</span><button class="copy">copiar</button></div>
+ <div class="cmd"><span>node scripts/leo-configura-rotas.ts &amp;&amp; node scripts/leo-integra-com-tools.ts</span><button class="copy">copiar</button></div>
+</section>
+
+<!-- PROVAS -->
+<section class="painel" id="provas">
+ <div class="cab"><div><h2>Validações e segurança</h2><p class="sub">Evidência bruta, não apenas resumo.</p></div></div>
+ <div class="col">
+  <div class="card"><h4>Testes</h4><div class="linha"><span>Testes focados</span><div class="bar"><i style="width:100%"></i></div><span>33/33</span></div><div class="linha"><span>Matriz juízes</span><div class="bar"><i style="width:100%"></i></div><span>3/3</span></div><div class="linha"><span>Typecheck</span><div class="bar"><i style="width:100%"></i></div><span>0 erros</span></div><div class="linha"><span>Cartão 1030</span><div class="bar"><i style="width:100%"></i></div><span>ok</span></div></div>
+  <div class="card"><h4>Segurança verificada</h4><ul><li>Nenhuma chave impressa ou enviada.</li><li>Nenhum código-fonte entregue ao juiz.</li><li>Nenhuma rota sensível (Codex/CLI).</li><li>Injeção tratada como dado.</li><li>Gemini Web fora das rotas.</li></ul></div>
+ </div>
+ <h3>Evidências em disco</h3>
+ <div class="card"><table class="tbl"><tbody>
+  <tr><td>Testes</td><td><code>outputs/validacao-testes-20261123.txt</code></td></tr>
+  <tr><td>Juízes</td><td><code>outputs/avaliacao-painel-20261123.json</code></td></tr>
+  <tr><td>Leo</td><td><code>outputs/leo-aovivo-20261123.jpg</code></td></tr>
+  <tr><td>Z.ai</td><td><code>outputs/zai-longa-transcricao.json</code></td></tr>
+ </tbody></table></div>
+</section>
+
+<!-- TAREFA LONGA -->
+<section class="painel" id="tarefa">
+ <div class="cab"><div><h2>Tarefa longa com Z.ai</h2><p class="sub">O mesmo loop de tools, agora sem limite de taxa.</p></div></div>
+ <div class="kpis"><div class="kpi"><b>6/6</b><small>arquivos</small></div><div class="kpi"><b>15</b><small>passos</small></div><div class="kpi"><b>13</b><small>aceitos</small></div></div>
+ <div class="card comp"><table class="tbl"><thead><tr><th>arquivo</th><th>conteúdo</th></tr></thead><tbody>
+ <tr><td>README.txt</td><td>guia-myn-web</td></tr><tr><td>config.txt</td><td>config-6-rotas</td></tr><tr><td>rotas.txt</td><td>6-rotas-liberadas</td></tr><tr><td>plano.txt</td><td>planejar-agir-validar</td></tr><tr><td>notas.txt</td><td>sem-chaves-sem-gemini</td></tr><tr><td>resumo.txt</td><td>6 rotas sem login</td></tr>
+ </tbody></table></div>
+ <div class="nota ok"><b>Contraste:</b> o Leo bateu o limite de taxa e repetiu o README; o Z.ai Guest completou os seis arquivos.</div>
+ <div class="cmd"><span>node scripts/web-tarefa-longa.ts</span><button class="copy">copiar</button></div>
+</section>
+
+<!-- FONTES -->
+<section class="painel" id="fontes">
+ <div class="cab"><div><h2>Fontes, commits e lacunas</h2><p class="sub">Documentação oficial, GitHub, papers e evidências locais.</p></div></div>
+ <div class="col">
+  <div class="card"><h4>Docs locais</h4><p><code>docs/brain/gemini-web-como-rota-do-myn.md</code><br><code>docs/brain/slm-reparo-e-rotas-brave-20261123.md</code><br><code>docs/brain/como-o-leo-usa-tools.md</code><br><code>docs/msp-usage/entrega-autonoma-rota-myn-20261122/recibo.json</code></p></div>
+  <div class="card"><h4>Externas</h4><p><a href="https://support.brave.com/hc/en-us/articles/34070140231821-How-do-I-use-the-Bring-Your-Own-Model-BYOM-with-Brave-Leo">Brave BYOM</a> · <a href="https://docs.z.ai/guides/tools/web-search">Z.ai Web Search</a> · <a href="https://platform.kimi.ai/docs/features">Kimi features</a> · <a href="https://huggingface.co/blog/community-tools">HuggingChat tools</a> · <a href="https://api-dashboard.search.brave.com/documentation/services/llm-context">Brave LLM Context</a> · <a href="https://arxiv.org/html/2601.14192v2">Survey eficiência</a></p></div>
+  <div class="card"><h4>Commits</h4><p><code>1c5ffc2b</code> · <code>607b831c</code> · <code>7e1f3746</code> · <code>6b836ee3</code> · <code>3c963120</code> · <code>72247028</code> · <code>520176e1</code> · <code>866805b3</code> · <code>1240a9d6</code> · <code>4c1c90cc</code></p></div>
+  <div class="card"><h4>Lacunas</h4><p>Números de fornecedor não replicados; leitura do Leo por OCR; Mistral exige login; Qwen/DeepSeek pedem login; token do gateway expira em 30 min; algoritmo de <code>search()</code> não documentado.</p></div>
+ </div>
+ <footer>Relatório único consolidado em 23/11/2026. Os HTMLs anteriores ficam em <code>reports/_arquivo/</code>. Nenhuma chave ou segredo foi reproduzido.</footer>
+</section>
+</main>
+<button class="topbtn" id="topo" aria-label="Topo">↑</button>
+<script>
+(function(){
+ var abas=[].slice.call(document.querySelectorAll('.tab')),painéis=[].slice.call(document.querySelectorAll('.painel')),
+     filtro=document.getElementById('filtro'),tema=document.getElementById('tema'),prog=document.getElementById('progresso'),
+     topo=document.getElementById('topo');
+ function ativar(id){
+   abas.forEach(function(b){b.classList.toggle('on',b.dataset.p===id)});
+   painéis.forEach(function(p){p.classList.toggle('on',p.id===id)});
+   scrollTo({top:0,behavior:'smooth'});
+ }
+ abas.forEach(function(b){b.addEventListener('click',function(){ativar(b.dataset.p)})});
+ filtro.addEventListener('input',function(){
+   var q=filtro.value.trim().toLowerCase();
+   if(!q){painéis.forEach(function(p){p.classList.add('on')});abas.forEach(function(b){b.classList.add('on')});return}
+   var vistos=[];
+   painéis.forEach(function(p){
+     var b=abas.find(function(x){return x.dataset.p===p.id});
+     var acha=p.textContent.toLowerCase().indexOf(q)>=0;
+     p.classList.toggle('on',acha); if(b)b.classList.toggle('on',acha); if(acha)vistos.push(p.id);
+   });
+   if(vistos.length===1)ativar(vistos[0]);
+ });
+ tema.addEventListener('click',function(){
+   document.documentElement.dataset.theme=document.documentElement.dataset.theme==='dark'?'light':'dark';
+   try{localStorage.setItem('relatorio-tema',document.documentElement.dataset.theme)}catch(e){}
+ });
+ try{var s=localStorage.getItem('relatorio-tema');if(s)document.documentElement.dataset.theme=s}catch(e){}
+ document.getElementById('print').addEventListener('click',function(){print()});
+ document.getElementById('expandir').addEventListener('click',function(){
+   var ds=[].slice.call(document.querySelectorAll('details'));
+   var fecha=ds.some(function(d){return d.open});
+   ds.forEach(function(d){d.open=!fecha});
+   this.classList.toggle('ativa',!fecha);
+ });
+ document.querySelectorAll('.copy').forEach(function(b){
+   b.addEventListener('click',function(){
+     var t=b.parentNode.querySelector('span').textContent;
+     navigator.clipboard.writeText(t).then(function(){var o=b.textContent;b.textContent='ok';setTimeout(function(){b.textContent=o},1100)});
+   });
+ });
+ addEventListener('scroll',function(){
+   var h=document.documentElement.scrollHeight-innerHeight;
+   prog.style.width=(h>0?scrollY/h*100:0)+'%';
+   topo.classList.toggle('show',scrollY>400);
+ },{passive:true});
+ topo.addEventListener('click',function(){scrollTo({top:0,behavior:'smooth'})});
+ addEventListener('keydown',function(e){
+   if(e.key==='/'&&document.activeElement!==filtro){e.preventDefault();filtro.focus()}
+   if(e.key==='Escape'){filtro.value='';filtro.dispatchEvent(new Event('input'));filtro.blur()}
+ });
+})();
+</script>
+</body>
+</html>

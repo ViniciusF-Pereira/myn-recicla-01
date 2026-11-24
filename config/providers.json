@@ -1,0 +1,18 @@
+{
+  "providers": [
+    { "id": "brave-leo", "nome": "Brave Leo", "url": "brave://leo-ai", "idioma": "en", "login": false, "ferramentas": ["upload de arquivo", "abrir abas", "seletor de modelos"], "envio": "type+Enter", "limite": "taxa de respostas", "fonte": "docs.brave.com" },
+    { "id": "zai", "nome": "Z.ai / GLM", "url": "https://chat.z.ai/", "idioma": "zh", "login": false, "ferramentas": ["web search", "visão", "coding", "MCP"], "envio": "clique no botão", "send": {"x": 868, "y": 544}, "limite": "generoso", "fonte": "docs.z.ai" },
+    { "id": "hugging", "nome": "HuggingChat", "url": "https://huggingface.co/chat", "idioma": "multi", "login": false, "ferramentas": ["web search", "upload PDF/DOCX", "community tools"], "envio": "type+Enter", "limite": "comunitário", "fonte": "huggingface.co/blog/community-tools" },
+    { "id": "openrouter", "nome": "OpenRouter Chat", "url": "https://openrouter.ai/chat", "idioma": "en", "login": false, "ferramentas": ["600+ modelos", ":free"], "envio": "type+Enter", "limite": "conforme modelo", "fonte": "openrouter.ai" },
+    { "id": "chatgpt", "nome": "ChatGPT Web", "url": "https://chatgpt.com/", "idioma": "en", "login": false, "ferramentas": ["voz", "busca", "ferramentas"], "envio": "type+Enter", "limite": "guest limitado", "fonte": "chatgpt.com" },
+    { "id": "claude", "nome": "Claude Web", "url": "https://claude.ai/", "idioma": "en", "login": true, "ferramentas": ["artifacts", "ferramentas"], "envio": "type+Enter", "limite": "por demanda", "fonte": "support.claude.com" },
+    { "id": "kimi", "nome": "Kimi", "url": "https://www.kimi.com/", "idioma": "zh", "login": false, "ferramentas": ["busca web", "upload de imagem", "Responses API"], "envio": "type+Enter", "limite": "parcial", "fonte": "platform.kimi.ai/docs/features" },
+    { "id": "mistral", "nome": "Mistral Le Chat", "url": "https://chat.mistral.ai/", "idioma": "en", "login": false, "ferramentas": ["web search", "upload PDF", "image gen"], "envio": "type+Enter", "limite": "10 msg/24h", "fonte": "docs.mistral.ai" },
+    { "id": "deepseek", "nome": "DeepSeek", "url": "https://chat.deepseek.com/", "idioma": "zh", "login": true, "ferramentas": ["raciocínio", "código"], "envio": "type+Enter", "limite": "20-30k tokens", "fonte": "chat.deepseek.com" },
+    { "id": "grok", "nome": "Grok", "url": "https://grok.com/chat", "idioma": "en", "login": false, "ferramentas": ["web/X search", "voz"], "envio": "type+Enter", "limite": "3 msg/2h", "fonte": "grok.com" },
+    { "id": "perplexity", "nome": "Perplexity", "url": "https://perplexity.ai", "idioma": "en", "login": false, "ferramentas": ["busca com fontes"], "envio": "type+Enter", "limite": "3 pro/dia", "fonte": "perplexity.ai" },
+    { "id": "lmarena", "nome": "LM Arena", "url": "https://lmarena.ai/", "idioma": "en", "login": false, "ferramentas": ["40+ modelos", "comparação"], "envio": "type+Enter", "limite": "ilimitado", "fonte": "lmarena.ai" },
+    { "id": "duck", "nome": "Duck.ai", "url": "https://duckduckgo.com/?q=DuckDuckGo+AI+Chat&ia=chat", "idioma": "en", "login": false, "ferramentas": ["chat simples"], "envio": "type+Enter", "limite": "generoso", "fonte": "duckduckgo.com" },
+    { "id": "pollinations", "nome": "Pollinations", "url": "https://sur.pollinations.ai/", "idioma": "en", "login": false, "ferramentas": ["vários modelos", "imagem"], "envio": "type+Enter", "limite": "ilimitado", "fonte": "pollinations.ai" }
+  ]
+}

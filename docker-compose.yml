@@ -1,0 +1,16 @@
+services:
+  recyla:
+    build: .
+    container_name: myn-recyla-01
+    ports:
+      - "5188:5188"
+    environment:
+      MYN_DADOS: /data
+      MYN_GATEWAY_TOKEN_FILE: /tmp/myn-recyla-token.txt
+      TTL: "1800000"
+    volumes:
+      - recyla-dados:/data
+    restart: unless-stopped
+
+volumes:
+  recyla-dados:

@@ -1,0 +1,15 @@
+{
+  "nota": "Somente rotas Browser. Nenhuma chave, nenhuma API, nenhum Codex.",
+  "gateway": {
+    "base": "http://127.0.0.1:36877",
+    "tokenFile": "C:/Users/Vini/AppData/Local/Temp/opencode/gateway-brave-token.txt"
+  },
+  "rotas": {
+    "zai": { "url": "https://chat.z.ai/", "lingua": "zh", "modo": "guest", "candidata": false, "send": { "x": 868, "y": 544 } },
+    "hugging": { "url": "https://huggingface.co/chat", "lingua": "multi", "modo": "guest", "candidata": true },
+    "openrouter": { "url": "https://openrouter.ai/chat", "lingua": "en", "modo": "guest", "candidata": true },
+    "chatgpt": { "url": "https://chatgpt.com/", "lingua": "en", "modo": "guest", "candidata": true },
+    "claude": { "url": "https://claude.ai/", "lingua": "en", "modo": "guest", "candidata": true },
+    "brave-leo": { "url": "brave://leo-ai", "lingua": "en", "modo": "nativo", "candidata": true }
+  }
+}

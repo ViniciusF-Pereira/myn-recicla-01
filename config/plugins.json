@@ -1,0 +1,1116 @@
+{
+  "plugins": [
+    {
+      "id": "nano-banana",
+      "nome": "Nano Banana (Gemini)",
+      "categoria": "imagem",
+      "url": "https://gemini.google.com/app",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "gerar imagem",
+        "editar imagem",
+        "upload de referência"
+      ],
+      "limite": "free no app Gemini; pool ~400 imagens/dia (não oficial); 1K sem plano; API é paga — usar só navegador",
+      "fonte": "https://gemini.google/overview/image-generation/",
+      "envio": "composer + Enter",
+      "prompt": "Gere uma imagem: {input}",
+      "conta": "google"
+    },
+    {
+      "id": "gemini",
+      "nome": "Gemini Web",
+      "categoria": "chat",
+      "url": "https://gemini.google.com/app",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "chat",
+        "Deep Research free",
+        "upload",
+        "resumo"
+      ],
+      "limite": "tier gratuito não divulgado; Deep Research incluído no free",
+      "fonte": "https://gemini.google.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "conta": "google"
+    },
+    {
+      "id": "google-chat",
+      "nome": "Google Chat",
+      "categoria": "mensageria",
+      "url": "https://chat.google.com/",
+      "login": true,
+      "chave": false,
+      "acao": "enviar_mensagem",
+      "capacidades": [
+        "DMs e spaces",
+        "enviar mensagem",
+        "MCP search_messages/send_message"
+      ],
+      "limite": "depende da conta Workspace; MCP oficial em chatmcp.googleapis.com",
+      "fonte": "https://developers.google.com/workspace/chat/release-notes",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "confirmacao": true,
+      "conta": "google"
+    },
+    {
+      "id": "google-messages",
+      "nome": "Google Messages (web)",
+      "categoria": "mensageria",
+      "url": "https://messages.google.com/web/",
+      "login": true,
+      "chave": false,
+      "acao": "enviar_mensagem",
+      "capacidades": [
+        "SMS/RCS",
+        "conversas pareadas",
+        "enviar pelo celular"
+      ],
+      "limite": "QR pairing com Android; web mostra ~50 conversas; sem chave",
+      "fonte": "https://messages.google.com/web/",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "confirmacao": true,
+      "conta": "google"
+    },
+    {
+      "id": "telegram-web",
+      "nome": "Telegram Web",
+      "categoria": "mensageria",
+      "url": "https://web.telegram.org/",
+      "login": true,
+      "chave": false,
+      "acao": "enviar_mensagem",
+      "capacidades": [
+        "enviar mensagem",
+        "canais",
+        "botões"
+      ],
+      "limite": "precisa login com número; API Bot exige token (não usada)",
+      "fonte": "https://web.telegram.org/",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "confirmacao": true
+    },
+    {
+      "id": "whatsapp-web",
+      "nome": "WhatsApp Web",
+      "categoria": "mensageria",
+      "url": "https://web.whatsapp.com/",
+      "login": true,
+      "chave": false,
+      "acao": "enviar_mensagem",
+      "capacidades": [
+        "enviar mensagem",
+        "anexos"
+      ],
+      "limite": "QR pairing; sem API key",
+      "fonte": "https://web.whatsapp.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "confirmacao": true
+    },
+    {
+      "id": "discord-web",
+      "nome": "Discord Web",
+      "categoria": "mensageria",
+      "url": "https://discord.com/app",
+      "login": true,
+      "chave": false,
+      "acao": "enviar_mensagem",
+      "capacidades": [
+        "enviar em canal",
+        "servidores"
+      ],
+      "limite": "precisa login; webhooks exigem URL (não usada)",
+      "fonte": "https://discord.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "confirmacao": true
+    },
+    {
+      "id": "pollinations-chat",
+      "nome": "Pollinations Chat",
+      "categoria": "chat",
+      "url": "https://sur.pollinations.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "vários modelos",
+        "sem cadastro"
+      ],
+      "limite": "comunitário, sem chave; taxa variável",
+      "fonte": "https://pollinations.ai/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pollinations-text-api",
+      "nome": "Pollinations Text API",
+      "categoria": "api",
+      "url": "https://text.pollinations.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "api",
+      "api": {
+        "url": "https://text.pollinations.ai/{encode}",
+        "tipo": "texto"
+      },
+      "capacidades": [
+        "LLM sem chave",
+        "rotating models",
+        "OpenAI-compatible"
+      ],
+      "limite": "tier anônimo, sem chave; modelos rotativos",
+      "fonte": "https://github.com/ClawLabsAI/free-ai-models",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pollinations-image-api",
+      "nome": "Pollinations Image API",
+      "categoria": "api",
+      "url": "https://image.pollinations.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "api",
+      "api": {
+        "url": "https://image.pollinations.ai/prompt/{encode}?width=768&height=512&nologo=true",
+        "tipo": "imagem"
+      },
+      "capacidades": [
+        "imagem sem chave",
+        "vários modelos"
+      ],
+      "limite": "free comunitário; taxa variável",
+      "fonte": "https://pollinations.ai/",
+      "prompt": "{input}"
+    },
+    {
+      "id": "image-local",
+      "nome": "Gerador de imagem local",
+      "categoria": "imagem",
+      "login": false,
+      "chave": false,
+      "acao": "local",
+      "local": "imagem",
+      "capacidades": [
+        "Pollinations",
+        "salva arquivo",
+        "sem chave"
+      ],
+      "limite": "mesmo do Pollinations; arquivo fica em dados/arquivos",
+      "fonte": "https://pollinations.ai/",
+      "prompt": "{input}"
+    },
+    {
+      "id": "voice-local",
+      "nome": "Narração edge-tts",
+      "categoria": "voz",
+      "login": false,
+      "chave": false,
+      "acao": "local",
+      "local": "audio",
+      "capacidades": [
+        "voz pt-BR",
+        "MP3",
+        "sem chave"
+      ],
+      "limite": "~1500 caracteres por chamada; local, sem cota",
+      "fonte": "https://github.com/rany2/edge-tts",
+      "prompt": "{input}"
+    },
+    {
+      "id": "video-local",
+      "nome": "Clipe local (ffmpeg)",
+      "categoria": "video",
+      "login": false,
+      "chave": false,
+      "acao": "local",
+      "local": "video",
+      "capacidades": [
+        "imagem → vídeo",
+        "Ken Burns",
+        "MP4"
+      ],
+      "limite": "6s padrão; ilimitado, limitado só pela CPU",
+      "fonte": "https://ffmpeg.org/",
+      "prompt": "{input}"
+    },
+    {
+      "id": "lmarena",
+      "nome": "LM Arena",
+      "categoria": "chat",
+      "url": "https://lmarena.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "40+ modelos",
+        "comparação cega",
+        "image arena"
+      ],
+      "limite": "ilimitado reportado",
+      "fonte": "https://lmarena.ai/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "duck-ai",
+      "nome": "Duck.ai",
+      "categoria": "chat",
+      "url": "https://duckduckgo.com/?q=DuckDuckGo+AI+Chat&ia=chat",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "chat simples",
+        "privacidade"
+      ],
+      "limite": "generoso, sem conta",
+      "fonte": "https://duckduckgo.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "kimi",
+      "nome": "Kimi",
+      "categoria": "chat",
+      "url": "https://www.kimi.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "busca web",
+        "upload de imagem",
+        "contexto longo"
+      ],
+      "limite": "parcial; alguns recursos pedem conta",
+      "fonte": "https://platform.kimi.ai/docs/features",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "mistral-lechat",
+      "nome": "Mistral Le Chat",
+      "categoria": "chat",
+      "url": "https://chat.mistral.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "web search",
+        "upload PDF",
+        "image gen"
+      ],
+      "limite": "10 mensagens/24h reportado; pode pedir login",
+      "fonte": "https://docs.mistral.ai/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "perplexity",
+      "nome": "Perplexity",
+      "categoria": "pesquisa",
+      "url": "https://www.perplexity.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "busca com fontes",
+        "citações"
+      ],
+      "limite": "3 buscas pro/dia reportado",
+      "fonte": "https://www.perplexity.ai/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "copilot",
+      "nome": "Microsoft Copilot",
+      "categoria": "chat",
+      "url": "https://copilot.microsoft.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "busca",
+        "imagem",
+        "voz"
+      ],
+      "limite": "generoso; pode pedir conta Microsoft",
+      "fonte": "https://copilot.microsoft.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "grok",
+      "nome": "Grok Web",
+      "categoria": "chat",
+      "url": "https://grok.com/chat",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "busca X/web",
+        "voz"
+      ],
+      "limite": "3 mensagens/2h reportado",
+      "fonte": "https://grok.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "huggingchat",
+      "nome": "HuggingChat",
+      "categoria": "chat",
+      "url": "https://huggingface.co/chat",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "community tools",
+        "upload",
+        "web search"
+      ],
+      "limite": "comunitário; rate limit variável; pode redirecionar para login",
+      "fonte": "https://huggingface.co/blog/community-tools",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "status": "instavel"
+    },
+    {
+      "id": "openrouter-free",
+      "nome": "OpenRouter :free",
+      "categoria": "chat",
+      "url": "https://openrouter.ai/chat",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "600+ modelos",
+        "filtro :free",
+        "router grátis"
+      ],
+      "limite": "~20 RPM / 50 req dia; via API exige chave, web não",
+      "fonte": "https://openrouter.ai/openrouter/free",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "zai",
+      "nome": "Z.ai / GLM",
+      "categoria": "chat",
+      "url": "https://chat.z.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "web search",
+        "visão",
+        "coding",
+        "MCP"
+      ],
+      "limite": "generoso; guest instável no envio",
+      "fonte": "https://docs.z.ai/",
+      "envio": "clique no botão",
+      "prompt": "{input}",
+      "status": "instavel"
+    },
+    {
+      "id": "brave-leo",
+      "nome": "Brave Leo",
+      "categoria": "chat",
+      "url": "brave://leo-ai",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "nativo",
+        "upload de abas",
+        "modelos"
+      ],
+      "limite": "taxa de respostas limitada; OCR da tela",
+      "fonte": "https://brave.com/leo/",
+      "envio": "type + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "chatgpt-web",
+      "nome": "ChatGPT Web",
+      "categoria": "chat",
+      "url": "https://chatgpt.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "voz",
+        "busca",
+        "ferramentas"
+      ],
+      "limite": "guest limitado",
+      "fonte": "https://chatgpt.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "claude-web",
+      "nome": "Claude Web",
+      "categoria": "chat",
+      "url": "https://claude.ai/",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "artifacts",
+        "ferramentas"
+      ],
+      "limite": "por demanda; pede login",
+      "fonte": "https://claude.ai/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "t3-chat",
+      "nome": "t3.chat",
+      "categoria": "chat",
+      "url": "https://t3.chat/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "múltiplos modelos"
+      ],
+      "limite": "generoso",
+      "fonte": "https://t3.chat/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "g4f",
+      "nome": "g4f.dev",
+      "categoria": "chat",
+      "url": "https://g4f.dev/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "200+ modelos",
+        "gateway comunitário"
+      ],
+      "limite": "ilimitado reportado",
+      "fonte": "https://g4f.dev/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "heck-ai",
+      "nome": "Heck.ai",
+      "categoria": "chat",
+      "url": "https://heck.ai",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "deepseek/grok/gemini",
+        "busca"
+      ],
+      "limite": "50 consultas/dia, 5 buscas/dia",
+      "fonte": "https://heck.ai",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pi-ai",
+      "nome": "Pi.ai",
+      "categoria": "chat",
+      "url": "https://pi.ai",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "conversa"
+      ],
+      "limite": "ilimitado reportado",
+      "fonte": "https://pi.ai",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "creen-video",
+      "nome": "Creen AI Vídeo",
+      "categoria": "video",
+      "url": "https://www.creen.ai/ai-video-generator",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "Sora 2",
+        "VEO 3.1",
+        "Kling",
+        "28+ modelos",
+        "10s 1080p"
+      ],
+      "limite": "free e ilimitado reportado; sem login; sem watermark em alguns tiers",
+      "fonte": "https://www.creen.ai/ai-video-generator",
+      "envio": "composer + Enter",
+      "prompt": "Crie um vídeo: {input}"
+    },
+    {
+      "id": "vidou",
+      "nome": "Vidou",
+      "categoria": "video",
+      "url": "https://vidou.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "image-to-video",
+        "sem cadastro",
+        "sem watermark"
+      ],
+      "limite": "free, sem login, sem watermark reportado",
+      "fonte": "https://vidou.ai/",
+      "envio": "composer + Enter",
+      "prompt": "Anime esta imagem: {input}"
+    },
+    {
+      "id": "nanopanda",
+      "nome": "Nanopanda",
+      "categoria": "video",
+      "url": "https://nanopanda.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "text-to-video",
+        "sem watermark"
+      ],
+      "limite": "free sem watermark",
+      "fonte": "https://nanopanda.ai/",
+      "envio": "composer + Enter",
+      "prompt": "Crie um vídeo: {input}"
+    },
+    {
+      "id": "free-ai-video",
+      "nome": "Free.ai Vídeo",
+      "categoria": "video",
+      "url": "https://free.ai/video/generate",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "MP4",
+        "sem watermark",
+        "fila de render"
+      ],
+      "limite": "MP4 sem marca d'água; fila em horários de pico",
+      "fonte": "https://free.ai/video/generate",
+      "envio": "composer + Enter",
+      "prompt": "Crie um vídeo: {input}"
+    },
+    {
+      "id": "magic-hour",
+      "nome": "Magic Hour",
+      "categoria": "video",
+      "url": "https://magichour.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "100+ ferramentas",
+        "imagem e vídeo",
+        "sem signup"
+      ],
+      "limite": "free para testar; alguns recursos com watermark",
+      "fonte": "https://magichour.ai/",
+      "envio": "composer + Enter",
+      "prompt": "Crie: {input}"
+    },
+    {
+      "id": "loremotion",
+      "nome": "LoreMotion",
+      "categoria": "video",
+      "url": "https://loremotion.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "animação",
+        "suportado por anúncios"
+      ],
+      "limite": "1 geração anônima; anúncios liberam mais",
+      "fonte": "https://loremotion.com/",
+      "envio": "composer + Enter",
+      "prompt": "Anime: {input}"
+    },
+    {
+      "id": "flux-ai-video",
+      "nome": "Flux AI Vídeo",
+      "categoria": "video",
+      "url": "https://flux-ai.io/free-ai-video-generator",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "clipes 5s",
+        "480p",
+        "sem cadastro"
+      ],
+      "limite": "5s/480p sem cadastro",
+      "fonte": "https://flux-ai.io/free-ai-video-generator",
+      "envio": "composer + Enter",
+      "prompt": "Crie um clipe: {input}"
+    },
+    {
+      "id": "kokoro-web",
+      "nome": "Kokoro TTS",
+      "categoria": "voz",
+      "url": "https://kokoroweb.app",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "54 vozes",
+        "roda no navegador",
+        "sem cadastro"
+      ],
+      "limite": "2000 caracteres por input; textos longos dividir",
+      "fonte": "https://kokoroweb.app",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "soundtools-tts",
+      "nome": "SoundTools TTS",
+      "categoria": "voz",
+      "url": "https://soundtools.io/text-to-speech",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "Kokoro",
+        "texto não sai do dispositivo",
+        "sem login"
+      ],
+      "limite": "sem limite reportado; local no navegador",
+      "fonte": "https://soundtools.io/text-to-speech",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "elevenlabs-free",
+      "nome": "ElevenLabs Free",
+      "categoria": "voz",
+      "url": "https://elevenlabs.io/text-to-speech",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "vozes realistas",
+        "90+ idiomas",
+        "multilingue"
+      ],
+      "limite": "10.000 créditos/mês (~10 min), sem cartão, uso não-comercial",
+      "fonte": "https://elevenlabs.io/pricing",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "tts-ai",
+      "nome": "TTS.ai",
+      "categoria": "voz",
+      "url": "https://tts.ai/text-to-speech",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "36+ modelos",
+        "100+ vozes"
+      ],
+      "limite": "tier free reportado",
+      "fonte": "https://tts.ai/text-to-speech",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "puretts",
+      "nome": "PureTTS",
+      "categoria": "voz",
+      "url": "https://puretts.com/elevenlabs-alternative.html",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "Kokoro-82M local",
+        "sem limites",
+        "privacidade"
+      ],
+      "limite": "ilimitado, roda local",
+      "fonte": "https://puretts.com/elevenlabs-alternative.html",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "perchance",
+      "nome": "Perchance Image",
+      "categoria": "imagem",
+      "url": "https://perchance.org/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "geração sem conta",
+        "vários estilos"
+      ],
+      "limite": "free sem conta",
+      "fonte": "https://perchance.org/",
+      "envio": "composer + Enter",
+      "prompt": "Gere uma imagem: {input}"
+    },
+    {
+      "id": "raphael",
+      "nome": "Raphael AI",
+      "categoria": "imagem",
+      "url": "https://raphael.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "imagem sem login"
+      ],
+      "limite": "free sem login",
+      "fonte": "https://raphael.ai/",
+      "envio": "composer + Enter",
+      "prompt": "Gere uma imagem: {input}"
+    },
+    {
+      "id": "ideogram",
+      "nome": "Ideogram",
+      "categoria": "imagem",
+      "url": "https://ideogram.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "tipografia em imagem",
+        "estilos"
+      ],
+      "limite": "tier free com restrições",
+      "fonte": "https://ideogram.ai/",
+      "envio": "composer + Enter",
+      "prompt": "Gere uma imagem: {input}"
+    },
+    {
+      "id": "imagefx",
+      "nome": "ImageFX",
+      "categoria": "imagem",
+      "url": "https://labs.google/fx/tools/image-fx",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "Google",
+        "sem watermark",
+        "prompt chips"
+      ],
+      "limite": "precisa conta Google; free",
+      "fonte": "https://labs.google/fx/tools/image-fx",
+      "envio": "composer + Enter",
+      "prompt": "Gere uma imagem: {input}",
+      "conta": "google"
+    },
+    {
+      "id": "deepai-image",
+      "nome": "DeepAI Image",
+      "categoria": "imagem",
+      "url": "https://deepai.org/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "imagem free limitada"
+      ],
+      "limite": "free limitado; alguns recursos pedem chave",
+      "fonte": "https://deepai.org/",
+      "envio": "composer + Enter",
+      "prompt": "Gere uma imagem: {input}"
+    },
+    {
+      "id": "nanobrowser",
+      "nome": "Nanobrowser",
+      "categoria": "agente",
+      "url": "https://nanobrowser.ai/docs",
+      "login": false,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "agente no navegador real",
+        "multi-agente",
+        "Ask mode",
+        "sem model lock-in"
+      ],
+      "limite": "open-source Apache-2.0; usa modelo local ou chave própria",
+      "fonte": "https://nanobrowser.ai/docs",
+      "prompt": "{input}"
+    },
+    {
+      "id": "openbua",
+      "nome": "OpenBUA",
+      "categoria": "agente",
+      "url": "https://github.com/AliSharjeell/OpenBUA",
+      "login": false,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "extensão local",
+        "logins ativos",
+        "preenche formulários",
+        "streaming"
+      ],
+      "limite": "Gemini free 1.500 req/dia ou BYOK",
+      "fonte": "https://github.com/AliSharjeell/OpenBUA",
+      "prompt": "{input}"
+    },
+    {
+      "id": "free-computer-use",
+      "nome": "FreeComputerUse",
+      "categoria": "agente",
+      "url": "https://github.com/OthmaneBlial/FreeComputerUse",
+      "login": false,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "Playwright local",
+        "replay sem chamada de modelo",
+        "grava e repete"
+      ],
+      "limite": "open-source; sem custo de modelo no replay",
+      "fonte": "https://github.com/OthmaneBlial/FreeComputerUse",
+      "prompt": "{input}"
+    },
+    {
+      "id": "laya-agent",
+      "nome": "Laya Browser Agent",
+      "categoria": "agente",
+      "url": "https://github.com/ChenneyZhuang/laya-browser-agent",
+      "login": false,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "local-first",
+        "sem cloud",
+        "sem API key",
+        "Playwright/CDP",
+        "MCP"
+      ],
+      "limite": "open-source Apache-2.0; modelo na própria máquina",
+      "fonte": "https://github.com/ChenneyZhuang/laya-browser-agent",
+      "prompt": "{input}"
+    },
+    {
+      "id": "tabi-mcp",
+      "nome": "Tabi MCP",
+      "categoria": "agente",
+      "url": "https://github.com/Adityatex/Tabi",
+      "login": false,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "MCP para Chrome/Edge/Brave",
+        "dirige o navegador real"
+      ],
+      "limite": "open-source; o modelo roda no app que já usa",
+      "fonte": "https://github.com/Adityatex/Tabi",
+      "prompt": "{input}"
+    },
+    {
+      "id": "browser-use",
+      "nome": "Browser Use",
+      "categoria": "agente",
+      "url": "https://browser-use.com/",
+      "login": false,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "agente open-source",
+        "cloud opcional"
+      ],
+      "limite": "open-source local; cloud ~US$0,06/browser-hora",
+      "fonte": "https://browser-use.com/",
+      "prompt": "{input}"
+    },
+    {
+      "id": "google-translate",
+      "nome": "Google Tradutor",
+      "categoria": "utilidade",
+      "url": "https://translate.google.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "tradução",
+        "detecção de idioma",
+        "documentos"
+      ],
+      "limite": "free; limites anti-abuso não divulgados",
+      "fonte": "https://translate.google.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}",
+      "conta": "google"
+    },
+    {
+      "id": "deepl-free",
+      "nome": "DeepL Free",
+      "categoria": "utilidade",
+      "url": "https://www.deepl.com/translator",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "tradução de qualidade",
+        "texto e documento"
+      ],
+      "limite": "free com limite de caractéres; API exige chave",
+      "fonte": "https://www.deepl.com/translator",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "notebooklm",
+      "nome": "NotebookLM",
+      "categoria": "pesquisa",
+      "conta": "google",
+      "url": "https://notebooklm.google.com/",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "upload de fontes",
+        "resumo com citações",
+        "podcast"
+      ],
+      "limite": "free com conta Google; cota não divulgada",
+      "fonte": "https://notebooklm.google.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "google-search",
+      "nome": "Google Search / AI Overviews",
+      "categoria": "pesquisa",
+      "conta": "google",
+      "url": "https://www.google.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "busca web",
+        "AI Overviews",
+        "links"
+      ],
+      "limite": "free; sem chave via navegador",
+      "fonte": "https://www.google.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "google-drive",
+      "nome": "Google Drive",
+      "categoria": "utilidade",
+      "conta": "google",
+      "url": "https://drive.google.com/",
+      "login": true,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "arquivos da conta",
+        "documentos",
+        "planilhas"
+      ],
+      "limite": "15 GB free compartilhados com Gmail/Fotos",
+      "fonte": "https://drive.google.com/",
+      "prompt": "{input}"
+    },
+    {
+      "id": "google-meet",
+      "nome": "Google Meet",
+      "categoria": "utilidade",
+      "conta": "google",
+      "url": "https://meet.google.com/",
+      "login": true,
+      "chave": false,
+      "acao": "info",
+      "capacidades": [
+        "reuniões",
+        "legendas"
+      ],
+      "limite": "free com limites de duração para grupos",
+      "fonte": "https://meet.google.com/",
+      "prompt": "{input}"
+    },
+    {
+      "id": "ai-studio",
+      "nome": "Google AI Studio",
+      "categoria": "api",
+      "conta": "google",
+      "url": "https://aistudio.google.com/",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "Gemini",
+        "teste de prompts",
+        "geração de imagem Nano Banana"
+      ],
+      "limite": "tier free com cotas; API exige chave, web não",
+      "fonte": "https://aistudio.google.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "google-veo",
+      "nome": "Google Veo / Flow (vídeo)",
+      "categoria": "video",
+      "conta": "google",
+      "url": "https://labs.google/fx/tools/video-fx",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "texto→vídeo",
+        "imagem→vídeo",
+        "Veo"
+      ],
+      "limite": "free com conta Google; cotas e fila variáveis; alguns recursos pedem AI Pro",
+      "fonte": "https://labs.google/fx/tools/video-fx",
+      "envio": "composer + Enter",
+      "prompt": "Crie um vídeo: {input}"
+    },
+    {
+      "id": "google-create-images",
+      "nome": "Google “Create images”",
+      "categoria": "imagem",
+      "conta": "google",
+      "url": "https://gemini.google.com/app",
+      "login": true,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "Create images no Gemini",
+        "Nano Banana",
+        "edição por conversa"
+      ],
+      "limite": "free na conta Google; sem chave de API",
+      "fonte": "https://gemini.google.com/app",
+      "envio": "composer + Enter",
+      "prompt": "Create images: {input}"
+    }
+  ]
+}
