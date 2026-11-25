@@ -15,5 +15,6 @@
   "export-saude-media",
   "export-rag-tokens",
   "export-midia-ext",
-  "export-plugins-grupos"
+  "export-plugins-grupos",
+  "export-historico-contar"
 ]

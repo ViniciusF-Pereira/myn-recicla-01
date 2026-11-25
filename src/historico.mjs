@@ -39,3 +39,4 @@ export async function limparTipo(tipo) {
   const atual = await listar(null, 100000);
   await writeFile(ARQ, atual.filter((r) => r.tipo !== tipo).map((r) => JSON.stringify(r)).join('\n') + '\n');
 }
+export async function contarHistorico(){return (await listar(null,100000)).length}
