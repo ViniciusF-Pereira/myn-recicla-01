@@ -20,6 +20,7 @@ Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`).
 - `node --test` dentro do container → 23/23 testes passando.
 - Processo executado como usuário `myn` (UID 10001), não root.
 - Healthcheck respondeu `200` em `/api/saude`.
+- Assets do WORK e painel atual presentes: `site/assistente.mjs`, `site/dados-atuais.mjs` e `docs/RELATORIO_UNICO.html`.
 
 ## Infra
 
