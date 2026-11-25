@@ -32,3 +32,4 @@ export async function buscarFilmes(q, limite = 5) {
     })).filter((x) => x.titulo);
   } catch { return []; }
 }
+export function normalizarFilme(s){return String(s||"").replace(/<[^>]+>/g," ").replace(/\s+/g," ").trim()}
