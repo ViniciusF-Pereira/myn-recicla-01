@@ -29,7 +29,8 @@ export async function listarArquivos() {
 }
 export async function lerArquivo(nome) {
   const alvo = path.join(DIR_ARQUIVOS, seguro(nome));
-  if (!alvo.startsWith(DIR_ARQUIVOS)) throw new Error('fora do diretorio');
+  const rel = path.relative(DIR_ARQUIVOS, alvo);
+  if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) throw new Error('fora do diretorio');
   return readFile(alvo);
 }
 
