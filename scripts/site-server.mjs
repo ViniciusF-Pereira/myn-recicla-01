@@ -49,7 +49,7 @@ const servidor = http.createServer(async (req, res) => {
       const b = JSON.parse(corpo || '{}');
       iniciarWorker({
         objetivo: String(b.objetivo || 'melhorar e otimizar o codigo do Myn Recicla').slice(0, 500),
-        maxCiclos: Math.min(1000, Number(b.maxCiclos) || Infinity),
+        maxCiclos: Math.min(1000, Number(b.maxCiclos) || 24),
         intervaloMs: Math.max(500, Number(b.intervaloMs) || 4000),
         autoMerge: b.autoMerge !== false,
       }).catch((e) => console.log('[worker] erro', e.message));

@@ -6,12 +6,13 @@ import { promisify } from 'node:util';
 import { planejar } from './planejador.mjs';
 import { respostaRapida } from './stream.mjs';
 import { relatorio as relatorioSaude } from './saude.mjs';
+import { analisarMelhorias, marcar as marcarMelhoria } from './analise.mjs';
 
 const executar = promisify(execFile);
 const RAIZ = process.cwd();
 const BRANCH = 'worker/auto';
 const ALVO = 'master';
-const PERMITIDO = /^(docs\/[\w.-]+\.md|src\/[\w.-]+\.mjs|scripts\/[\w.-]+\.mjs|config\/[\w.-]+\.json)$/;
+const PERMITIDO = /^(docs\/[\w.-]+\.(md|json)|src\/[\w.-]+\.mjs|scripts\/[\w.-]+\.mjs|config\/[\w.-]+\.json|README\.md)$/;
 
 let ativo = false;
 let abortar = false;
@@ -65,7 +66,7 @@ function extrairJson(texto) {
 function validarPatch(p) {
   if (!p || typeof p !== 'object') return false;
   if (!PERMITIDO.test(String(p.arquivo || ''))) return false;
-  if (!['append', 'replace'].includes(p.modo)) return false;
+  if (!['append', 'replace', 'criar'].includes(p.modo)) return false;
   const c = String(p.conteudo || '');
   return c.length > 10 && c.length < 20000;
 }
@@ -124,19 +125,25 @@ async function ciclo(n, objetivo, { autoMerge, intervaloMs, sinal }) {
     const limpos = await higienizar();
     emitir('higienizacao', { n, removidos: limpos });
 
-    let patch = null, via = 'deterministico';
+    const analise = await analisarMelhorias();
+    emitir('analise', { n, ...analise.analise });
+    if (!analise.tarefa) {
+      emitir('sem_tarefas', { n, objetivo });
+      return { n, ok: true, semTarefas: true, ms: Date.now() - inicio };
+    }
+    const t = analise.tarefa;
+    const patch = { arquivo: t.alvo, modo: t.modo, conteudo: t.conteudo };
+    let via = 'analise-local';
     try {
-      const prompt = 'Você é o Myn Recicla, agente de código. Melhore este projeto: ' + objetivo
-        + '\nResponda SOMENTE JSON: {"arquivo":"docs/EVOLUCAO.md","modo":"append","conteudo":"..."}'
-        + '\nArquivos permitidos: docs/*.md, src/*.mjs, scripts/*.mjs, config/*.json. Sem texto fora do JSON.';
+      const prompt = 'Você é o Myn Recicla. Analise e priorize melhorias reais para: ' + objetivo
+        + '\nObjetivo descoberto: ' + t.titulo + '. Responda curto, apenas confirme a prioridade.';
       const r = await Promise.race([
-        respostaRapida(prompt, 9000),
-        new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 10000)),
+        respostaRapida(prompt, 7000),
+        new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 8000)),
       ]);
-      if (r.ok) { patch = extrairJson(r.texto); via = r.via; }
+      if (r.ok) via = r.via;
     } catch (e) { emitir('modelo_falhou', { n, erro: String(e.message).slice(0, 120) }); }
-    if (!validarPatch(patch)) { patch = await patchDeterministico(n, objetivo, plano); via = 'deterministico'; }
-    emitir('patch', { n, arquivo: patch.arquivo, modo: patch.modo, via, bytes: patch.conteudo.length });
+    emitir('patch', { n, id: t.id, titulo: t.titulo, arquivo: patch.arquivo, modo: patch.modo, via, bytes: patch.conteudo.length });
 
     const arquivo = await aplicarPatch(patch);
     const checagens = await checar([arquivo]);
@@ -147,8 +154,9 @@ async function ciclo(n, objetivo, { autoMerge, intervaloMs, sinal }) {
       emitir('revertido', { n, arquivo });
       return { n, ok: false, motivo: 'testes falharam', ms: Date.now() - inicio };
     }
-    const merge = autoMerge ? await commitEmerge('worker: ciclo ' + n + ' — ' + objetivo.slice(0, 80)) : { commit: false, merge: false, motivo: 'autoMerge desligado' };
-    emitir('git', { n, ...merge });
+    const merge = autoMerge ? await commitEmerge('worker: ' + t.titulo + ' (ciclo ' + n + ')') : { commit: false, merge: false, motivo: 'autoMerge desligado' };
+    if (merge.commit) await marcarMelhoria(t.id);
+    emitir('git', { n, ...merge, tarefa: t.id });
     return { n, ok: true, merge: merge.merge === true, ms: Date.now() - inicio, arquivo };
   } catch (erro) {
     emitir('erro', { n, erro: String(erro.message).slice(0, 300) });
