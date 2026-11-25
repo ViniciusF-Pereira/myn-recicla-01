@@ -11,5 +11,6 @@
   "script-validar-config",
   "script-exportar-db",
   "docs-rotas",
-  "docs-endpoints"
+  "docs-endpoints",
+  "export-saude-media"
 ]

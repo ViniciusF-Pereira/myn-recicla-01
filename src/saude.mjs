@@ -67,3 +67,4 @@ export function escolherRotas(ids) {
 export function relatorio() {
   return [...mapa.keys()].map(pontuar).sort((a, b) => b.score - a.score).slice(0, LIMITE);
 }
+export function mediaSaude(){const r=relatorio();return r.length?Math.round(r.reduce((n,x)=>n+x.score,0)/r.length*100)/100:0}
