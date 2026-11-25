@@ -8,7 +8,7 @@ import { randomBytes } from 'node:crypto';
 import { carregarConfigAsync, criarGateway } from '../src/gateway.mjs';
 
 const executar = promisify(execFile);
-const TESSERACT = process.env.MYNCELLIUM_TESSERACT || 'C:/Program Files/Tesseract-OCR/tesseract.exe';
+const TESSERACT = process.env.MYN_TESSERACT || process.env.MYNCELLIUM_TESSERACT || 'tesseract';
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const [config, base] = await Promise.all([
   carregarConfigAsync(path.join(raiz, 'config/rotas.json')),
