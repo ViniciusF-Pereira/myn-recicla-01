@@ -298,7 +298,7 @@ body>header,main,footer{position:relative;z-index:1}
 </div>
 
 <div class="material"><div class="wrap"><small>material reciclado de</small><div class="logos">
- <span><svg class="ico"><use href="#i-leaf"/></svg> Brave Leo</span><span>Z.ai / GLM</span><span>HuggingChat</span><span>OpenRouter</span><span>LM Arena</span><span>Pollinations</span><span>Gemini</span>
+ <span id="materialRotas">carregando rotas...</span>
 </div></div></div>
 
 <section class="apresentacao"><div class="wrap">
@@ -306,24 +306,31 @@ body>header,main,footer{position:relative;z-index:1}
  <h1>IA de graça já existe.<br><em>O Myn recicla.</em></h1>
  <p>Transformamos abas de chat gratuitas em rotas de agente. Sem chave de API, sem assinatura, sem Codex — só navegador, gateway mediado e ferramentas com escopo.</p>
  <p><a class="btn" href="playground.html" target="_blank" rel="noopener"><svg class="ico"><use href="#i-arrow"/></svg> ABRIR PLAYGROUND /01</a></p>
- <div class="chips"><span class="chip m">♻ browser only</span><span class="chip">🔌 167 rotas</span><span class="chip">🎬 imagem · voz · vídeo</span><span class="chip">⚡ chat rápido</span></div>
+ <div class="chips"><span class="chip m">♻ browser only</span><span class="chip" id="rotasChip">🔌 carregando rotas</span><span class="chip" id="modelosChip">🧠 carregando modelos</span><span class="chip">🎬 imagem · voz · vídeo</span></div>
 </div></section>
 
 
 
 <section id="bancada"><div class="wrap">
  <div class="st"><span class="num">01</span><h2>Bancada viva</h2><span class="traco"></span><span class="nota">worker autônomo · rotas free</span></div>
- <p class="sub">O Myn reciclando o próprio código em tempo real: plano, rota, patch, testes, commit e merge. Cada etapa aparece aqui — incluindo o modelo acionado.</p>
+ <p class="sub">O Myn audita o próprio código em tempo real: achado, patch, testes, commit, smoke e merge. Cada etapa aparece aqui — sem enviar código para LLM.</p>
  <div class="bancada">
   <div class="bc-topo"><span class="bc-dot"></span><b id="bcStatus">conectando...</b><span class="bc-modelo" id="bcModelo">modelo: —</span><a class="btn sec" href="playground.html" target="_blank" rel="noopener">ABRIR PLAYGROUND</a></div>
-  <div class="bc-linhas" id="bcLinhas"><div class="bc-linha">aguardando eventos...</div></div>
+   <div class="bc-linhas" id="bcLinhas"><div class="bc-linha">aguardando eventos...</div></div>
+   <div class="mini" style="border-top:1px solid var(--linha);padding:12px 16px;grid-template-columns:repeat(auto-fit,minmax(130px,1fr))">
+    <div><b id="metricPlugins">—</b><small>rotas ativas</small></div>
+    <div><b id="metricModelos">—</b><small>modelos descobertos</small></div>
+    <div><b id="metricDesempenho">—</b><small>payload medido</small></div>
+    <div><b id="metricArquitetura">—</b><small>módulos · dependências</small></div>
+    <div><b id="metricSaude">—</b><small>saúde média</small></div>
+   </div>
  </div>
 </div></section>
 
 <section id="catalogo"><div class="wrap">
- <div class="st"><span class="num">02</span><h2>Catálogo de material reciclável</h2><span class="traco"></span><span class="nota">26 espécimes</span></div>
- <p class="sub">Chats web gratuitos encontrados na varredura: idioma, limites e ferramentas.</p>
- <div class="tabs" id="filtros"><button class="aba on" data-f="todos">todos</button><button class="aba" data-f="sem-login">sem login</button><button class="aba" data-f="ferramentas">com ferramentas</button><button class="aba" data-f="zh">chinês</button><button class="aba" data-f="ja">japonês</button><button class="aba" data-f="ko">coreano</button><button class="aba" data-f="ru">russo</button></div>
+ <div class="st"><span class="num">02</span><h2>Catálogo de material reciclável</h2><span class="traco"></span><span class="nota" id="catalogoCount">carregando catálogo...</span></div>
+ <p class="sub">Catálogo atual vindo de <code>/api/plugins</code>: rotas, login, capacidades e limites.</p>
+ <div class="tabs" id="filtros"><button class="aba on" data-f="todos">todos</button><button class="aba" data-f="sem-login">sem login</button><button class="aba" data-f="ferramentas">com ferramentas</button><button class="aba" data-f="api">API</button><button class="aba" data-f="navegador">navegador</button></div>
  <div class="grade lista-limite" id="lista"></div>
 </div></section>
 
@@ -334,7 +341,7 @@ body>header,main,footer{position:relative;z-index:1}
    <div class="tabs" id="tabsVitrine"><button class="aba on" data-c="todos">todos</button><button class="aba" data-c="chat">chat</button><button class="aba" data-c="imagem">imagem</button><button class="aba" data-c="video">vídeo</button><button class="aba" data-c="voz">voz</button><button class="aba" data-c="agente">agentes</button><button class="aba" data-c="api">APIs</button></div>
    <h3>Recicle qualquer aba em ferramenta.</h3>
    <p>Cada plugin é uma rota declarativa: navegador mediado, API sem chave ou gerador local. Nenhum segredo, nenhuma chave, nenhum serviço pago.</p>
-   <div class="mini-linha"><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="mini"><div><b>167 rotas</b><small>chat, mídia, mensageria, APIs</small></div><div><b>Sem chave</b><small>somente rotas free</small></div><div><b>Limites honestos</b><small>documentados por serviço</small></div><div><b>Confirmação</b><small>mensagens reais só com /confirmar</small></div></div>
+   <div class="mini-linha"><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="mini"><div><b id="rotasMini">—</b><small>chat, mídia, mensageria, APIs</small></div><div><b>Sem chave</b><small>somente rotas free</small></div><div><b>Limites honestos</b><small>documentados por serviço</small></div><div><b>Confirmação</b><small>mensagens reais só com /confirmar</small></div></div>
   </div>
   <figure class="colagem">
    <div class="colagem-dupla"><img src="assets/hero-sky.jpg" alt="Céu azul com nuvens reaproveitado como material de colagem"><img src="assets/hero-sky.jpg" alt="Textura de nuvem reaproveitada"></div>
@@ -343,12 +350,12 @@ body>header,main,footer{position:relative;z-index:1}
   </figure>
  </div>
  <div class="grade" style="margin-top:22px">
-  <div class="card" data-cat="chat"><h3><svg class="ico"><use href="#i-chat"/></svg>Chats</h3><p>Gemini, LM Arena, Duck.ai, Kimi, Mistral, Perplexity, Grok, Copilot, OpenRouter :free, Pollinations…</p></div>
-  <div class="card" data-cat="imagem"><h3><svg class="ico"><use href="#i-leaf"/></svg>Imagem</h3><p>Nano Banana no Gemini, Pollinations, Perchance, Raphael, Ideogram, ImageFX, DeepAI.</p></div>
-  <div class="card" data-cat="video"><h3><svg class="ico"><use href="#i-video"/></svg>Vídeo</h3><p>Creen (Sora 2/Veo), Vidou, Nanopanda, Free.ai, Magic Hour, LoreMotion, Flux + ffmpeg local.</p></div>
-  <div class="card" data-cat="voz"><h3><svg class="ico"><use href="#i-sound"/></svg>Voz</h3><p>edge-tts local, Kokoro Web, SoundTools, ElevenLabs free, TTS.ai, PureTTS.</p></div>
-  <div class="card" data-cat="agente"><h3><svg class="ico"><use href="#i-loop"/></svg>Agentes</h3><p>Nanobrowser, OpenBUA, FreeComputerUse, Laya, Tabi MCP, Browser Use — open-source e locais.</p></div>
-  <div class="card" data-cat="api"><h3><svg class="ico"><use href="#i-api"/></svg>APIs</h3><p>Pollinations texto/imagem sem chave, Free-LLM (74 provedores), OpenRouter free router, LLM7.</p></div>
+  <div class="card" data-cat="chat"><h3><svg class="ico"><use href="#i-chat"/></svg>Chats</h3><p><span id="cat-chat-desc">Carregando rotas de chat...</span></p></div>
+  <div class="card" data-cat="imagem"><h3><svg class="ico"><use href="#i-leaf"/></svg>Imagem</h3><p><span id="cat-imagem-desc">Carregando rotas de imagem...</span></p></div>
+  <div class="card" data-cat="video"><h3><svg class="ico"><use href="#i-video"/></svg>Vídeo</h3><p><span id="cat-video-desc">Carregando rotas de vídeo...</span></p></div>
+  <div class="card" data-cat="voz"><h3><svg class="ico"><use href="#i-sound"/></svg>Voz</h3><p><span id="cat-voz-desc">Carregando rotas de voz...</span></p></div>
+  <div class="card" data-cat="agente"><h3><svg class="ico"><use href="#i-loop"/></svg>Agentes</h3><p><span id="cat-agente-desc">Carregando rotas de agentes...</span></p></div>
+  <div class="card" data-cat="api"><h3><svg class="ico"><use href="#i-api"/></svg>APIs</h3><p><span id="cat-api-desc">Carregando APIs...</span></p></div>
  </div>
 </div></section>
 
@@ -384,11 +391,11 @@ body>header,main,footer{position:relative;z-index:1}
   </div>
   <div class="autor-numeros" id="autorNumeros"><div><b>—</b><small>repos</small></div><div><b>—</b><small>seguidores</small></div><div><b>—</b><small>seguindo</small></div><div><b>—</b><small>no GitHub desde</small></div></div>
   <div class="autor-repos" id="autorRepos"></div>
-  <p class="autor-assinatura">Myn Recyla/01 · de aba descartada a rota reaproveitada · <span id="autorAtualizado">—</span></p>
+  <p class="autor-assinatura">Myn Recicla/01 · de aba descartada a rota reaproveitada · <span id="autorAtualizado">—</span></p>
  </div>
 </div></section>
 
-<footer class="wrap"><span>Myn — Recicla/01 · de aba descartada a rota reaproveitada · 23/11/2026</span><span>sem chaves · sem Codex · browser only</span><span class="cc">cc</span></footer>
+<footer class="wrap"><span>Myn — Recicla/01 · dados atuais em <span id="dataAtualizacao">—</span></span><span>sem chaves · sem Codex · browser only</span><span class="cc">cc</span></footer>
 </main>
 
 
@@ -400,17 +407,46 @@ body>header,main,footer{position:relative;z-index:1}
 </script>
 
 
-<script>
+<script type="module">
+import { carregarDados } from './dados-atuais.mjs';
+import './assistente.mjs';
 const $=id=>document.getElementById(id);
-const ITENS=[{n:'Z.ai / GLM',u:'https://chat.z.ai/',l:'zh',t:['guest','web search','ferramentas'],lim:'generoso',login:false},{n:'Brave Leo',u:'brave://leo-ai',l:'en',t:['nativo','upload abas','modelos'],lim:'taxa limitada',login:false},{n:'HuggingChat',u:'https://huggingface.co/chat',l:'multi',t:['guest','web search','upload','community tools'],lim:'comunitário',login:false},{n:'OpenRouter Chat',u:'https://openrouter.ai/chat',l:'en',t:['guest','600+ modelos'],lim:':free',login:false},{n:'ChatGPT Web',u:'https://chatgpt.com/',l:'en',t:['guest','voz','ferramentas'],lim:'limitado',login:false},{n:'Claude Web',u:'https://claude.ai/',l:'en',t:['login','artifacts','ferramentas'],lim:'por demanda',login:true},{n:'Kimi',u:'https://www.kimi.com/',l:'zh',t:['busca web','upload imagem','Responses API'],lim:'parcial',login:false},{n:'Mistral Le Chat',u:'https://chat.mistral.ai/',l:'en',t:['web search','upload PDF','image gen'],lim:'10/24h',login:false},{n:'DeepSeek',u:'https://chat.deepseek.com/',l:'zh',t:['login','raciocínio','código'],lim:'20-30k',login:true},{n:'Grok',u:'https://grok.com/chat',l:'en',t:['guest','web/X search','voz'],lim:'3/2h',login:false},{n:'Perplexity',u:'https://perplexity.ai',l:'en',t:['guest','busca com fontes'],lim:'3 pro/dia',login:false},{n:'Copilot',u:'https://copilot.microsoft.com',l:'en',t:['guest','busca','imagem'],lim:'generoso',login:false},{n:'Pi.ai',u:'https://pi.ai',l:'en',t:['guest','conversa'],lim:'ilimitado',login:false},{n:'LM Arena',u:'https://lmarena.ai/',l:'en',t:['guest','40+ modelos'],lim:'ilimitado',login:false},{n:'g4f.dev',u:'https://g4f.dev/',l:'en',t:['guest','200+ modelos'],lim:'ilimitado',login:false},{n:'t3.chat',u:'https://t3.chat/',l:'en',t:['guest','múltiplos modelos'],lim:'generoso',login:false},{n:'Pollinations',u:'https://sur.pollinations.ai/',l:'en',t:['guest','vários modelos'],lim:'ilimitado',login:false},{n:'Heck.ai',u:'https://heck.ai',l:'multi',t:['guest','deepseek/grok/gemini','busca'],lim:'50/dia',login:false},{n:'GPT.chat',u:'https://gpt.chat/ja',l:'ja',t:['guest','japonês','código'],lim:'generoso',login:false},{n:'bota.chat',u:'https://bota.chat/ja',l:'ja',t:['guest','sem cadastro'],lim:'generoso',login:false},{n:'ainologin',u:'https://ainologin.com/ja',l:'ja',t:['guest','sem login'],lim:'—',login:false},{n:'notrack.ai',u:'https://notrack.ai/ja/ai-chat',l:'ja',t:['guest','privacidade'],lim:'—',login:false},{n:'freegpt.ai',u:'https://freegpt.ai/ko',l:'ko',t:['guest','coreano'],lim:'—',login:false},{n:'chatg.org',u:'https://chatg.org/ko',l:'ko',t:['guest','coreano'],lim:'—',login:false},{n:'rugpt.io',u:'https://rugpt.io/',l:'ru',t:['guest','russo'],lim:'—',login:false},{n:'aibro.io',u:'https://aibro.io/',l:'ru',t:['guest','russo','código'],lim:'—',login:false}];
+const escHtml=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let ITENS=[];
+let dadosAtuais=null;
+
+async function atualizarDados(){
+ try{
+  const d=await carregarDados(); dadosAtuais=d;
+  $('rotasChip').textContent='🔌 '+d.totalPlugins+' rotas';
+  $('rotasMini').textContent=d.totalPlugins+' rotas';
+  $('modelosChip').textContent='🧠 '+d.totalDescobertos+' modelos livres';
+  $('catalogoCount').textContent=d.totalPlugins+' rotas · '+new Date(d.atualizadoEm).toLocaleTimeString('pt-BR');
+  $('materialRotas').textContent=(d.pluginsLista||[]).slice(0,7).map(p=>p.nome).join(' · ');
+  $('metricPlugins').textContent=d.totalPlugins;
+  $('metricModelos').textContent=d.totalDescobertos;
+  $('metricDesempenho').textContent=d.totalKb==null?'—':d.totalKb+' KB · pior '+d.piorMs+'ms';
+  $('metricArquitetura').textContent=d.arquiteturaResumo?d.arquiteturaResumo.modulos+' · '+d.arquiteturaResumo.dependencias:'—';
+  $('metricSaude').textContent=d.saudeMedia==null?'—':d.saudeMedia.toFixed(2);
+  $('dataAtualizacao').textContent=new Date(d.atualizadoEm).toLocaleString('pt-BR');
+  for(const [cat,lista] of Object.entries(d.categorias||{})){
+   const alvo=$('cat-'+cat+'-desc'); if(alvo)alvo.textContent=lista.length+' rotas · '+(lista.slice(0,5).map(p=>p.nome).join(', ')||'nenhuma');
+  }
+  ITENS=(d.pluginsLista||[]).map(p=>({n:p.nome,u:p.url,l:'multi',t:p.capacidades||[],lim:p.limite||'—',login:!!p.login,acao:p.acao||'navegador'}));
+  pintar('todos');
+ }catch(e){$('catalogoCount').textContent='dados indisponíveis: '+e.message}
+}
+atualizarDados();
+setInterval(atualizarDados,30000);
+
 function pintar(f){
  const q=f==='todos'?null:f;
  const lista=$('lista');
- lista.innerHTML=ITENS.filter(x=>!q||(q==='sem-login'&&!x.login)||(q==='ferramentas'&&x.t.some(t=>/search|upload|tool|api|imagem|artifact/i.test(t)))||x.l===q).map(x=>
-  '<div class="card ficha"><div class="ficha-topo"><b>'+x.n+'</b><span class="tag '+(x.login?'':'m')+'">'+(x.login?'login':'sem login')+'</span></div>'+
-  '<a href="'+x.u+'" target="_blank" rel="noopener">'+x.u+'</a>'+
-  '<div class="tags">'+x.t.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>'+
-  '<small>'+x.l+' · '+x.lim+'</small></div>').join('');
+ lista.innerHTML=ITENS.filter(x=>!q||(q==='sem-login'&&!x.login)||(q==='ferramentas'&&x.t.some(t=>/search|upload|tool|api|imagem|artifact/i.test(t)))||(q==='api'&&x.acao==='api')||(q==='navegador'&&x.acao!=='api')||x.l===q).map(x=>
+  '<div class="card ficha"><div class="ficha-topo"><b>'+escHtml(x.n)+'</b><span class="tag '+(x.login?'':'m')+'">'+(x.login?'login':'sem login')+'</span></div>'+
+  '<a href="'+escHtml(x.u)+'" target="_blank" rel="noopener">'+escHtml(x.u)+'</a>'+
+  '<div class="tags">'+x.t.map(t=>'<span class="tag">'+escHtml(t)+'</span>').join('')+'</div>'+
+  '<small>'+escHtml(x.l)+' · '+escHtml(x.lim)+'</small></div>').join('');
 }
 pintar('todos');
 document.querySelectorAll('#filtros .aba').forEach(b=>b.addEventListener('click',()=>{

@@ -14,7 +14,11 @@ function valido(texto) {
 
 async function tentar(modelo, pergunta, ms) {
   const url = 'https://text.pollinations.ai/' + encodeURIComponent(SISTEMA + pergunta) + '?model=' + modelo;
-  const r = await fetch(url, { signal: AbortSignal.timeout(ms) });
+  let r = await fetch(url, { signal: AbortSignal.timeout(ms) });
+  if (!r.ok && [429, 503].includes(r.status)) {
+    await new Promise((ok) => setTimeout(ok, 10_000));
+    r = await fetch(url, { signal: AbortSignal.timeout(ms) });
+  }
   const texto = await r.text();
   if (!r.ok || !valido(texto)) throw new Error('modelo ' + modelo + ' indisponível');
   return texto.trim();

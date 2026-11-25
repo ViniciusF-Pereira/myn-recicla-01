@@ -23,7 +23,11 @@ async function executarApi(plugin, entrada) {
   const url = String(plugin.api.url)
     .replace('{encode}', encodeURIComponent(prompt))
     .replace('{input}', prompt);
-  const r = await fetch(url, { signal: AbortSignal.timeout(120000) });
+  let r = await fetch(url, { signal: AbortSignal.timeout(120000) });
+  if (!r.ok && plugin.id === 'pollinations-text-api' && [429, 503].includes(r.status)) {
+    await new Promise((ok) => setTimeout(ok, 10_000));
+    r = await fetch(url, { signal: AbortSignal.timeout(120000) });
+  }
   if (!r.ok) throw new Error('API HTTP ' + r.status);
   if (plugin.api.tipo === 'imagem') {
     const bytes = Buffer.from(await r.arrayBuffer());

@@ -18,7 +18,11 @@ function urlStream(pergunta, modelo) {
 }
 
 async function tentar(modelo, pergunta, ms) {
-  const r = await fetch(urlTexto(pergunta, modelo), { signal: AbortSignal.timeout(ms) });
+  let r = await fetch(urlTexto(pergunta, modelo), { signal: AbortSignal.timeout(ms) });
+  if (!r.ok && [429, 503].includes(r.status)) {
+    await new Promise((ok) => setTimeout(ok, 10_000));
+    r = await fetch(urlTexto(pergunta, modelo), { signal: AbortSignal.timeout(ms) });
+  }
   const texto = await r.text();
   if (!r.ok || !valido(texto)) throw new Error('modelo ' + modelo + ' indisponível');
   return { texto: texto.trim(), via: 'pollinations:' + modelo };
@@ -43,7 +47,11 @@ export async function* streamResposta(mensagem, prazoMs = 30000, fallbackTexto =
   for (const modelo of MODELOS.slice(0, 3)) {
     let emitiu = false;
     try {
-      const r = await fetch(urlStream(pergunta, modelo), { signal: AbortSignal.timeout(Math.max(1, prazoMs - (Date.now() - inicio))) });
+      let r = await fetch(urlStream(pergunta, modelo), { signal: AbortSignal.timeout(Math.max(1, prazoMs - (Date.now() - inicio))) });
+      if (!r.ok && [429, 503].includes(r.status)) {
+        await new Promise((ok) => setTimeout(ok, 10_000));
+        r = await fetch(urlStream(pergunta, modelo), { signal: AbortSignal.timeout(Math.max(1, prazoMs - (Date.now() - inicio))) });
+      }
       if (!r.ok || !r.body) throw new Error('stream HTTP ' + r.status);
       const leitor = r.body.getReader();
       const decod = new TextDecoder();

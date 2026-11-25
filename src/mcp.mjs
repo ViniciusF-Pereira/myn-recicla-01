@@ -12,7 +12,7 @@ const B = (desc) => ({ type: 'boolean', description: desc });
 
 export const FERRAMENTAS = [
   T('myn_chat', 'Conversa com o Myn-01. Rotas free, sem chave. Use rota="auto" para escolher a melhor.', [['message', S('Mensagem do usuário')], ['rota', S('auto, brave-leo, zai, openrouter, chatgpt, claude')]], ['message']),
-  T('myn_pesquisar', 'Pesquisa local: RAG nos docs + catálogo de 167 plugins.', [['query', S('Pergunta ou termo')]], ['query']),
+  T('myn_pesquisar', 'Pesquisa local: RAG nos docs + catálogo atual de plugins.', [['query', S('Pergunta ou termo')]], ['query']),
   T('myn_rotas', 'Lista rotas, saúde (score/circuito) e plugins disponíveis.', [], []),
   T('myn_plugin', 'Executa qualquer plugin por id (/id no chat).', [['id', S('id do plugin')], ['entrada', S('texto de entrada')]], ['id', 'entrada']),
   T('myn_imagem', 'Gera imagem. Pollinations primeiro; se a cota acabar, desenha o sujeito por palavra-chave localmente.', [['prompt', S('O que gerar')]], ['prompt']),
@@ -20,8 +20,7 @@ export const FERRAMENTAS = [
   T('myn_video', 'Gera clipe MP4 a partir de imagem (Pollinations/local + ffmpeg).', [['prompt', S('Cena do vídeo')], ['segundos', N('Duração 3-15')]], ['prompt']),
   T('myn_documento', 'Anexa e extrai texto de documento (PDF, imagem OCR, CSV/TXT/JSON/HTML).', [['nome', S('Nome do arquivo')], ['base64', S('Conteúdo em base64')]], ['nome', 'base64']),
   T('myn_historico', 'Lê o caderno de histórico do Playground.', [['tipo', S('chat, rag, plugin, midia, documento, google')], ['limite', N('Até 200')]], []),
-  T('myn_google', 'Agenda Google: listar/conectar as 13 rotas com um login.', [['acao', S('listar ou conectar')], ['id', S('id da rota')], ['entrada', S('mensagem')]], ['acao']),
-  T('myn_mensagem', 'Envia mensagem real (Google Chat, Messages, Telegram, WhatsApp, Discord). Exige confirmação explícita.', [['id', S('id do plugin de mensageria')], ['texto', S('Mensagem')], ['confirmar', B('Deve ser true')]], ['id', 'texto', 'confirmar'], { annotations: { readOnlyHint: false, destructiveHint: true } }),
+  T('myn_mensagem', 'Envia mensagem real (Telegram, WhatsApp, Discord). Exige confirmação explícita.', [['id', S('id do plugin de mensageria')], ['texto', S('Mensagem')], ['confirmar', B('Deve ser true')]], ['id', 'texto', 'confirmar'], { annotations: { readOnlyHint: false, destructiveHint: true } }),
 ];
 
 const POR_ID = new Map(FERRAMENTAS.map((f) => [f.name, f]));
@@ -50,12 +49,12 @@ async function executar(nome, a, base) {
       return (d.reply || '') + (d.via ? '\n[via: ' + d.via + ']' : '');
     }
     case 'myn_pesquisar': {
-      const d = await post(base, '/api/chat/stream?pesquisa=1&message=' + encodeURIComponent(a.query), {});
-      return 'Pesquisa iniciada via /api/chat/stream. Use myn_chat com a pergunta para obter o texto completo.';
+      const d = await post(base, '/api/rag', { q: a.query });
+      return JSON.stringify(d.resultados || [], null, 2).slice(0, 12000);
     }
     case 'myn_rotas': {
       const [p, s] = await Promise.all([get(base, '/api/plugins'), get(base, '/api/saude')]);
-      return JSON.stringify({ plugins: p.total, google: p.plugins.filter((x) => x.conta === 'google').length, saude: s.rotas.slice(0, 20) }, null, 2);
+      return JSON.stringify({ plugins: p.total, google: 0, saude: s.rotas.slice(0, 20) }, null, 2);
     }
     case 'myn_plugin': {
       const d = await post(base, '/api/chat', { message: '/' + a.id + ' ' + a.entrada, rota: 'auto' });
@@ -83,14 +82,6 @@ async function executar(nome, a, base) {
       if (a.limite) q.set('limite', String(Math.min(200, a.limite)));
       const d = await get(base, '/api/historico?' + q);
       return JSON.stringify(d.itens, null, 2).slice(0, 12000);
-    }
-    case 'myn_google': {
-      if (a.acao === 'conectar') {
-        const d = await post(base, '/api/google/login', {});
-        return d.aviso || 'Login Google aberto no navegador do gateway.';
-      }
-      const d = await get(base, '/api/google');
-      return JSON.stringify({ conta: d.conta, rotas: d.rotas.map((r) => r.id + ':' + r.estado) }, null, 2);
     }
     case 'myn_mensagem': {
       if (a.confirmar !== true) throw new Error('CONFIRMAÇÃO NECESSÁRIA: myn_mensagem envia mensagem real. Chame de novo com confirmar=true.');

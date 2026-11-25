@@ -97,6 +97,8 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Workers separados:** `docs/WORKER_INFINITO.md`. Análise (`/api/worker-analise/*`) mede código, desempenho, modelos e arquitetura. Melhoria (`/api/worker-melhoria/*`) aplica achados reproduzíveis, roda `node --test`, usa lock de processo, smoke pós-merge e rollback. Merge automático por allowlist, sem revisão humana; desligue com `MYN_AUTO_MERGE_CODIGO=0`. O fluxo padrão não envia código para LLM. Sem Gemini/Google.
 
+**WORK — assistente virtual:** presente em todas as telas, com mascote animado, som, mini-chat, voz, microfone e ferramentas MCP visíveis em uso. Veja `docs/ASSISTENTE_WORK.md`.
+
 **Created By (seção 06 da home):** `node scripts/atualizar-perfil.mjs` busica dados públicos do GitHub via `gh api` e grava `site/perfil.json` — foto, bio, números, repos e LinkedIn (achado no campo `blog` do GitHub). Sem segredos.
 
 Goal mestre para dirigir a entrega completa:

@@ -17,7 +17,7 @@ Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`).
 - `GET /api/arquitetura` → 57 módulos, 78 dependências, 0 ciclos/violações/imports quebrados.
 - Worker de análise: `start` → 1 ciclo → `finalizado`.
 - Git local: branch `master`, commit `base do container`.
-- `node --test` dentro do container → 21/21 testes passando.
+- `node --test` dentro do container → 23/23 testes passando.
 - Processo executado como usuário `myn` (UID 10001), não root.
 - Healthcheck respondeu `200` em `/api/saude`.
 

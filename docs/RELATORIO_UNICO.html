@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Painel único — agentes, SLM, juízes e rotas web</title>
+<title>Myn Recicla/01 · painel atual</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&display=swap" rel="stylesheet">
 <style>
@@ -98,7 +98,7 @@ footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:v
 <div id="barra">
  <div class="top">
   <div class="logo">Myn <em>/</em> painel único</div>
-  <div class="ent">22–23 nov 2026</div>
+  <div class="ent" id="dataRelatorio">atualizando...</div>
   <div class="spacer"></div>
   <div class="busca"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg><input id="filtro" placeholder="buscar..."></div>
   <button class="btn" id="tema" title="Tema">◐</button>
@@ -121,30 +121,20 @@ footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:v
 <main>
 <!-- SÍNTESE -->
 <section class="painel on" id="sintese">
- <div class="cab"><div><h1>Menos tools.<br><em>Mais entrega.</em></h1><p class="sub">Consolidação de uma semana de pesquisa, engenharia e provas ao vivo. Sem chaves expostas e com as lacunas declaradas.</p></div></div>
+ <div class="cab"><div><h1>Myn Recicla/01.<br><em>Dados atuais.</em></h1><p class="sub">Rotas, modelos, desempenho, arquitetura e workers em tempo real. Sem números congelados.</p></div>
+  <div class="linha"><a href="/index.html">← home</a><a href="/playground.html">abrir playground →</a></div>
+ </div>
  <div class="kpis">
-  <div class="kpi"><b>150k→2k</b><small>Tokens · Anthropic</small><p>Fluxo Drive→Salesforce; mede dados intermediários.</p></div>
-  <div class="kpi"><b>1,17mi→1k</b><small>Schemas · Cloudflare</small><p>Footprint de 2.500 definições de tools.</p></div>
-  <div class="kpi"><b>−47%</b><small>Tokens · GPT-5.4</small><p>36 servidores MCP, mesma acurácia.</p></div>
-  <div class="kpi"><b>646 ms</b><small>SLM de reparo real</small><p>groq-fast corrigiu tool call quebrada.</p></div>
-  <div class="kpi"><b>3/3</b><small>Matriz de juízes</small><p>Casos correto, errado e injeção.</p></div>
-  <div class="kpi"><b>6/6</b><small>Tarefa longa</small><p>Z.ai decidiu, Myn executou 15 passos.</p></div>
+  <div class="kpi"><b id="relRotas">—</b><small>rotas ativas</small><p>Catálogo público sem Google/Gemini.</p></div>
+  <div class="kpi"><b id="relModelos">—</b><small>modelos descobertos</small><p>Pollinations, OpenRouter e HuggingFace.</p></div>
+  <div class="kpi"><b id="relPayload">—</b><small>payload medido</small><p>gzip + ETag/304 no fio.</p></div>
+  <div class="kpi"><b id="relArquitetura">—</b><small>módulos · dependências</small><p>Grafo de imports auditado.</p></div>
+  <div class="kpi"><b id="relSaude">—</b><small>saúde média</small><p>Scoreboard de rotas em runtime.</p></div>
  </div>
  <div class="col">
-  <div class="card"><h4>O que ficou provado</h4><ul>
-   <li>Cartão 1030 entregue por rota do Myn, aceite + commit <code>b82ddda1</code>.</li>
-   <li>Painel de juízes com maioria e divergência registrada.</li>
-   <li>SLM de reparo ativo no loop e como ferramenta.</li>
-   <li>Chats web integrados como rotas free, sem Gemini.</li>
-  </ul></div>
-  <div class="card"><h4>Progresso das frentes</h4>
-   <div class="linha"><span>Pesquisa web</span><div class="bar"><i style="width:100%"></i></div><span>100%</span></div>
-   <div class="linha"><span>OpenCode V2</span><div class="bar"><i style="width:92%"></i></div><span>92%</span></div>
-   <div class="linha"><span>SLM + juízes</span><div class="bar"><i style="width:96%"></i></div><span>96%</span></div>
-   <div class="linha"><span>Rotas web</span><div class="bar a"><i style="width:78%"></i></div><span>78%</span></div>
-   <div class="linha"><span>Leitura do Leo</span><div class="bar b"><i style="width:55%"></i></div><span>55%</span></div>
-  </div>
-  <div class="card"><h4>Regra de ouro</h4><p>Reduzir <b>número de chamadas</b>, <b>tokens por chamada</b> e <b>latência</b> são três coisas distintas. Meça as três no seu workflow — não há benchmark independente que as trate como métrica de primeira classe.</p><span class="pildora ok">sem chaves</span><span class="pildora ok">rotas free</span><span class="pildora a">OCR declarado</span></div>
+  <div class="card"><h4>Workers</h4><p id="relWorkers">carregando...</p><span class="pildora ok">lock de processo</span><span class="pildora ok">smoke + rollback</span><span class="pildora ok">sem LLM no fluxo padrão</span></div>
+  <div class="card"><h4>Engenharia atual</h4><ul><li>Achado concreto → patch mínimo.</li><li>Node test, sintaxe e diff check.</li><li>Merge fast-forward por allowlist.</li><li>Eventos persistidos em JSONL.</li></ul></div>
+  <div class="card"><h4>Evidências</h4><p><a href="AUTO_MERGE_PROVA.md">prova de merge automático</a><br><a href="DOCKER_VALIDACAO.md">validação Docker</a><br><a href="WORKER_INFINITO.md">arquitetura dos workers</a></p></div>
  </div>
 </section>
 
@@ -254,7 +244,18 @@ footer{margin-top:30px;border-top:1px solid var(--line);padding-top:12px;color:v
 </section>
 </main>
 <button class="topbtn" id="topo" aria-label="Topo">↑</button>
-<script>
+<script type="module">
+import { carregarDados, resumoWorkers } from '/dados-atuais.mjs';
+import '/assistente.mjs';
+carregarDados().then(d=>{
+ const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
+ set('dataRelatorio',new Date(d.atualizadoEm).toLocaleString('pt-BR'));
+ set('relRotas',d.totalPlugins); set('relModelos',d.totalDescobertos);
+ set('relPayload',d.totalKb+' KB · pior '+d.piorMs+'ms');
+ set('relArquitetura',d.arquiteturaResumo?d.arquiteturaResumo.modulos+' · '+d.arquiteturaResumo.dependencias:'—');
+ set('relSaude',d.saudeMedia==null?'—':d.saudeMedia.toFixed(2));
+ set('relWorkers',resumoWorkers(d));
+}).catch(e=>{const el=document.getElementById('relWorkers');if(el)el.textContent='Erro: '+e.message});
 (function(){
  var abas=[].slice.call(document.querySelectorAll('.tab')),painéis=[].slice.call(document.querySelectorAll('.painel')),
      filtro=document.getElementById('filtro'),tema=document.getElementById('tema'),prog=document.getElementById('progresso'),

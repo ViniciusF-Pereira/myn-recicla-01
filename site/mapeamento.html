@@ -27,11 +27,17 @@ img{width:160px;border:1px solid var(--linha);border-radius:6px;margin:6px 6px 0
 <header><span class="logo">MYN</span><b>Recicla/01 · evidências do mapeamento</b><a style="margin-left:auto" href="index.html">← site</a></header>
 <h1>Mapa de provedores</h1>
 <p class="sub" id="info">carregando evidências...</p>
-<div id="lista"></div>
+<div id="resumoAtual" class="card">carregando dados atuais...</div><div id="lista"></div>
 </div>
-<script>
+<script type="module">
+import { carregarDados, resumoWorkers } from './dados-atuais.mjs';
+import './assistente.mjs';
 const esc = s => String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
-fetch('mapeamento.json').then(r=>r.json()).then(d=>{
+carregarDados().then(d=>{
+  document.getElementById('resumoAtual').innerHTML='<div class="linha"><b>Dados atuais</b><span class="badge ok">'+new Date(d.atualizadoEm).toLocaleString('pt-BR')+'</span></div>'+
+   '<div class="meta">'+d.totalPlugins+' rotas · '+d.totalDescobertos+' modelos livres · '+d.totalKb+' KB · '+resumoWorkers(d)+'</div>';
+ }).catch(e=>{document.getElementById('resumoAtual').textContent='Erro nos dados atuais: '+e.message});
+ fetch('mapeamento.json').then(r=>r.json()).then(d=>{
  document.getElementById('info').textContent=`Mapeado em ${d.em} · gateway ${d.gateway} · sonda: "${d.probe}" · ${d.resultados.length} provedores`;
  document.getElementById('lista').innerHTML=d.resultados.map((p,i)=>`
  <div class="card">

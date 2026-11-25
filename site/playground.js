@@ -1,3 +1,5 @@
+import { carregarDados, resumoWorkers } from './dados-atuais.mjs';
+import './assistente.mjs';
 const $=id=>document.getElementById(id);
 const ROTAS={
  auto:['Myn-01 Auto','resposta rápida sem chave, com fallback no navegador'],
@@ -299,10 +301,11 @@ $('btnFilmes').onclick=async()=>{
  }catch(e){espera.className='msg err';espera.textContent='Erro: '+e.message}
 };
 $('btnModelos').onclick=async()=>{
- const espera=add('mapeando modelos por provider...','ele');
+ const espera=add('carregando modelos atuais...','ele');
  try{
-  const d=await (await fetch('/api/modelos')).json();
-  espera.innerHTML='<div class="modelos">'+d.rotas.map(r=>'<div><b>'+esc(r.id)+'</b> · '+esc(r.modelo)+'<br><small>'+esc(r.agente||'')+' · '+esc((r.capacidades||[]).join(', '))+'</small></div>').join('')+'</div>';
+  const [d,disc]=await Promise.all([fetch('/api/modelos').then(r=>r.json()),fetch('/api/modelos/descobertos').then(r=>r.json())]);
+  espera.innerHTML='<div class="modelos"><div><b>'+d.total+' rotas mapeadas</b><br><small>'+disc.total+' modelos descobertos · '+Object.entries(disc.porFonte||{}).map(([k,v])=>k+': '+v).join(' · ')+'</small></div>'+
+   d.rotas.map(r=>'<div><b>'+esc(r.id)+'</b> · '+esc(r.modelo)+'<br><small>'+esc(r.agente||'')+' · '+esc((r.capacidades||[]).join(', '))+'</small></div>').join('')+'</div>';
  }catch(e){espera.className='msg err';espera.textContent='Erro: '+e.message}
 };
 
@@ -337,3 +340,14 @@ $('agExec').onclick=async()=>{
   saida.innerHTML=r.resultados.map(x=>'<div class="pv-linha"><b>'+esc(x.agente)+'</b> · '+esc(x.foco)+' · '+x.ms+'ms · '+esc(x.via)+'<br>'+esc(x.texto).replace(/\n/g,'<br>')+'</div>').join('');
  }catch(e){saida.innerHTML='<div class="pv-linha">Erro: '+esc(e.message)+'</div>'}
 };
+
+async function atualizarDadosPlayground(){
+ try{
+  const d=await carregarDados();
+  $('msgRotas').textContent=d.totalPlugins;
+  $('pluginsCount').textContent=d.totalPlugins+' plugins disponíveis';
+  $('pwResumo').textContent=resumoWorkers(d);
+ }catch(e){$('pwResumo').textContent='dados indisponíveis'}
+}
+atualizarDadosPlayground();
+setInterval(atualizarDadosPlayground,30000);
