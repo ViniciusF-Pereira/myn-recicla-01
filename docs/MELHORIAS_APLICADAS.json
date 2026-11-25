@@ -21,5 +21,6 @@
   "export-filme",
   "export-stream",
   "export-auto",
-  "export-worker"
+  "export-worker",
+  "export-gateway"
 ]

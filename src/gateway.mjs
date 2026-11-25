@@ -132,3 +132,4 @@ export function criarTrava() {
     return r;
   };
 }
+export async function pingGateway(base){try{const r=await fetch(String(base).replace(/\/$/,"")+"/v1/browser/targets",{signal:AbortSignal.timeout(5000)});return r.ok}catch{return false}}
