@@ -112,7 +112,12 @@ async function candidatosDeReferencia(feitas) {
         conteudo: '# Endpoints\n\nExtraído de `scripts/site-server.mjs`: ' + achados.size + ' caminhos.\n\n' + [...achados].sort().map((e) => '- `' + e + '`').join('\n') + '\n' });
     }
   }
-  if (!feitas.has('tests-puros') && !(await existe('tests/puros.test.mjs'))) {
+  // Testes só entram na fila quando os exports que eles exercitam já existem.
+  const prontoParaTestes = (await texto('src/filmes.mjs')).includes('normalizarFilme')
+    && (await texto('src/rag.mjs')).includes('contarTokens')
+    && (await texto('src/midia.mjs')).includes('extensaoArquivo')
+    && (await texto('src/versao.mjs')).includes('VERSAO');
+  if (prontoParaTestes && !feitas.has('tests-puros') && !(await existe('tests/puros.test.mjs'))) {
     out.push({ id: 'tests-puros', alvo: 'tests/puros.test.mjs', modo: 'criar', titulo: 'testes dos módulos puros',
       conteudo: "import test from 'node:test';\nimport assert from 'node:assert/strict';\nimport { normalizarFilme } from '../src/filmes.mjs';\nimport { contarTokens } from '../src/rag.mjs';\nimport { extensaoArquivo } from '../src/midia.mjs';\nimport { NOME, VERSAO } from '../src/versao.mjs';\n\ntest('normalizarFilme remove tags', () => {\n  assert.equal(normalizarFilme('<b>Matrix</b>'), 'Matrix');\n});\n\ntest('contarTokens conta palavras', () => {\n  assert.equal(contarTokens('a b c'), 3);\n});\n\ntest('extensaoArquivo normaliza', () => {\n  assert.equal(extensaoArquivo('foto.PNG'), 'png');\n});\n\ntest('identidade do produto', () => {\n  assert.equal(NOME, 'Myn Recicla/01');\n  assert.ok(VERSAO);\n});\n" });
   }

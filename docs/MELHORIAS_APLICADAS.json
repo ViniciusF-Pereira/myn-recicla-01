@@ -9,5 +9,7 @@
   "doc-indice",
   "config-app",
   "script-validar-config",
-  "script-exportar-db"
+  "script-exportar-db",
+  "docs-rotas",
+  "docs-endpoints"
 ]

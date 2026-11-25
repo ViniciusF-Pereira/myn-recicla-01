@@ -87,12 +87,13 @@ async function ciclo(n, objetivo) {
     emitir('revertido', { n, arquivo, tarefa: t.id });
     return { n, ok: false, tarefa: t.id };
   }
-  // Commita apenas o arquivo da tarefa — nunca mudanças alheias da árvore.
-  await git(['add', '--', arquivo]).catch(() => undefined);
-  const pendente = await git(['status', '--porcelain', '--', arquivo]);
+  // Commita apenas o arquivo da tarefa e o marcador — nunca mudanças alheias da árvore.
+  await marcar(t.id);
+  await git(['add', '--', arquivo, 'docs/MELHORIAS_APLICADAS.json']).catch(() => undefined);
+  const pendente = await git(['status', '--porcelain', '--', arquivo, 'docs/MELHORIAS_APLICADAS.json']);
   let merge = false;
   if (pendente) {
-    await git(['commit', '-m', 'worker: ' + t.titulo + ' (ciclo ' + n + ')', '--', arquivo]);
+    await git(['commit', '-m', 'worker: ' + t.titulo + ' (ciclo ' + n + ')', '--', arquivo, 'docs/MELHORIAS_APLICADAS.json']);
     const seguro = /^(docs\/|config\/)/.test(t.alvo);
     if (seguro) {
       await git(['checkout', 'master']);
@@ -101,10 +102,8 @@ async function ciclo(n, objetivo) {
     } else {
       emitir('revisao', { n, arquivo: t.alvo, aviso: 'codigo permanece em worker/auto para revisao' });
     }
-    await marcar(t.id);
   } else {
     emitir('sem_alteracao', { n, arquivo });
-    await marcar(t.id);
   }
   emitir('git', { n, merge, tarefa: t.id });
   return { n, ok: true, merge, tarefa: t.id };
