@@ -288,7 +288,7 @@ function linhaWorker(ev){
 }
 let workerStream=null;
 function conectarWorker(){
- if(workerStream)workerStream.cancel().catch(()=>{});
+ if(workerStream)workerStream.abort();
  workerStream=new AbortController();
  fetch('/api/worker/stream',{signal:workerStream.signal}).then(async r=>{
   const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
