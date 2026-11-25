@@ -159,3 +159,8 @@ Módulo do Myn Recicla/01.
 Exports: registrarEvento, lerEventos
 
 Módulo do Myn Recicla/01.
+## lock.mjs
+
+Exports: adquirirLock
+
+Módulo do Myn Recicla/01.

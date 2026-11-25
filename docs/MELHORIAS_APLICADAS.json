@@ -29,5 +29,6 @@
   "modulo-engenheiro",
   "modulo-modelos-pollinations",
   "modulo-auditoria-codigo",
-  "modulo-eventlog"
+  "modulo-eventlog",
+  "modulo-lock"
 ]
