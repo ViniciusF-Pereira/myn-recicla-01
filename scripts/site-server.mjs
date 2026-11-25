@@ -32,7 +32,7 @@ let cacheGoogle = null;
 const PORTA = Number(process.env.PORT || 5188);
 const HOST = process.env.MYN_HOST || '127.0.0.1';
 
-const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' };
 
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -415,6 +415,16 @@ const servidor = http.createServer(async (req, res) => {
     try {
       const bytes = await lerArquivo(nome);
       res.writeHead(200, { 'content-type': tipoMime(nome), 'content-disposition': 'inline; filename="' + nome.replace(/"/g, '') + '"' });
+      res.end(bytes);
+    } catch { res.writeHead(404); res.end('não encontrado'); }
+    return;
+  }
+  if (url.pathname.startsWith('/web/')) {
+    const alvo = path.join(raiz, url.pathname.replace(/^\/+/, ''));
+    if (!alvo.startsWith(path.join(raiz, 'web'))) { res.writeHead(403); res.end(); return; }
+    try {
+      const bytes = await readFile(alvo);
+      res.writeHead(200, { 'content-type': TIPOS['.js'] });
       res.end(bytes);
     } catch { res.writeHead(404); res.end('não encontrado'); }
     return;
