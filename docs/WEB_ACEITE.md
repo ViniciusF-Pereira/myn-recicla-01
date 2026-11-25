@@ -13,6 +13,8 @@ Executado no navegador (`http://127.0.0.1:5188/playground.html`), sem Node no cl
 | LLM WebGPU | ✅ `window.myn.llm.disponivel() === true`; modelo `Qwen2.5-0.5B-Instruct-q4f16_1-MLC` carregado sob demanda |
 | Recusa de rota | ✅ não desvia mais para imagem; cai para WebGPU ou mensagem honesta com troca de rota |
 | Botões mídia/plugins | ✅ imagem, áudio, vídeo geram artifact; painel de plugins lista 62 |
+| Botões da home | ✅ catálogo (26→24), vitrine (6→1 em “voz”), ABRIR PLAYGROUND em nova aba; zero botões mortos |
+| Recusa sem imagem | ✅ WebGPU `Qwen2.5-0.5B` carregado sob demanda; sem desvio para gerador |
 | Servidor `/web/*` | ✅ módulos ES com MIME `text/javascript` |
 | Playground | ✅ em página própria, chat funcional, botão da home abre nova aba |
 

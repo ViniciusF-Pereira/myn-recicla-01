@@ -205,6 +205,7 @@ body>header,main,footer{position:relative;z-index:1}
 
 .painel-plugins{display:none;position:absolute;left:16px;right:16px;bottom:100%;margin-bottom:8px;background:var(--card);border:2px solid var(--azul);border-radius:9px;box-shadow:0 12px 30px rgba(13,79,165,.25);z-index:20;max-height:340px;overflow:auto;padding:12px}
 .painel-plugins.on{display:block}
+.hidden,.card.hidden{display:none}
 .painel-plugins .pp-topo{display:flex;align-items:center;gap:8px;margin-bottom:9px;font:600 .7rem var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--azul2)}
 .painel-plugins .pp-topo button{margin-left:auto;border:1px solid var(--linha);background:var(--papel);border-radius:4px;cursor:pointer;padding:2px 7px}
 .plugin-grupo{margin-bottom:10px}
@@ -292,7 +293,7 @@ body>header,main,footer{position:relative;z-index:1}
  <div class="st"><span class="num">03</span><h2>Plugins & nichos</h2><span class="traco"></span><span class="nota">via /comando no chat</span></div>
  <div class="vitrine">
   <div>
-   <div class="tabs" id="tabsPlugins"><button class="aba on" data-c="todos">todos</button><button class="aba" data-c="chat">chat</button><button class="aba" data-c="imagem">imagem</button><button class="aba" data-c="video">vídeo</button><button class="aba" data-c="voz">voz</button><button class="aba" data-c="agente">agentes</button><button class="aba" data-c="api">APIs</button></div>
+   <div class="tabs" id="tabsVitrine"><button class="aba on" data-c="todos">todos</button><button class="aba" data-c="chat">chat</button><button class="aba" data-c="imagem">imagem</button><button class="aba" data-c="video">vídeo</button><button class="aba" data-c="voz">voz</button><button class="aba" data-c="agente">agentes</button><button class="aba" data-c="api">APIs</button></div>
    <h3>Recicle qualquer aba em ferramenta.</h3>
    <p>Cada plugin é uma rota declarativa: navegador mediado, API sem chave ou gerador local. Nenhum segredo, nenhuma chave, nenhum serviço pago.</p>
    <div class="mini-linha"><span></span><span></span><span></span><span></span><span></span><span></span></div><div class="mini"><div><b>50+ plugins</b><small>chat, mídia, mensageria, APIs</small></div><div><b>Sem chave</b><small>somente rotas free</small></div><div><b>Limites honestos</b><small>documentados por serviço</small></div><div><b>Confirmação</b><small>mensagens reais só com /confirmar</small></div></div>
@@ -337,10 +338,11 @@ body>header,main,footer{position:relative;z-index:1}
 <footer class="wrap"><span>Myn — Recyla/01 · de aba descartada a rota reaproveitada · 23/11/2026</span><span>sem chaves · sem Codex · browser only</span><span class="cc">cc</span></footer>
 </main>
 
-<div class="gaveta" id="gaveta" aria-hidden="true"><div class="gaveta-topo"><b><svg class="ico"><use href="#i-history"/></svg> Caderno / histórico</b><button class="icobtn" id="fecharHist" aria-label="Fechar">✕</button></div><div class="gaveta-corpo" id="hist"><div class="passo-linha">carregando...</div></div><div class="gaveta-pe"><button class="btn sec" id="recarregarHist">ATUALIZAR</button><button class="btn sec" id="limparHist">LIMPAR</button></div></div>
-<div class="fundo" id="fundo"></div>
+
 
 <script src="assets/mini-myns.js">
+
+
 
 </script>
 
@@ -362,6 +364,11 @@ document.querySelectorAll('#filtros .aba').forEach(b=>b.addEventListener('click'
  document.querySelectorAll('#filtros .aba').forEach(x=>x.classList.remove('on'));b.classList.add('on');pintar(b.dataset.f)
 }));
 
+
+document.querySelectorAll('#tabsVitrine .aba').forEach(b=>b.onclick=()=>{
+ document.querySelectorAll('#tabsVitrine .aba').forEach(x=>x.classList.remove('on'));b.classList.add('on');
+ document.querySelectorAll('#extras .card[data-cat]').forEach(c=>c.classList.toggle('hidden',b.dataset.c!=='todos'&&c.dataset.cat!==b.dataset.c));
+});
 </script>
 </body>
 </html>
