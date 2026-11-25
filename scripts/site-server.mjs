@@ -21,6 +21,7 @@ import { orquestrar, classificarTarefa } from '../src/orquestrar-modelos.mjs';
 import { medirDesempenho } from '../src/desempenho.mjs';
 import { obterModelos } from '../src/modelos-livres.mjs';
 import { auditarArquitetura } from '../src/arquitetura.mjs';
+import { lerEventos } from '../src/eventlog.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
@@ -116,6 +117,12 @@ const servidor = http.createServer(async (req, res) => {
     analise: { iniciar: iniciarAnalise, parar: pararAnalise, status: statusAnalise, assinar: assinarAnalise },
     melhoria: { iniciar: iniciarMelhoria, parar: pararMelhoria, status: statusMelhoria, assinar: assinarMelhoria },
   };
+  const eventosRota = /^\/api\/worker-(analise|melhoria)\/eventos$/.exec(url.pathname);
+  if (eventosRota && req.method === 'GET') {
+    const limite = Number(url.searchParams.get('limite')) || 100;
+    enviarJson(req, res, { worker: eventosRota[1], eventos: await lerEventos(eventosRota[1], limite) });
+    return;
+  }
   const workerRota = /^\/api\/worker-(analise|melhoria)\/(status|start|stop|stream)$/.exec(url.pathname);
   if (workerRota) {
     const w = workerRotas[workerRota[1]], op = workerRota[2];

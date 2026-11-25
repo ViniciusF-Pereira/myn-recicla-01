@@ -40,12 +40,22 @@ Antes do merge, o worker verifica **todo o diff `master...worker/auto`**. Qualqu
 
 O merge é sempre `--ff-only`. Se houver conflito ou falha, a branch permanece para inspeção.
 
+## Freios adicionais
+
+- **Lock de processo:** `dados/worker-melhoria.lock` impede dois workers no mesmo repositório/volume.
+- **Smoke pós-merge:** consulta `/api/saude` e `/`; se falhar, faz `reset --hard` e rollback da branch.
+- **Testes protegidos:** `tests/*` não entra na allowlist por padrão. Exceção requer `MYN_AUTO_MERGE_TESTES=1`.
+- **Push opcional:** defina `MYN_AUTO_PUSH=1` para enviar `master` ao remote após smoke.
+- **Eventos persistidos:** JSONL em `dados/worker-{analise,melhoria}-eventos.jsonl`.
+
 ## Endpoints
 
 - `GET /api/worker-analise/{status,stream}`
 - `POST /api/worker-analise/{start,stop}`
-- `GET /api/worker-melhoria/{status,stream}`
+- `GET /api/worker-melhoria/{status,stream,eventos}`
 - `POST /api/worker-melhoria/{start,stop}`
+- `GET /api/worker-analise/{status,stream,eventos}`
+- `POST /api/worker-analise/{start,stop}`
 
 ## Eventos principais
 

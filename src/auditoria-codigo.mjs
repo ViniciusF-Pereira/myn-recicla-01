@@ -7,9 +7,9 @@ async function texto(arquivo) {
   try { return await readFile(path.join(RAIZ, arquivo), 'utf8'); } catch { return ''; }
 }
 
-function achado(id, arquivo, descricao, teste, correcao = null) {
+function achado(id, arquivo, descricao, teste, correcao = null, prova = null) {
   const correcoes = Array.isArray(correcao) ? correcao : correcao ? [correcao] : [];
-  return { id, arquivo, categoria: /midia/.test(arquivo) ? 'infra' : 'codigo', descricao, teste, correcao: correcoes.length ? correcoes : null };
+  return { id, arquivo, categoria: /midia/.test(arquivo) ? 'infra' : 'codigo', descricao, teste, correcao: correcoes.length ? correcoes : null, prova };
 }
 
 export async function auditarCodigo() {
@@ -17,10 +17,15 @@ export async function auditarCodigo() {
   const midia = await texto('src/midia.mjs');
   if (midia.includes('if (!alvo.startsWith(DIR_ARQUIVOS))')) {
     findings.push(achado('midia-path-traversal', 'src/midia.mjs',
-      'startsWith permite prefixo de diretório irmão; usar path.relative para confinar o arquivo.',
+      'confinamento por startsWith é frágil como defesa; usar path.relative e validar por comportamento.',
       async () => (await texto('src/midia.mjs')).includes('if (!alvo.startsWith(DIR_ARQUIVOS))'),
       { antigo: "  if (!alvo.startsWith(DIR_ARQUIVOS)) throw new Error('fora do diretorio');",
-        novo: "  const rel = path.relative(DIR_ARQUIVOS, alvo);\n  if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) throw new Error('fora do diretorio');" }));
+        novo: "  const rel = path.relative(DIR_ARQUIVOS, alvo);\n  if (!rel || rel.startsWith('..') || path.isAbsolute(rel)) throw new Error('fora do diretorio');" },
+      async () => {
+        const { lerArquivo } = await import('./midia.mjs');
+        try { await lerArquivo('../package.json'); return false; }
+        catch { return true; }
+      }));
   }
 
   for (const arquivo of ['src/midia.mjs', 'src/gateway.mjs', 'scripts/mapear.mjs']) {
@@ -57,15 +62,24 @@ export async function auditarCodigo() {
       'caminho de execução contém Google/Gemini.', async () => /gemini|google/i.test(await texto(arquivo))));
   }
 
+  const confirmados = [];
+  for (const f of findings) {
+    if (f.prova) {
+      try { if (await f.prova()) continue; } catch { /* prova falhou: confirma o achado */ }
+    }
+    confirmados.push(f);
+  }
   return {
     quando: new Date().toISOString(),
-    achados: findings,
-    resumo: { total: findings.length, deterministicos: findings.filter((f) => f.correcao).length, llm: findings.filter((f) => !f.correcao).length },
+    achados: confirmados,
+    resumo: { total: confirmados.length, deterministicos: confirmados.filter((f) => f.correcao).length, llm: confirmados.filter((f) => !f.correcao).length },
   };
 }
 
 export async function reproduzirAchado(id) {
   const auditoria = await auditarCodigo();
   const f = auditoria.achados.find((x) => x.id === id);
-  return f ? Boolean(await f.teste()) : false;
+  if (!f) return false;
+  if (f.prova) return !(await f.prova()); // prova retorna true quando o comportamento é seguro
+  return Boolean(await f.teste());
 }

@@ -9,9 +9,15 @@ test('allowlist de merge bloqueia segredos e dados', () => {
   assert.equal(caminhoPermitido('config/app.json', false), true);
   assert.equal(caminhoPermitido('src/stream.mjs', false), false);
   assert.equal(caminhoPermitido('src/stream.mjs', true), true);
+  assert.equal(caminhoPermitido('tests/engenharia.test.mjs', true), false);
   assert.equal(caminhoPermitido('.env', true), false);
   assert.equal(caminhoPermitido('dados/historico.jsonl', true), false);
   assert.equal(caminhoPermitido('src/../.env', true), false);
+});
+
+test('leitura de arquivo confina caminhos traversal por comportamento', async () => {
+  const { lerArquivo } = await import('../src/midia.mjs');
+  await assert.rejects(() => lerArquivo('../package.json'));
 });
 
 test('cada achado da auditoria é reproduzível e tem patch exato', async () => {

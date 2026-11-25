@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { normalizarOpenRouter } from '../src/modelos-livres.mjs';
-import { escolherPara, orquestrar, carregarMapaModelos } from '../src/orquestrar-modelos.mjs';
+import { escolherPara, orquestrar, carregarMapaModelos, avaliar } from '../src/orquestrar-modelos.mjs';
 import { buscar } from '../src/rag.mjs';
 import { gerarProposta } from '../src/engenheiro.mjs';
 import { readFile } from 'node:fs/promises';
@@ -36,6 +36,14 @@ test('todo modelo mapeado tem plugin real e nenhum é Google', async () => {
 test('orquestrador não escolhe gerador local nem em modo normal', async () => {
   const rotas = await escolherPara('gere uma imagem de um gato', 10, false);
   assert.ok(rotas.every((r) => !/-local$/.test(r.id)));
+});
+
+test('pontuação valoriza código e penaliza imagem em tarefa textual', () => {
+  const codigo = avaliar('```js\nconst x = 1;\n```', ['codigo']);
+  const texto = avaliar('Uma resposta textual sem bloco de código.', ['codigo']);
+  const imagem = avaliar('![foto](http://x/y.jpg)', ['chat']);
+  assert.ok(codigo > texto);
+  assert.ok(imagem < texto);
 });
 
 test('se todas as rotas falham, o orquestrador usa fallback determinístico', async () => {

@@ -5,11 +5,14 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { analisarMelhorias, marcar } from './analise.mjs';
 import { auditarCodigo, reproduzirAchado } from './auditoria-codigo.mjs';
+import { registrarEvento } from './eventlog.mjs';
+import { adquirirLock } from './lock.mjs';
 
 const run = promisify(execFile);
 const RAIZ = process.cwd();
 const AUTO_MERGE_CODIGO = process.env.MYN_AUTO_MERGE_CODIGO !== '0';
-let ativo = false, abortar = false;
+const AUTO_PUSH = process.env.MYN_AUTO_PUSH === '1';
+let ativo = false, abortar = false, liberarLock = null;
 const inscritos = new Set();
 let estado = { ciclos: 0, ultimo: null, iniciadoEm: null, objetivo: null };
 
@@ -17,6 +20,7 @@ function emitir(tipo, dados = {}) {
   const ev = { t: new Date().toISOString(), tipo, ...dados };
   for (const fn of inscritos) { try { fn(ev); } catch { /* morto */ } }
   estado.ultimo = ev;
+  void registrarEvento('melhoria', ev).catch(() => { /* disco indisponível */ });
 }
 export function assinar(fn) { inscritos.add(fn); return () => inscritos.delete(fn); }
 export function status() { return { ativo, autoMergeCodigo: AUTO_MERGE_CODIGO, ...estado, inscritos: inscritos.size }; }
@@ -81,8 +85,21 @@ export function caminhoPermitido(caminho, permitirCodigo) {
   if (caminho.split(/[\\/]/).includes('..')) return false;
   if (/^(docs|config)\//.test(caminho)) return true;
   if (!permitirCodigo) return false;
-  return /^(src|scripts|tests|web|site)\//.test(caminho)
+  if (/^tests\//.test(caminho)) return process.env.MYN_AUTO_MERGE_TESTES === '1';
+  return /^(src|scripts|web|site)\//.test(caminho)
     || /^(Dockerfile|docker-compose\.yml|package\.json)$/.test(caminho);
+}
+
+async function smokePosMerge() {
+  if (process.env.MYN_SMOKE_HTTP === '0') return { ok: true, ignorado: true };
+  const base = process.env.MYN_API_BASE || 'http://127.0.0.1:' + (process.env.PORTA || 5188);
+  try {
+    const respostas = await Promise.all([
+      fetch(base + '/api/saude', { signal: AbortSignal.timeout(5000) }),
+      fetch(base + '/', { signal: AbortSignal.timeout(5000) }),
+    ]);
+    return { ok: respostas.every((r) => r.ok), status: respostas.map((r) => r.status) };
+  } catch (e) { return { ok: false, erro: String(e.message).slice(0, 180) }; }
 }
 
 async function mesclarBranch(n, permitirCodigo = AUTO_MERGE_CODIGO) {
@@ -94,9 +111,27 @@ async function mesclarBranch(n, permitirCodigo = AUTO_MERGE_CODIGO) {
     emitir('merge_bloqueado', { n, arquivos: proibidos, aviso: 'caminho fora da allowlist ou merge de código desativado' });
     return false;
   }
+  const antes = await git(['rev-parse', 'master']);
   await git(['checkout', 'master']);
-  try { await git(['merge', '--ff-only', 'worker/auto']); return true; }
-  catch { await git(['merge', '--abort']).catch(() => undefined); return false; }
+  try {
+    await git(['merge', '--ff-only', 'worker/auto']);
+    const smoke = await smokePosMerge();
+    if (!smoke.ok) {
+      await git(['reset', '--hard', antes]);
+      await git(['branch', '-f', 'worker/auto', antes]).catch(() => undefined);
+      emitir('rollback', { n, commit: antes, motivo: 'smoke pós-merge falhou', smoke });
+      return false;
+    }
+    if (AUTO_PUSH) {
+      try { await git(['push', 'origin', 'master']); emitir('push', { n, branch: 'master', ok: true }); }
+      catch (e) { emitir('push', { n, branch: 'master', ok: false, erro: String(e.stderr || e.message).slice(0, 180) }); }
+    }
+    return true;
+  } catch (e) {
+    await git(['merge', '--abort']).catch(() => undefined);
+    emitir('merge_falhou', { n, erro: String(e.stdout || e.stderr || e.message).trim().slice(0, 200) });
+    return false;
+  }
 }
 
 async function reverter(arquivo, existia) {
@@ -186,22 +221,30 @@ async function ciclo(n, objetivo) {
 
 export async function iniciar({ objetivo = 'melhorar codigo, infra, modelos e arquitetura', maxCiclos = 1000, intervaloMs = 4000 } = {}) {
   if (ativo) return { ok: false, erro: 'worker de melhoria ja ativo' };
+  const lock = await adquirirLock('melhoria');
+  if (!lock.ok) return { ok: false, erro: lock.motivo, pid: lock.pid };
+  liberarLock = lock.liberar;
   ativo = true; abortar = false;
   estado = { ciclos: 0, ultimo: null, iniciadoEm: new Date().toISOString(), objetivo: String(objetivo).slice(0, 500) };
-  emitir('iniciado', { objetivo: estado.objetivo, autoMergeCodigo: AUTO_MERGE_CODIGO, modo: 'achado-concreto' });
+  emitir('iniciado', { objetivo: estado.objetivo, autoMergeCodigo: AUTO_MERGE_CODIGO, modo: 'achado-concreto', pid: process.pid });
   let n = 0, motivo = 'limite', falhou = null, falhas = 0;
-  while (ativo && !abortar && n < maxCiclos) {
-    n++; estado.ciclos = n;
-    const r = await ciclo(n, estado.objetivo);
-    if (abortar) { motivo = 'parado'; break; }
-    if (r.ok === false) {
-      if (r.tarefa === falhou) falhas++; else { falhou = r.tarefa; falhas = 1; }
-      if (falhas >= 2) { emitir('bloqueado', { tarefa: falhou, aviso: 'tarefa falhou 2x; parando para revisão técnica' }); motivo = 'tarefa bloqueada'; break; }
-    } else falhou = null;
-    await new Promise((r2) => setTimeout(r2, Math.max(500, intervaloMs)));
+  try {
+    while (ativo && !abortar && n < maxCiclos) {
+      n++; estado.ciclos = n;
+      const r = await ciclo(n, estado.objetivo);
+      if (abortar) { motivo = 'parado'; break; }
+      if (r.ok === false) {
+        if (r.tarefa === falhou) falhas++; else { falhou = r.tarefa; falhas = 1; }
+        if (falhas >= 2) { emitir('bloqueado', { tarefa: falhou, aviso: 'tarefa falhou 2x; parando para revisão técnica' }); motivo = 'tarefa bloqueada'; break; }
+      } else falhou = null;
+      await new Promise((r2) => setTimeout(r2, Math.max(500, intervaloMs)));
+    }
+    return { ok: true, ciclos: n, motivo };
+  } finally {
+    ativo = false;
+    emitir('finalizado', { ciclos: n, motivo });
+    await liberarLock?.();
+    liberarLock = null;
   }
-  ativo = false;
-  emitir('finalizado', { ciclos: n, motivo });
-  return { ok: true, ciclos: n, motivo };
 }
 export function parar() { if (!ativo) return { ok: false, erro: 'worker de melhoria nao estava ativo' }; abortar = true; emitir('parando', {}); return { ok: true }; }

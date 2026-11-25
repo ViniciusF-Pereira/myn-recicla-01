@@ -48,12 +48,18 @@ export async function escolherPara(tarefa, max = 3, rapido = false) {
   return candidatos.sort((a, b) => (ordem.get(a.id) ?? 999) - (ordem.get(b.id) ?? 999)).slice(0, max).map((r) => ({ ...r, capacidadesMatch: r.capacidades.filter((c) => caps.includes(c)) }));
 }
 
-function avaliar(texto) {
+export function avaliar(texto, capacidades = []) {
   const s = String(texto || '').trim();
+  if (!s) return 0;
   const penalidade = /não consegui|nao consegui|sem resposta|erro|sorry|can't help|não entendi/i.test(s);
-  const tamanho = Math.min(1, s.length / 400);
-  const tempo = /rapido|rápido/.test(s) ? 0.1 : 0;
-  return Math.max(0, (penalidade ? 0 : 0.7) + tamanho * 0.3 - tempo);
+  let nota = penalidade ? 0.1 : 0.7;
+  if (s.length < 20) nota -= 0.25;
+  if (s.length > 8000) nota -= 0.2;
+  if (capacidades.includes('codigo') && /```|\bfunction\b|\bconst\b|\bclass\b/.test(s)) nota += 0.15;
+  if (capacidades.includes('pesquisa') && /https?:\/\//.test(s)) nota += 0.1;
+  if (capacidades.includes('imagem') && /!\[[^\]]*\]\([^)]+\)/.test(s)) nota += 0.2;
+  if (!capacidades.includes('imagem') && /^!\[[^\]]*\]\([^)]+\)/.test(s)) nota -= 0.5;
+  return Math.max(0, Math.min(1, nota));
 }
 
 /** Roda as rotas em paralelo com Promise.all e escolhe a melhor resposta. */
@@ -68,7 +74,7 @@ export async function orquestrar({ tarefa, gateway, trava, plugins, max = 3, rap
     const d = await executarPlugin({ plugin, entrada: tarefa, gateway, trava, log: (x) => log({ rota: rota.id, ...x }) });
     registrar(rota.id, { ok: d.ok, ms: d.ms, erro: d.erro || (d.ok ? '' : 'sem_resposta') });
     const texto = d.ok ? d.resposta : (d.erro || '');
-    return { rota: rota.id, nome: rota.nome, modelo: rota.modelo, ok: d.ok, resposta: texto, nota: avaliar(texto), ms: Date.now() - t };
+    return { rota: rota.id, nome: rota.nome, modelo: rota.modelo, ok: d.ok, resposta: texto, nota: avaliar(texto, classificarTarefa(tarefa)), ms: Date.now() - t };
   });
   const resultados = await Promise.all(promessas);
   const sucessos = resultados.filter((r) => r.ok && String(r.resposta || '').trim());

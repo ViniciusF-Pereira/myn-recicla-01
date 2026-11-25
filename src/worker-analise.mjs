@@ -8,6 +8,7 @@ import { medirDesempenho } from './desempenho.mjs';
 import { obterModelos } from './modelos-livres.mjs';
 import { auditarArquitetura } from './arquitetura.mjs';
 import { auditarCodigo } from './auditoria-codigo.mjs';
+import { registrarEvento } from './eventlog.mjs';
 
 const RAIZ = process.cwd();
 let ativo = false, abortar = false;
@@ -18,6 +19,7 @@ function emitir(tipo, dados = {}) {
   const ev = { t: new Date().toISOString(), tipo, ...dados };
   for (const fn of inscritos) { try { fn(ev); } catch { /* morto */ } }
   estado.ultimo = ev;
+  void registrarEvento('analise', ev).catch(() => { /* disco indisponível */ });
 }
 export function assinar(fn) { inscritos.add(fn); return () => inscritos.delete(fn); }
 export function status() { return { ativo, ...estado, inscritos: inscritos.size }; }
