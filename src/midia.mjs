@@ -205,3 +205,4 @@ export function tipoMime(nome) {
   const ext = path.extname(nome).toLowerCase();
   return ({ '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.png':'image/png', '.gif':'image/gif', '.webp':'image/webp', '.mp3':'audio/mpeg', '.wav':'audio/wav', '.ogg':'audio/ogg', '.m4a':'audio/mp4', '.mp4':'video/mp4', '.webm':'video/webm', '.pdf':'application/pdf', '.csv':'text/csv', '.json':'application/json', '.txt':'text/plain', '.md':'text/markdown' })[ext] || 'application/octet-stream';
 }
+export function extensaoArquivo(n){return String(n||"").split(".").pop().toLowerCase()}

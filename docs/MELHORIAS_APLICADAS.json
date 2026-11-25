@@ -13,5 +13,6 @@
   "docs-rotas",
   "docs-endpoints",
   "export-saude-media",
-  "export-rag-tokens"
+  "export-rag-tokens",
+  "export-midia-ext"
 ]
