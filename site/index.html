@@ -436,6 +436,7 @@ function bcAdicionar(ev){
  if(ev.arquivo)txt+=' · '+ev.arquivo;
  if(ev.total!==undefined)txt+=' · '+ev.total+' arquivos'+(ev.mudou===false?' (sem mudança)':'');
  if(ev.media!==undefined)txt+=' · saúde '+ev.media.toFixed(2);
+ if(ev.totalKb!==undefined)txt+=' · '+ev.totalKb+' KB · pior '+ev.piorMs+'ms'+(ev.gargalos?.length?' · gargalos: '+ev.gargalos.join(', '):'');
  if(ev.achados)txt+=' · '+ev.achados.join('; ');
  if(ev.pendentes!==undefined)txt+=' · pendentes '+ev.pendentes;
  if(ev.titulo)txt+=' · '+ev.titulo;

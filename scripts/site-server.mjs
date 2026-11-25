@@ -1,6 +1,7 @@
 /** Site Myn - Recicla/01 + API do chat -01, ligada somente ao gateway Browser. */
 import http from 'node:http';
-import { readFile } from 'node:fs/promises';
+import { readFile, stat } from 'node:fs/promises';
+import { gzipSync } from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { carregarConfigAsync, criarGateway, criarTrava } from '../src/gateway.mjs';
@@ -17,6 +18,7 @@ import { contextoPara } from '../src/rag.mjs';
 import { carregarRotasGoogle, sondarGoogle, rodarRotaGoogle } from '../src/google.mjs';
 import { registrar as registrarSaude, relatorio as relatorioSaude, escolherRotas } from '../src/saude.mjs';
 import { orquestrar, classificarTarefa } from '../src/orquestrar-modelos.mjs';
+import { medirDesempenho } from '../src/desempenho.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
@@ -37,6 +39,66 @@ const PORTA = Number(process.env.PORT || 5188);
 const HOST = process.env.MYN_HOST || '127.0.0.1';
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' };
+
+/** Estático com ETag, 304 e gzip sob demanda (só texto). Evita rebaixar bytes a cada visita. */
+const cacheGzip = new Map();
+async function servirEstatico(req, res, alvo, tipo) {
+  try {
+    const info = await stat(alvo);
+    const etag = 'W/"' + info.size.toString(16) + '-' + Math.round(info.mtimeMs).toString(16) + '"';
+    const cab = { etag, vary: 'accept-encoding' };
+    if (req.headers['if-none-match'] === etag) {
+      res.writeHead(304, { ...cab, 'cache-control': 'no-cache' });
+      res.end();
+      return;
+    }
+    const comprimivel = /^(text\/|application\/(json|javascript|xml))/.test(tipo);
+    let bytes = await readFile(alvo);
+    if (comprimivel && /\bgzip\b/.test(String(req.headers['accept-encoding'] || ''))) {
+      const chave = alvo + ':' + etag;
+      const guardado = cacheGzip.get(chave);
+      if (guardado) bytes = guardado;
+      else {
+        bytes = gzipSync(bytes);
+        if (cacheGzip.size > 64) cacheGzip.clear();
+        cacheGzip.set(chave, bytes);
+      }
+      cab['content-encoding'] = 'gzip';
+    }
+    cab['content-type'] = tipo;
+    cab['cache-control'] = comprimivel ? 'no-cache' : 'public, max-age=3600';
+    cab['content-length'] = bytes.length;
+    res.writeHead(200, cab);
+    res.end(bytes);
+  } catch {
+    res.writeHead(404);
+    res.end('não encontrado');
+  }
+}
+
+/** JSON dinâmico: comprime no fio sem cachear conteúdo. */
+function enviarJson(req, res, objeto) {
+  let bytes = Buffer.from(JSON.stringify(objeto));
+  const cab = { 'content-type': 'application/json; charset=utf-8', vary: 'accept-encoding' };
+  if (/\bgzip\b/.test(String(req.headers['accept-encoding'] || ''))) {
+    bytes = gzipSync(bytes);
+    cab['content-encoding'] = 'gzip';
+  }
+  cab['content-length'] = bytes.length;
+  res.writeHead(200, cab);
+  res.end(bytes);
+}
+
+/** config/modelos.json muda pouco; evita reler e reparsear a cada requisição. */
+let cacheModelos = { mtimeMs: 0, dados: null };
+async function lerModelosConfig() {
+  const arquivo = path.join(raiz, 'config/modelos.json');
+  const info = await stat(arquivo);
+  if (!cacheModelos.dados || info.mtimeMs !== cacheModelos.mtimeMs) {
+    cacheModelos = { mtimeMs: info.mtimeMs, dados: JSON.parse(await readFile(arquivo, 'utf8')) };
+  }
+  return cacheModelos.dados;
+}
 
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
@@ -424,11 +486,10 @@ const servidor = http.createServer(async (req, res) => {
   }
   if (url.pathname === '/api/modelos' && req.method === 'GET') {
     try {
-      const modelos = JSON.parse(await readFile(path.join(raiz, 'config/modelos.json'), 'utf8'));
+      const modelos = await lerModelosConfig();
       const grupos = {};
       for (const r of modelos.rotas || []) (grupos[r.id] = grupos[r.id] || []).push(r);
-      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ total: (modelos.rotas || []).length, rotas: modelos.rotas || [], grupos }));
+      enviarJson(req, res, { total: (modelos.rotas || []).length, rotas: modelos.rotas || [], grupos });
     } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
     return;
   }
@@ -526,13 +587,22 @@ const servidor = http.createServer(async (req, res) => {
     return;
   }
   if (url.pathname === '/api/saude' && req.method === 'GET') {
-    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ rotas: relatorioSaude(), estrategia: 'score = 0.45*sucesso + 0.35*velocidade + 0.2*recencia; circuit breaker 3-estados' }));
+    enviarJson(req, res, { rotas: relatorioSaude(), estrategia: 'score = 0.45*sucesso + 0.35*velocidade + 0.2*recencia; circuit breaker 3-estados' });
+    return;
+  }
+  if (url.pathname === '/api/desempenho' && req.method === 'GET') {
+    try {
+      const medidas = await medirDesempenho('http://127.0.0.1:' + PORTA, 2);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'cache-control': 'no-store' });
+      res.end(JSON.stringify(medidas));
+    } catch (erro) {
+      res.writeHead(500, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) }));
+    }
     return;
   }
   if (url.pathname === '/api/plugins' && req.method === 'GET') {
-    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-    res.end(JSON.stringify({ total: plugins.length, plugins: listaPublica(plugins), comando: 'Use /id mensagem no chat' }));
+    enviarJson(req, res, { total: plugins.length, plugins: listaPublica(plugins), comando: 'Use /id mensagem no chat' });
     return;
   }
   if (url.pathname === '/api/arquivos' && req.method === 'GET') {
@@ -552,31 +622,19 @@ const servidor = http.createServer(async (req, res) => {
   if (url.pathname.startsWith('/web/')) {
     const alvo = path.join(raiz, url.pathname.replace(/^\/+/, ''));
     if (!alvo.startsWith(path.join(raiz, 'web'))) { res.writeHead(403); res.end(); return; }
-    try {
-      const bytes = await readFile(alvo);
-      res.writeHead(200, { 'content-type': TIPOS['.js'] });
-      res.end(bytes);
-    } catch { res.writeHead(404); res.end('não encontrado'); }
+    await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || TIPOS['.js']);
     return;
   }
   if (url.pathname.startsWith('/outputs/')) {
     const alvo = path.join(raiz, url.pathname.replace(/^\/+/, ''));
     if (!alvo.startsWith(path.join(raiz, 'outputs'))) { res.writeHead(403); res.end(); return; }
-    try {
-      const bytes = await readFile(alvo);
-      res.writeHead(200, { 'content-type': TIPOS['.jpg'] || 'image/jpeg' });
-      res.end(bytes);
-    } catch { res.writeHead(404); res.end('não encontrado'); }
+    await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || TIPOS['.jpg'] || 'image/jpeg');
     return;
   }
   const arquivo = url.pathname === '/' ? 'index.html' : url.pathname.replace(/^\/+/, '');
   const alvo = path.join(site, arquivo);
   if (!alvo.startsWith(site)) { res.writeHead(403); res.end(); return; }
-  try {
-    const bytes = await readFile(alvo);
-    res.writeHead(200, { 'content-type': TIPOS[path.extname(alvo)] || 'application/octet-stream' });
-    res.end(bytes);
-  } catch { res.writeHead(404); res.end('não encontrado'); }
+  await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || 'application/octet-stream');
 });
 
 servidor.listen(PORTA, HOST, () => console.log('Myn - Recicla/01 em http://' + HOST + ':' + PORTA));
