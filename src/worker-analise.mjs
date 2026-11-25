@@ -74,10 +74,7 @@ export async function iniciar({ objetivo = 'analisar codigo e desempenho do Myn 
   while (ativo && !abortar && n < maxCiclos) {
     n++; estado.ciclos = n;
     const r = await ciclo(n, estado.objetivo);
-    if (r && r.mudou === false) {
-      emitir('inalterado', { n, aviso: 'nenhuma mudança desde o último ciclo' });
-      break;
-    }
+    if (r && r.mudou === false) emitir('inalterado', { n, aviso: 'nenhuma mudança; continuando em observação' });
     if (abortar) break;
     await new Promise((r) => setTimeout(r, Math.max(1000, intervaloMs)));
   }

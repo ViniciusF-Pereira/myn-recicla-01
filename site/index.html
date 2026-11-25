@@ -429,45 +429,76 @@ fetch('/api/modelos').then(r=>r.json()).then(d=>{for(const r of (d.rotas||[]))ma
 function bcAdicionar(ev){
  const d=document.createElement('div');
  d.className='bc-linha'+(/erro|falha|revertido/.test(ev.tipo)?' erro':/git|commit|merge|branch/.test(ev.tipo)?' git':/testes|ok/.test(ev.tipo)?' ok':'');
- let txt=ev.tipo;
+ let txt=(ev.worker?'['+ev.worker+'] ':'')+ev.tipo;
  if(ev.n)txt+=' #'+ev.n;
  if(ev.objetivo)txt+=' · '+ev.objetivo;
  if(ev.passos)txt+=' · '+ev.passos.join(', ');
  if(ev.arquivo)txt+=' · '+ev.arquivo;
+ if(ev.total!==undefined)txt+=' · '+ev.total+' arquivos'+(ev.mudou===false?' (sem mudança)':'');
+ if(ev.media!==undefined)txt+=' · saúde '+ev.media.toFixed(2);
+ if(ev.achados)txt+=' · '+ev.achados.join('; ');
+ if(ev.pendentes!==undefined)txt+=' · pendentes '+ev.pendentes;
+ if(ev.titulo)txt+=' · '+ev.titulo;
+ if(ev.via)txt+=' · via '+ev.via;
  if(ev.removidos)txt+=' · limpos: '+(ev.removidos.join(', ')||'nenhum');
  if(ev.checagens)txt+=' · '+ev.checagens.map(c=>c.arquivo+':'+(c.ok?'ok':'FALHA')).join(' ');
  if(ev.merge!==undefined)txt+=' · merge='+ev.merge;
  if(ev.motivo)txt+=' · '+ev.motivo;
+ if(ev.aviso)txt+=' · '+ev.aviso;
  if(ev.erro)txt+=' · '+ev.erro;
  d.textContent=ev.t+' · '+txt;
  bcLinhas.appendChild(d);
  while(bcLinhas.children.length>60)bcLinhas.removeChild(bcLinhas.firstChild);
  bcLinhas.scrollTop=bcLinhas.scrollHeight;
 }
-let bcModeloAtual='';
+let bcModeloAtual='modelo: nenhum (análise local)';
 function bcAtualizarModelo(ev){
  if(ev.passos){
   const ids=ev.passos.map(p=>String(p).split('→').pop().trim());
   const id=ids.find(x=>mapaModelos[x]);
   if(id)bcModeloAtual='modelo: '+mapaModelos[id];
  }
- const via=ev.via?'via: '+ev.via:'';
- const texto=[bcModeloAtual,via].filter(Boolean).join(' · ');
- if(texto)bcModelo.textContent=texto;
+ const via=ev.via&&ev.via!=='analise-local'?'via: '+ev.via:'';
+ bcModelo.textContent=[bcModeloAtual,via].filter(Boolean).join(' · ');
+}
+bcModelo.textContent=bcModeloAtual;
+const bcWorkers={analise:'/api/worker-analise',melhoria:'/api/worker-melhoria'};
+const bcEstado={analise:{ativo:false,ciclos:0},melhoria:{ativo:false,ciclos:0}};
+function bcPintarStatus(){
+ bcStatus.textContent=Object.keys(bcWorkers).map(n=>{const e=bcEstado[n];return n+': '+(e.ativo?'ativo':'parado')+' · ciclo '+e.ciclos+(e.nota?' · '+e.nota:'')}).join('   |   ');
+}
+function bcAtualizarEstado(nome,ev){
+ const e=bcEstado[nome];
+ if(!e)return;
+ if(ev.ciclos!==undefined)e.ciclos=ev.ciclos;
+ if(ev.n!==undefined)e.ciclos=ev.n;
+ if(ev.tipo==='conectado'){e.ativo=!!ev.status?.ativo;if(ev.status?.ciclos!==undefined)e.ciclos=ev.status.ciclos}
+ else if(ev.tipo==='iniciado'){e.ativo=true;e.nota='iniciado'}
+ else if(ev.tipo==='ciclo_inicio'||ev.tipo==='analise_inicio'){e.ativo=true;e.nota='trabalhando'}
+ else if(ev.tipo==='inalterado'){e.nota='sem mudança'}
+ else if(ev.tipo==='sem_tarefas'){e.nota='backlog vazio'}
+ else if(ev.tipo==='analise_fim'||ev.tipo==='git'){e.nota=ev.merge?'merge ok':'ciclo ok'}
+ else if(ev.tipo==='finalizado'||ev.tipo==='parando'){e.ativo=false;e.nota=ev.motivo||'parado'}
+ bcPintarStatus();
+}
+async function bcOuvir(nome,caminho){
+ try{
+  const r=await fetch(caminho+'/stream');
+  const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
+  for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
+   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}
+    ev.worker=nome;bcAdicionar(ev);bcAtualizarModelo(ev);bcAtualizarEstado(nome,ev);
+   }
+  }
+ }catch(e){bcStatus.textContent=nome+' desconectado · '+e.message}
 }
 async function bcConectar(){
  try{
-  const r=await fetch('/api/worker/stream');
-  const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
-   for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
-   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}
-    bcAdicionar(ev);bcAtualizarModelo(ev);
-    if(ev.tipo==='conectado'||ev.tipo==='iniciado')bcStatus.textContent='ao vivo · ciclo '+(ev.status?.ciclos??0);
-    if(ev.tipo==='ciclo_inicio')bcStatus.textContent='trabalhando · ciclo '+ev.n;
-    if(ev.tipo==='finalizado'||ev.tipo==='parando')bcStatus.textContent='parado · '+ev.ciclos+' ciclos';
-   }
-  }
- }catch(e){bcStatus.textContent='desconectado · '+e.message}
+  const estados=await Promise.all(Object.entries(bcWorkers).map(async([n,c])=>({n,...await fetch(c+'/status').then(r=>r.json())})));
+  for(const x of estados)bcEstado[x.n]={ativo:!!x.ativo,ciclos:x.ciclos||0,nota:''};
+  bcPintarStatus();
+ }catch{}
+ await Promise.all(Object.entries(bcWorkers).map(([n,c])=>bcOuvir(n,c)));
 }
 bcConectar();
 

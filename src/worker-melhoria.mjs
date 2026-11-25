@@ -1,9 +1,7 @@
 /** Worker de MELHORIA em loop: analisa lacunas, aplica tarefa real, testa, commita e mergeia. Sem Gemini/Google. */
-import { readFile, writeFile } from 'node:fs/promises';
+import { readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { analisarMelhorias, marcar } from './analise.mjs';
-import { executarPlugin } from './plugins.mjs';
-import { carregarPlugins } from './plugins.mjs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -35,11 +33,24 @@ async function aplicar(t) {
   else await writeFile(destino, t.conteudo + '\n');
   return t.alvo;
 }
+async function temTestes() {
+  for (const dir of ['test', 'tests', '__tests__']) {
+    try { if ((await readdir(path.join(RAIZ, dir))).length) return true; } catch { /* não existe */ }
+  }
+  try {
+    return (await readdir(path.join(RAIZ, 'scripts'))).some((n) => /\.(test|spec)\.(mjs|js)$/.test(n));
+  } catch { return false; }
+}
+
 async function verificar(arquivo) {
   const checagens = [];
-  // Validação real: testes node --test; sintaxe apenas como piso.
-  try { await run(process.execPath, ['--test', '--test-force-exit'], { cwd: RAIZ, timeout: 60000 }); checagens.push({ arquivo: 'node --test', ok: true }); }
-  catch (e) { checagens.push({ arquivo: 'node --test', ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
+  // Validação behavioral só quando existem testes; sintaxe é o piso sempre.
+  if (await temTestes()) {
+    try { await run(process.execPath, ['--test'], { cwd: RAIZ, timeout: 60000 }); checagens.push({ arquivo: 'node --test', ok: true }); }
+    catch (e) { checagens.push({ arquivo: 'node --test', ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
+  } else {
+    checagens.push({ arquivo: 'sem testes no projeto', ok: true, nota: 'sintaxe + diff check' });
+  }
   try { await run(process.execPath, ['--check', path.join(RAIZ, arquivo)]); checagens.push({ arquivo, ok: true }); }
   catch (e) { checagens.push({ arquivo, ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
   try { await git(['diff', '--check']); checagens.push({ arquivo: 'git diff --check', ok: true }); }
@@ -60,21 +71,24 @@ async function ciclo(n, objetivo) {
   emitir('branch', { n, branch: await git(['rev-parse', '--abbrev-ref', 'HEAD']) });
 
   const via = 'analise-local';
+  const existia = await readFile(path.join(RAIZ, t.alvo), 'utf8').then(() => true).catch(() => false);
   emitir('patch', { n, id: t.id, titulo: t.titulo, arquivo: t.alvo, via });
   const arquivo = await aplicar(t);
   const checagens = await verificar(arquivo);
   const ok = checagens.every((c) => c.ok);
   emitir('testes', { n, ok, checagens });
   if (!ok) {
-    await git(['checkout', '--', arquivo]).catch(() => undefined);
+    if (existia) await git(['checkout', '--', arquivo]).catch(() => undefined);
+    else await unlink(path.join(RAIZ, arquivo)).catch(() => undefined);
     emitir('revertido', { n, arquivo });
     return { n, ok: false };
   }
-  const sujo = await git(['status', '--porcelain']);
+  // Commita apenas o arquivo da tarefa — nunca mudanças alheias da árvore.
+  await git(['add', '--', arquivo]).catch(() => undefined);
+  const pendente = await git(['status', '--porcelain', '--', arquivo]);
   let merge = false;
-  if (sujo) {
-    await git(['add', '-A']);
-    await git(['commit', '-m', 'worker: ' + t.titulo + ' (ciclo ' + n + ')']);
+  if (pendente) {
+    await git(['commit', '-m', 'worker: ' + t.titulo + ' (ciclo ' + n + ')', '--', arquivo]);
     const seguro = /^(docs\/|config\/)/.test(t.alvo);
     if (seguro) {
       await git(['checkout', 'master']);
@@ -83,6 +97,9 @@ async function ciclo(n, objetivo) {
     } else {
       emitir('revisao', { n, arquivo: t.alvo, aviso: 'codigo permanece em worker/auto para revisao' });
     }
+    await marcar(t.id);
+  } else {
+    emitir('sem_alteracao', { n, arquivo });
     await marcar(t.id);
   }
   emitir('git', { n, merge, tarefa: t.id });
@@ -94,16 +111,16 @@ export async function iniciar({ objetivo = 'melhorar o projeto Myn Recicla', max
   ativo = true; abortar = false;
   estado = { ciclos: 0, ultimo: null, iniciadoEm: new Date().toISOString(), objetivo: String(objetivo).slice(0, 500) };
   emitir('iniciado', { objetivo: estado.objetivo, rotas: ROTAS });
-  let n = 0;
+  let n = 0, motivo = 'limite';
   while (ativo && !abortar && n < maxCiclos) {
     n++; estado.ciclos = n;
     const r = await ciclo(n, estado.objetivo);
-    if (r.semTarefas) { emitir('finalizado', { ciclos: n, motivo: 'backlog vazio' }); break; }
-    if (abortar) break;
+    if (r.semTarefas) { motivo = 'backlog vazio'; break; }
+    if (abortar) { motivo = 'parado'; break; }
     await new Promise((r2) => setTimeout(r2, Math.max(500, intervaloMs)));
   }
   ativo = false;
-  emitir('finalizado', { ciclos: n, motivo: abortar ? 'parado' : 'limite' });
-  return { ok: true, ciclos: n };
+  emitir('finalizado', { ciclos: n, motivo });
+  return { ok: true, ciclos: n, motivo };
 }
 export function parar() { if (!ativo) return { ok: false, erro: 'worker de melhoria nao estava ativo' }; abortar = true; emitir('parando', {}); return { ok: true }; }

@@ -72,11 +72,29 @@ const CANDIDATOS = [
     conteudo:"import { readFile } from 'node:fs/promises';\nexport async function exportarCaderno(){try{return JSON.parse(await readFile('dados/historico.jsonl','utf8').catch(()=>'[]'))}catch{return []}}\nconst d=await exportarCaderno();console.log(JSON.stringify({linhas:d.length}));\n" },
 ];
 
+/** Gera melhorias dinâmicas a partir do próprio código: documentar cada módulo que ainda não tem seção. */
+async function candidatosDinamicos(feitas) {
+  const mods = [];
+  try { mods.push(...(await readdir(path.join(RAIZ, 'src'))).filter((n) => n.endsWith('.mjs'))); } catch { /* vazio */ }
+  const doc = await texto('docs/MODULOS.md');
+  const out = [];
+  for (const nome of mods) {
+    const id = 'modulo-' + nome.replace(/\.mjs$/, '');
+    if (feitas.has(id)) continue;
+    if (doc.includes('## ' + nome)) continue;
+    const t = await texto('src/' + nome);
+    const exports = (t.match(/export\s+(?:async\s+)?(?:function|const|class)\s+(\w+)/g) || []).map((s) => s.split(/\s+/).pop()).join(', ');
+    out.push({ id, alvo: 'docs/MODULOS.md', modo: 'append', titulo: 'documenta módulo ' + nome,
+      conteudo: '\n## ' + nome + '\n\nExports: ' + (exports || 'nenhum') + '\n\nMódulo do Myn Recicla/01.\n' });
+  }
+  return out;
+}
+
 /** Analisa o estado e devolve a próxima melhoria real ainda não aplicada. */
 export async function analisarMelhorias() {
   const feitas = await jaFeitas();
   const saude = await rotasSaude();
-  const candidatos = [];
+  const candidatos = [...await candidatosDinamicos(feitas)];
   for (const c of CANDIDATOS) {
     if (feitas.has(c.id)) continue;
     let pendente = false;

@@ -274,32 +274,52 @@ const painelWorker=$('painelWorker'), logWorker=$('workerLog');
 function linhaWorker(ev){
  const d=document.createElement('div');
  d.className='pw-linha'+(/erro|falha|revertido/.test(ev.tipo)?' erro':/git|commit|merge|branch/.test(ev.tipo)?' git':/higienizacao/.test(ev.tipo)?' higienizacao':/ok|testes/.test(ev.tipo)?' ok':'');
- let texto=ev.tipo;
+ let texto=(ev.worker?'['+ev.worker+'] ':'')+ev.tipo;
+ if(ev.n!==undefined)texto+=' #'+ev.n;
  if(ev.objetivo)texto+=' · '+ev.objetivo;
  if(ev.passos)texto+=' · '+ev.passos.join(', ');
  if(ev.removidos)texto+=' · removidos: '+(ev.removidos.join(', ')||'nenhum');
  if(ev.arquivo)texto+=' · '+ev.arquivo;
+ if(ev.total!==undefined)texto+=' · '+ev.total+' arquivos'+(ev.mudou===false?' (sem mudança)':'');
+ if(ev.media!==undefined)texto+=' · saúde '+ev.media.toFixed(2);
+ if(ev.achados)texto+=' · '+ev.achados.join('; ');
+ if(ev.pendentes!==undefined)texto+=' · pendentes '+ev.pendentes;
+ if(ev.titulo)texto+=' · '+ev.titulo;
+ if(ev.via)texto+=' · via '+ev.via;
  if(ev.checagens)texto+=' · '+ev.checagens.map(c=>c.arquivo+':'+(c.ok?'ok':'FALHA')).join(' ');
  if(ev.merge!==undefined)texto+=' · merge='+ev.merge;
  if(ev.motivo)texto+=' · '+ev.motivo;
+ if(ev.aviso)texto+=' · '+ev.aviso;
  if(ev.erro)texto+=' · '+ev.erro;
  d.textContent=ev.t+' · '+texto;
  logWorker.appendChild(d);logWorker.scrollTop=logWorker.scrollHeight;
 }
-let workerStream=null;
-function conectarWorker(){
- if(workerStream)workerStream.abort();
- workerStream=new AbortController();
- fetch('/api/worker/stream',{signal:workerStream.signal}).then(async r=>{
+const WORKERS={analise:'/api/worker-analise',melhoria:'/api/worker-melhoria'};
+const streams={};
+function conectarWorker(nome){
+ if(streams[nome])streams[nome].abort();
+ streams[nome]=new AbortController();
+ fetch(WORKERS[nome]+'/stream',{signal:streams[nome].signal}).then(async r=>{
   const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
   for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
-   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;try{linhaWorker(JSON.parse(m[1]))}catch{}}}
+   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;try{const e=JSON.parse(m[1]);e.worker=nome;linhaWorker(e)}catch{}}}
  }).catch(()=>{});
 }
-$('btnWorker').onclick=()=>{painelWorker.classList.toggle('on');if(painelWorker.classList.contains('on')&&!workerStream)conectarWorker()};
+$('btnWorker').onclick=()=>{painelWorker.classList.toggle('on');if(painelWorker.classList.contains('on'))Object.keys(WORKERS).forEach(conectarWorker)};
 $('fecharWorker').onclick=()=>painelWorker.classList.remove('on');
-$('startWorker').onclick=async()=>{logWorker.innerHTML='';conectarWorker();try{await post('/api/worker/start',{objetivo:$('workerObj').value.trim(),maxCiclos:1000,intervaloMs:4000,autoMerge:true});linhaWorker({t:new Date().toISOString(),tipo:'iniciado'})}catch(e){linhaWorker({t:new Date().toISOString(),tipo:'erro',erro:e.message})}};
-$('stopWorker').onclick=async()=>{try{const r=await post('/api/worker/stop',{});linhaWorker({t:new Date().toISOString(),tipo:'parando',ok:r.ok})}catch(e){linhaWorker({t:new Date().toISOString(),tipo:'erro',erro:e.message})}};
+$('startWorker').onclick=async()=>{
+ logWorker.innerHTML='';
+ const objetivo=$('workerObj').value.trim();
+ Object.keys(WORKERS).forEach(conectarWorker);
+ try{
+  await Promise.all(Object.entries(WORKERS).map(([n,c])=>post(c+'/start',{objetivo,maxCiclos:1000,intervaloMs:4000})));
+  linhaWorker({t:new Date().toISOString(),tipo:'iniciado',worker:'analise+melhoria'});
+ }catch(e){linhaWorker({t:new Date().toISOString(),tipo:'erro',erro:e.message})}
+};
+$('stopWorker').onclick=async()=>{
+ try{const r=await Promise.all(Object.values(WORKERS).map(c=>post(c+'/stop',{})));linhaWorker({t:new Date().toISOString(),tipo:'parando',worker:'analise+melhoria',ok:r.every(x=>x.ok)})}
+ catch(e){linhaWorker({t:new Date().toISOString(),tipo:'erro',erro:e.message})}
+};
 
 $('btnFilmes').onclick=async()=>{
  const q=$('texto').value.trim();if(!q){add('Escreva o título do filme e clique em filmes.','err');$('texto').focus();return}
