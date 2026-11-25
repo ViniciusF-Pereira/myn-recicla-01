@@ -29,8 +29,9 @@ async function aplicar(t) {
   const destino = path.join(RAIZ, t.alvo);
   let atual = '';
   try { atual = await readFile(destino, 'utf8'); } catch { /* criar */ }
-  if (t.modo === 'append') await writeFile(destino, atual.replace(/\s+$/, '') + '\n' + t.conteudo.replace(/^\n+/, '') + '\n');
-  else await writeFile(destino, t.conteudo + '\n');
+  const corpo = String(t.conteudo).replace(/^\n+|\n+$/g, '');
+  if (t.modo === 'append') await writeFile(destino, atual.replace(/\s+$/, '') + '\n' + corpo + '\n');
+  else await writeFile(destino, corpo + '\n');
   return t.alvo;
 }
 async function temTestes() {
@@ -58,7 +59,7 @@ async function verificar(arquivo) {
     checagens.push({ arquivo, ok: true, nota: 'documento/config' });
   }
   try { await git(['diff', '--check']); checagens.push({ arquivo: 'git diff --check', ok: true }); }
-  catch (e) { checagens.push({ arquivo: 'git diff --check', ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
+  catch (e) { checagens.push({ arquivo: 'git diff --check', ok: false, erro: String(e.stdout || e.stderr || e.message).trim().slice(0, 240) }); }
   return checagens;
 }
 
