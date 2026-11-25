@@ -119,7 +119,12 @@ export async function iniciar({ objetivo = 'melhorar o projeto Myn Recicla', max
   while (ativo && !abortar && n < maxCiclos) {
     n++; estado.ciclos = n;
     const r = await ciclo(n, estado.objetivo);
-    if (r.semTarefas) { motivo = 'backlog vazio'; break; }
+    if (r.semTarefas) {
+      emitir('aguardando', { n, aviso: 'backlog vazio; vigiando por tarefas reais' });
+      if (abortar) { motivo = 'parado'; break; }
+      await new Promise((r2) => setTimeout(r2, Math.max(1000, intervaloMs)));
+      continue;
+    }
     if (abortar) { motivo = 'parado'; break; }
     if (r.ok === false) {
       if (r.tarefa === falhou) falhas++; else { falhou = r.tarefa; falhas = 1; }

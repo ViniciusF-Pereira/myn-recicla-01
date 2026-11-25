@@ -53,7 +53,8 @@ Playground → botão **worker** abre painel com log escuro, cor por tipo de eve
 
 ## Dois workers separados (25/11/2026)
 - **Análise** (`src/worker-analise.mjs`): só observa — varrimento de arquivos, saúde, backlog e achados. Nunca edita nem commita. Endpoints `/api/worker-analise/{status,start,stop,stream}`.
-- **Melhoria** (`src/worker-melhoria.mjs`): aplica tarefa real do backlog, testa, commita e faz merge. Usa apenas rotas free **não-Google** (Pollinations, OpenRouter, Brave Leo, Kimi, HuggingChat) para confirmar prioridade. Endpoints `/api/worker-melhoria/{status,start,stop,stream}`.
+- **Melhoria** (`src/worker-melhoria.mjs`): aplica tarefa real do backlog, testa, commita e faz merge. Quando o backlog acaba, fica em `aguardando` (vigia) em vez de inventar trabalho. Código permanece em `worker/auto` para revisão; só docs/config têm merge automático. Endpoints `/api/worker-melhoria/{status,start,stop,stream}`.
+- **Desempenho**: `src/desempenho.mjs` mede bytes no fio, p50 e 304 via ETag. `node scripts/medir.mjs` roda a auditoria; `/api/desempenho` expõe o JSON. Gzip, ETag/304 e cache de `config/modelos.json` reduziram a soma medida de 173,5 KB para 41,8 KB.
 
 ## Backlog dinâmico (correção 25/11/2026)
 O worker antigo repetia uma linha em `docs/EVOLUCAO.md` e gerava commits sem melhoria real. Foi substituído por `src/analise.mjs`: a cada ciclo ele lê o projeto, encontra lacunas reais (scripts, docs, exports, config) e gera uma tarefa verificável. `docs/MELHORIAS_APLICADAS.json` guarda o que já foi feito, evitando repetição. Quando não há pendências, ele emite `sem_tarefas` e para de commitar.
