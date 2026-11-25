@@ -265,22 +265,22 @@ function linhaWorker(ev){
  logWorker.appendChild(d);logWorker.scrollTop=logWorker.scrollHeight;
 }
 const WORKERS={analise:'/api/worker-analise',melhoria:'/api/worker-melhoria'};
-const streams={};
-function conectarWorker(nome){
- if(streams[nome])streams[nome].abort();
- streams[nome]=new AbortController();
- fetch(WORKERS[nome]+'/stream',{signal:streams[nome].signal}).then(async r=>{
+let workerStream=null;
+function conectarWorker(){
+ if(workerStream)workerStream.abort();
+ workerStream=new AbortController();
+ fetch('/api/workers/stream',{signal:workerStream.signal}).then(async r=>{
   const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
   for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
-   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;try{const e=JSON.parse(m[1]);e.worker=nome;linhaWorker(e)}catch{}}}
+   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;try{linhaWorker(JSON.parse(m[1]))}catch{}}}
  }).catch(()=>{});
 }
-$('btnWorker').onclick=()=>{painelWorker.classList.toggle('on');if(painelWorker.classList.contains('on'))Object.keys(WORKERS).forEach(conectarWorker)};
+$('btnWorker').onclick=()=>{painelWorker.classList.toggle('on');if(painelWorker.classList.contains('on'))conectarWorker()};
 $('fecharWorker').onclick=()=>painelWorker.classList.remove('on');
 $('startWorker').onclick=async()=>{
  logWorker.innerHTML='';
  const objetivo=$('workerObj').value.trim();
- Object.keys(WORKERS).forEach(conectarWorker);
+ conectarWorker();
  try{
   await Promise.all(Object.entries(WORKERS).map(([n,c])=>post(c+'/start',{objetivo,maxCiclos:1000,intervaloMs:4000})));
   linhaWorker({t:new Date().toISOString(),tipo:'iniciado',worker:'analise+melhoria'});

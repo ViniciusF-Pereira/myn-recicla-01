@@ -92,12 +92,16 @@ function msg(texto, tipo = 'bot', persistir = true) {
   const area = document.getElementById('waMsgs');
   const el = document.createElement('div'); el.className = 'wa-msg ' + tipo;
   const imagens = String(texto).match(/!\[[^\]]*\]\(([^)]+)\)/g) || [];
-  const limpo = String(texto).replace(/!\[[^\]]*\]\([^)]+\)/g, '').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');
+  const audioUrl = /\[🔊 áudio\]\(([^)]+)\)/.exec(String(texto))?.[1];
+  const videoUrl = /\[🎬 vídeo\]\(([^)]+)\)/.exec(String(texto))?.[1];
+  const limpo = String(texto).replace(/!\[[^\]]*\]\([^)]+\)/g, '').replace(/\[🔊 áudio\]\([^)]+\)/g, '').replace(/\[🎬 vídeo\]\([^)]+\)/g, '').replace(/\[([^\]]+)\]\(([^)]+)\)/g, '$1');
   el.textContent = limpo;
   for (const md of imagens) {
     const url = /\(([^)]+)\)/.exec(md)?.[1];
     if (url && /^https?:\/\//.test(url)) { const img = document.createElement('img'); img.src = url; img.alt = 'mídia gerada'; img.style.cssText = 'max-width:100%;border-radius:8px;margin-top:7px'; el.appendChild(img); }
   }
+  if (audioUrl && /^https?:\/\//.test(audioUrl)) { const a = document.createElement('audio'); a.controls = true; a.src = audioUrl; a.style.cssText = 'width:100%;margin-top:7px'; el.appendChild(a); }
+  if (videoUrl && /^https?:\/\//.test(videoUrl)) { const v = document.createElement('video'); v.controls = true; v.src = videoUrl; v.style.cssText = 'width:100%;border-radius:8px;margin-top:7px'; el.appendChild(v); }
   area?.appendChild(el); area?.scrollTo({ top: area.scrollHeight, behavior: 'smooth' });
   if (persistir) try {
     const h = JSON.parse(localStorage.getItem(HISTORICO) || '[]');
@@ -175,6 +179,35 @@ async function enviar(texto) {
   }
 }
 
+async function processarAnexo(file) {
+  if (!file || ocupado) return;
+  if (file.size > 12 * 1024 * 1024) { msg('Arquivo acima de 12 MB.', 'erro'); return; }
+  ocupado = true; controleAtual = new AbortController();
+  document.getElementById('waSend').disabled = true;
+  document.getElementById('waCancelar').disabled = false;
+  msg('📎 ' + file.name, 'user');
+  try {
+    estado('📎 myn_documento', 'pensando');
+    const base64 = await new Promise((resolve, reject) => {
+      const leitor = new FileReader();
+      leitor.onload = () => resolve(String(leitor.result).split(',')[1] || '');
+      leitor.onerror = () => reject(leitor.error || new Error('falha ao ler arquivo'));
+      leitor.readAsDataURL(file);
+    });
+    const resposta = await ferramenta('myn_documento', { nome: file.name, base64 });
+    msg(resposta); falar(resposta);
+    estado('online · ' + ferramentas.length + ' ferramentas MCP');
+  } catch (e) {
+    if (controleAtual?.signal.aborted) { msg('Leitura cancelada.', 'erro'); estado('online · ' + ferramentas.length + ' ferramentas MCP'); }
+    else { msg('Não consegui ler o anexo: ' + e.message, 'erro'); estado('offline · ' + e.message); }
+  } finally {
+    ocupado = false; controleAtual = null;
+    document.getElementById('waSend').disabled = false;
+    document.getElementById('waCancelar').disabled = true;
+    document.getElementById('waArquivo').value = '';
+  }
+}
+
 function iniciarVoz() {
   const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
   const botao = document.getElementById('waMic');
@@ -201,7 +234,7 @@ export function iniciarAssistente() {
     <div class="wa-status"><span class="wa-led"></span><span id="waStatus">online</span></div>
     <div class="wa-acoes"><button data-acao="quais são as rotas?">ver rotas</button><button data-acao="pesquise worker">pesquisar</button><button data-acao="ir para catálogo">ir ao catálogo</button><button data-acao="explique o que é o Myn">sobre o Myn</button></div>
     <div class="wa-msgs" id="waMsgs"><div class="wa-msg bot">Oi, eu sou o WORK. Posso conversar, pesquisar, consultar rotas, gerar mídia e navegar pela página. As ferramentas MCP aparecem aqui enquanto eu uso.</div></div>
-    <form class="wa-form" id="waForm"><input id="waInput" autocomplete="off" placeholder="Escreva ou use o microfone..."><button type="button" class="sec" id="waMic" title="Falar">🎙</button><button type="button" class="cancel" id="waCancelar" title="Cancelar chamada" disabled>■</button><button id="waSend" type="submit">ENVIAR</button></form>
+    <form class="wa-form" id="waForm"><input type="file" id="waArquivo" hidden accept=".txt,.md,.csv,.json,.html,.pdf,.png,.jpg,.jpeg,.webp"><input id="waInput" autocomplete="off" placeholder="Escreva ou use o microfone..."><button type="button" class="sec" id="waAnexar" title="Anexar documento ou imagem">📎</button><button type="button" class="sec" id="waMic" title="Falar">🎙</button><button type="button" class="cancel" id="waCancelar" title="Cancelar chamada" disabled>■</button><button id="waSend" type="submit">ENVIAR</button></form>
    </section>`;
   document.body.appendChild(root);
   try {
@@ -211,6 +244,8 @@ export function iniciarAssistente() {
   document.getElementById('waOlho').onclick = abrir; document.getElementById('waBolha').onclick = abrir; document.getElementById('waFechar').onclick = fechar;
   document.getElementById('waForm').onsubmit = (e) => { e.preventDefault(); const input = document.getElementById('waInput'); enviar(input.value); input.value = ''; };
   document.querySelectorAll('.wa-acoes button').forEach((b) => { b.onclick = () => enviar(b.dataset.acao); });
+  document.getElementById('waAnexar').onclick = () => document.getElementById('waArquivo').click();
+  document.getElementById('waArquivo').onchange = (e) => processarAnexo(e.target.files?.[0]);
   document.getElementById('waCancelar').onclick = () => controleAtual?.abort();
   document.getElementById('waLimpar').onclick = () => {
     localStorage.removeItem(HISTORICO);

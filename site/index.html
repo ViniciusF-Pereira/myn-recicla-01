@@ -531,16 +531,16 @@ function bcAtualizarEstado(nome,ev){
  else if(ev.tipo==='finalizado'||ev.tipo==='parando'){e.ativo=false;e.nota=ev.motivo||'parado'}
  bcPintarStatus();
 }
-async function bcOuvir(nome,caminho){
+async function bcOuvirTodos(){
  try{
-  const r=await fetch(caminho+'/stream');
+  const r=await fetch('/api/workers/stream');
   const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
   for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
    for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}
-    ev.worker=nome;bcAdicionar(ev);bcAtualizarModelo(ev);bcAtualizarEstado(nome,ev);
+    bcAdicionar(ev);bcAtualizarModelo(ev);bcAtualizarEstado(ev.worker,ev);
    }
   }
- }catch(e){bcStatus.textContent=nome+' desconectado · '+e.message}
+ }catch(e){bcStatus.textContent='workers desconectados · '+e.message}
 }
 async function bcConectar(){
  try{
@@ -548,7 +548,7 @@ async function bcConectar(){
   for(const x of estados)bcEstado[x.n]={ativo:!!x.ativo,ciclos:x.ciclos||0,nota:''};
   bcPintarStatus();
  }catch{}
- await Promise.all(Object.entries(bcWorkers).map(([n,c])=>bcOuvir(n,c)));
+ await bcOuvirTodos();
 }
 bcConectar();
 

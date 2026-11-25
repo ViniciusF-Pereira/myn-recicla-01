@@ -48,9 +48,11 @@ Google/Gemini não fazem parte do catálogo.
 - `myn_imagem`: JPEG gerado.
 - `myn_audio`: MP3 gerado.
 - `myn_video`: MP4 de 3 segundos gerado.
-- `myn_documento`: TXT extraído com 20 caracteres.
+- `myn_documento`: TXT extraído com 20 caracteres e anexo enviado pelo mini-chat.
+- Player de áudio: `<audio controls>` criado no chat.
 - Cancelamento: chamada lenta interrompida e estado restaurado.
 - Histórico: mensagens mantidas após recarregar a página.
+- Três abas abertas: chamada MCP respondida em 9 ms, sem esgotar conexões (SSE combinado).
 
 ## Atalhos
 

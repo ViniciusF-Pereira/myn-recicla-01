@@ -52,6 +52,7 @@ O merge é sempre `--ff-only`. Se houver conflito ou falha, a branch permanece p
 
 - `GET /api/worker-analise/{status,stream}`
 - `POST /api/worker-analise/{start,stop}`
+- `GET /api/workers/stream` — SSE combinado de análise e melhoria (uma conexão por aba).
 - `GET /api/worker-melhoria/{status,stream,eventos}`
 - `POST /api/worker-melhoria/{start,stop}`
 - `GET /api/worker-analise/{status,stream,eventos}`

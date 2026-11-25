@@ -118,6 +118,17 @@ const servidor = http.createServer(async (req, res) => {
     analise: { iniciar: iniciarAnalise, parar: pararAnalise, status: statusAnalise, assinar: assinarAnalise },
     melhoria: { iniciar: iniciarMelhoria, parar: pararMelhoria, status: statusMelhoria, assinar: assinarMelhoria },
   };
+  if (url.pathname === '/api/workers/stream' && req.method === 'GET') {
+    res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', connection: 'keep-alive', 'x-accel-buffering': 'no' });
+    const enviar = (worker, ev) => { if (!res.writableEnded) res.write('data: ' + JSON.stringify({ ...ev, worker }) + '\n\n'); };
+    enviar('analise', { t: new Date().toISOString(), tipo: 'conectado', status: statusAnalise() });
+    enviar('melhoria', { t: new Date().toISOString(), tipo: 'conectado', status: statusMelhoria() });
+    const cancelarA = assinarAnalise((ev) => enviar('analise', ev));
+    const cancelarM = assinarMelhoria((ev) => enviar('melhoria', ev));
+    const ping = setInterval(() => { if (!res.writableEnded) res.write(': ping\n\n'); }, 15000);
+    req.on('close', () => { clearInterval(ping); cancelarA(); cancelarM(); });
+    return;
+  }
   const eventosRota = /^\/api\/worker-(analise|melhoria)\/eventos$/.exec(url.pathname);
   if (eventosRota && req.method === 'GET') {
     const limite = Number(url.searchParams.get('limite')) || 100;
