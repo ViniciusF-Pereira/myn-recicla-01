@@ -51,8 +51,12 @@ async function verificar(arquivo) {
   } else {
     checagens.push({ arquivo: 'sem testes no projeto', ok: true, nota: 'sintaxe + diff check' });
   }
-  try { await run(process.execPath, ['--check', path.join(RAIZ, arquivo)]); checagens.push({ arquivo, ok: true }); }
-  catch (e) { checagens.push({ arquivo, ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
+  if (/\.(mjs|js|cjs)$/.test(arquivo)) {
+    try { await run(process.execPath, ['--check', path.join(RAIZ, arquivo)]); checagens.push({ arquivo, ok: true }); }
+    catch (e) { checagens.push({ arquivo, ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
+  } else {
+    checagens.push({ arquivo, ok: true, nota: 'documento/config' });
+  }
   try { await git(['diff', '--check']); checagens.push({ arquivo: 'git diff --check', ok: true }); }
   catch (e) { checagens.push({ arquivo: 'git diff --check', ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
   return checagens;
@@ -80,8 +84,8 @@ async function ciclo(n, objetivo) {
   if (!ok) {
     if (existia) await git(['checkout', '--', arquivo]).catch(() => undefined);
     else await unlink(path.join(RAIZ, arquivo)).catch(() => undefined);
-    emitir('revertido', { n, arquivo });
-    return { n, ok: false };
+    emitir('revertido', { n, arquivo, tarefa: t.id });
+    return { n, ok: false, tarefa: t.id };
   }
   // Commita apenas o arquivo da tarefa — nunca mudanças alheias da árvore.
   await git(['add', '--', arquivo]).catch(() => undefined);
@@ -111,12 +115,16 @@ export async function iniciar({ objetivo = 'melhorar o projeto Myn Recicla', max
   ativo = true; abortar = false;
   estado = { ciclos: 0, ultimo: null, iniciadoEm: new Date().toISOString(), objetivo: String(objetivo).slice(0, 500) };
   emitir('iniciado', { objetivo: estado.objetivo, rotas: ROTAS });
-  let n = 0, motivo = 'limite';
+  let n = 0, motivo = 'limite', falhou = null, falhas = 0;
   while (ativo && !abortar && n < maxCiclos) {
     n++; estado.ciclos = n;
     const r = await ciclo(n, estado.objetivo);
     if (r.semTarefas) { motivo = 'backlog vazio'; break; }
     if (abortar) { motivo = 'parado'; break; }
+    if (r.ok === false) {
+      if (r.tarefa === falhou) falhas++; else { falhou = r.tarefa; falhas = 1; }
+      if (falhas >= 2) { emitir('bloqueado', { tarefa: falhou, aviso: 'tarefa falhou 2x; parando para revisão' }); motivo = 'tarefa bloqueada'; break; }
+    } else { falhou = null; falhas = 0; }
     await new Promise((r2) => setTimeout(r2, Math.max(500, intervaloMs)));
   }
   ativo = false;
