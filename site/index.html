@@ -442,6 +442,9 @@ function bcAdicionar(ev){
  if(ev.media!==undefined)txt+=' · saúde '+ev.media.toFixed(2);
  if(ev.tipo==='modelos')txt+=' · '+ev.total+' modelos · '+Object.entries(ev.porFonte||{}).map(([k,v])=>k+':'+v).join(' · ')+(ev.erros?' · fontes com erro '+ev.erros:'');
  if(ev.tipo==='arquitetura')txt+=' · '+ev.modulos+' módulos · '+ev.dependencias+' dependências · '+ev.ciclos+' ciclos · '+ev.violacoes+' violações';
+ if(ev.tipo==='codigo')txt+=' · '+ev.total+' achados · '+ev.deterministicos+' determinísticos · '+ev.llm+' LLM';
+ if(ev.tipo==='achado')txt+=' · '+ev.arquivo+' · '+ev.descricao+(ev.reproduzido?' · reproduzido':'');
+ if(ev.tipo==='engenharia_aplicada')txt+=' · '+ev.arquivo+' · merge='+ev.merge;
  if(ev.totalKb!==undefined)txt+=' · '+ev.totalKb+' KB · pior '+ev.piorMs+'ms'+(ev.gargalos?.length?' · gargalos: '+ev.gargalos.join(', '):'');
  if(ev.achados)txt+=' · '+ev.achados.join('; ');
  if(ev.pendentes!==undefined)txt+=' · pendentes '+ev.pendentes;
@@ -482,7 +485,10 @@ function bcAtualizarEstado(nome,ev){
  if(ev.n!==undefined)e.ciclos=ev.n;
  if(ev.tipo==='conectado'){e.ativo=!!ev.status?.ativo;if(ev.status?.ciclos!==undefined)e.ciclos=ev.status.ciclos}
  else if(ev.tipo==='iniciado'){e.ativo=true;e.nota='iniciado'}
- else if(ev.tipo==='ciclo_inicio'||ev.tipo==='analise_inicio'){e.ativo=true;e.nota='trabalhando'}
+ else if(ev.tipo==='ciclo_inicio'||ev.tipo==='analise_inicio'||ev.tipo==='achado'){e.ativo=true;e.nota='trabalhando'}
+ else if(ev.tipo==='auditoria_codigo'){e.nota=ev.total+' achados'}
+ else if(ev.tipo==='engenharia_aplicada'){e.nota=ev.merge?'merge ok':'revisão'}
+ else if(ev.tipo==='llm_necessario'){e.nota='LLM necessário'}
  else if(ev.tipo==='inalterado'){e.nota='sem mudança'}
  else if(ev.tipo==='aguardando'||ev.tipo==='sem_tarefas'){e.ativo=true;e.nota='vigiando backlog'}
  else if(ev.tipo==='analise_fim'||ev.tipo==='git'){e.nota=ev.merge?'merge ok':'ciclo ok'}

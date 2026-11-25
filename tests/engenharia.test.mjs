@@ -55,7 +55,7 @@ test('se todas as rotas falham, o orquestrador usa fallback determinístico', as
 });
 
 test('RAG encontra documentos do próprio projeto sem caminho absoluto', async () => {
-  const achados = await buscar('gzip desempenho worker', 3);
+  const achados = await buscar('worker melhoria auditoria', 3);
   assert.ok(achados.length > 0);
   assert.ok(achados.every((a) => !a.fonte.includes('Myncellium')));
 });
