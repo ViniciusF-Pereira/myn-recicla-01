@@ -78,7 +78,7 @@ async function cicloProposta(n) {
   try {
     const p = await gerarProposta();
     await garantirBranch();
-    emitir('proposta', { n, categoria: p.categoria, modelo: p.modelo, titulo: p.titulo, motivo: p.motivo, arquivo: p.arquivo, substituicoes: p.substituicoes.length });
+    emitir('proposta', { n, categoria: p.categoria, modelo: p.modelo, titulo: p.titulo, motivo: p.motivo, arquivo: p.arquivo, substituicoes: p.substituicoes.length, trechos: p.contexto?.trechos, testes: p.contexto?.testes });
     const aplicacao = await aplicarProposta(p);
     arquivoAplicado = aplicacao.arquivo;
     const checagens = await verificar(aplicacao.arquivo);
