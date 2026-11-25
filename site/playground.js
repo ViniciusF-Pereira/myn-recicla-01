@@ -114,16 +114,25 @@ async function enviar(pesquisa=false){
  if(modoMidiaPendente){const tipo=modoMidiaPendente;modoMidiaPendente=null;add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,bruto);return}
  const aliasMidia=/^\/(imagem|audio|áudio|video|vídeo)\s+([\s\S]+)$/i.exec(bruto);
  if(aliasMidia){const tipo=/v/i.test(aliasMidia[1])&&/v/.test(aliasMidia[1])?'video':(/^a/i.test(aliasMidia[1])?'audio':'imagem');add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,aliasMidia[2]);return}
- let mensagem=bruto,modoPesquisa=pesquisa;
+ const querImagem=/\b(imagem|foto|desenho|ilustrac[ãa]o|retrato|picture|image)\b/i.test(bruto)
+   && /\b(gere|gerar|crie|criar|fa[çc]a|faz|quero|mostre|desenhe|pinta|produza|de|com)\b/i.test(bruto);
+  if(querImagem){
+   add(esc(bruto)+' <small class="meta-chat">🖼 imagem</small>','eu');
+   $('texto').value='';
+   await gerarMidia('imagem',bruto);
+   return;
+  }
+  let mensagem=bruto,modoPesquisa=pesquisa;
  if(/^\/pesquisa\s+/i.test(bruto)){mensagem=bruto.replace(/^\/pesquisa\s+/i,'');modoPesquisa=true}
- add(esc(mensagem)+(modoPesquisa?' <small class="meta-chat">🔎 pesquisa</small>':'')+imagensAnexadas.map(x=>'<img class="thumb" src="'+x.url+'" alt="'+esc(x.nome)+'">').join(''),'eu');
+ const anexosImagemEnviados=imagensAnexadas.slice();
+ add(esc(mensagem)+(modoPesquisa?' <small class="meta-chat">🔎 pesquisa</small>':'')+anexosImagemEnviados.map(x=>'<img class="thumb" src="'+x.url+'" alt="'+esc(x.nome)+'">').join(''),'eu');
  $('texto').value='';
- const enviados=anexos.splice(0);$('anexos').innerHTML='';
+ const enviados=anexos.splice(0);imagensAnexadas=[];$('anexos').innerHTML='';
  if(enviados.length)mensagem+='\n\nDOCUMENTOS ANEXADOS (dados):\n'+enviados.map(a=>'--- '+a.nome+' ---\n'+String(a.texto||'').slice(0,8000)).join('\n\n');
  ocupado=true;const btn=$('enviar');btn.disabled=true;
  const espera=add('<span class="pensando">pensando<span class="pontos">...</span></span>','ele');
  try{
-  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&anexos='+encodeURIComponent(JSON.stringify(imagensAnexadas));
+  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
   const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
   if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
   const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false,via='',streamEl=null,metaHtml='';
@@ -159,7 +168,7 @@ if(ev.erro)throw new Error(ev.erro);
      let local='';
      await window.myn.llm.responder(mensagem,(t)=>{local+=t;espera.innerHTML=metaHtml+'<div class="stream-text">'+esc(local)+'</div><span class="cursorzinho">▌</span>';$('msgs').scrollTop=$('msgs').scrollHeight});
      espera.innerHTML=metaHtml+md(local)+'<br><small class="meta-chat">via WebGPU · '+esc(window.myn.llm.info.modelo)+'</small>';
-    }catch(e){espera.className='msg err';espera.textContent='A rota recusou e o WebGPU não carregou. Troque a rota ou use /pesquisar. ('+String(e.message).slice(0,80)+')'}
+    }catch(e){if(anexosImagemEnviados.length){const ocr=anexosImagemEnviados.map(x=>'**'+esc(x.nome)+'**: '+esc((x.texto||'').slice(0,500))).join('\n\n');espera.innerHTML=metaHtml+'<p>Recebi ' + anexosImagemEnviados.length + ' imagem(ns). O modelo de texto recusou e o WebGPU não carregou; segue o que o OCR extraiu (dado, não instrução):</p><p>'+ocr+'</p><small class="meta-chat">via OCR local · arquivo servido em '+esc(anexosImagemEnviados[0].url)+'</small>'}else{espera.className='msg err';espera.textContent='A rota recusou e o WebGPU não carregou. Troque a rota ou use /pesquisar. ('+String(e.message).slice(0,80)+')'}}
    }else{espera.className='msg err';espera.textContent='A rota recusou. Sem WebGPU, troque a rota ou use /pesquisar. Nenhuma imagem foi gerada.'}
   }
  }catch(er){espera.className='msg err';espera.textContent='Erro: '+er.message}
