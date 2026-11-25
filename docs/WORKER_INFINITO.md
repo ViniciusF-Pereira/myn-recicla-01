@@ -50,3 +50,10 @@ Eventos SSE: `conectado`, `iniciado`, `ciclo_inicio`, `plano`, `branch`, `higien
 
 ## Visual
 Playground → botão **worker** abre painel com log escuro, cor por tipo de evento, campo de objetivo, INICIAR/PARAR. Cada etapa aparece com timestamp.
+
+## Validação real (25/11/2026)
+- Teste via SSE: 17 eventos em 2 ciclos: `conectado → iniciado → ciclo_inicio → plano → branch → higienizacao → patch → testes → git → ... → finalizado`.
+- Teste no navegador: 23 linhas no painel, sem erros de console.
+- Git: commits `worker: ciclo N — melhorar e otimizar o codigo do Myn Recicla` com merge automático em `master`.
+- Correção aplicada: `AbortController.abort()` (não `.cancel()`) para reconectar o stream.
+- STOP via `POST /api/worker/stop` funcionando.
