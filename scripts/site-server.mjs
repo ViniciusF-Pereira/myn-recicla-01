@@ -21,6 +21,8 @@ import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
 import { iniciar as iniciarWorker, parar as pararWorker, status as statusWorker, assinar as assinarWorker } from '../src/worker.mjs';
+import { iniciar as iniciarAnalise, parar as pararAnalise, status as statusAnalise, assinar as assinarAnalise } from '../src/worker-analise.mjs';
+import { iniciar as iniciarMelhoria, parar as pararMelhoria, status as statusMelhoria, assinar as assinarMelhoria } from '../src/worker-melhoria.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = path.join(raiz, 'site');
@@ -38,6 +40,44 @@ const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  const workerRotas = {
+    analise: { iniciar: iniciarAnalise, parar: pararAnalise, status: statusAnalise, assinar: assinarAnalise },
+    melhoria: { iniciar: iniciarMelhoria, parar: pararMelhoria, status: statusMelhoria, assinar: assinarMelhoria },
+  };
+  const workerRota = /^\/api\/worker-(analise|melhoria)\/(status|start|stop|stream)$/.exec(url.pathname);
+  if (workerRota) {
+    const w = workerRotas[workerRota[1]], op = workerRota[2];
+    if (op === 'status') {
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(w.status()));
+      return;
+    }
+    if (op === 'start') {
+      try {
+        let corpo = ''; for await (const p of req) corpo += p;
+        const b = JSON.parse(corpo || '{}');
+        w.iniciar({
+          objetivo: String(b.objetivo || 'melhorar e otimizar o codigo do Myn Recicla').slice(0, 500),
+          maxCiclos: Math.min(1000, Number(b.maxCiclos) || 1000),
+          intervaloMs: Math.max(500, Number(b.intervaloMs) || 4000),
+        }).catch((e) => console.log('[worker-' + workerRota[1] + ']', e.message));
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ ok: true, status: w.status() }));
+      } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+      return;
+    }
+    if (op === 'stop') {
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify(w.parar()));
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', 'connection': 'keep-alive' });
+    res.write('data: ' + JSON.stringify({ t: new Date().toISOString(), tipo: 'conectado', worker: workerRota[1], status: w.status() }) + '\n\n');
+    const cancelar = w.assinar((ev) => res.write('data: ' + JSON.stringify(ev) + '\n\n'));
+    const ping = setInterval(() => res.write(': ping\n\n'), 15000);
+    req.on('close', () => { clearInterval(ping); cancelar(); });
+    return;
+  }
   if (url.pathname === '/api/worker/status' && req.method === 'GET') {
     res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
     res.end(JSON.stringify(statusWorker()));

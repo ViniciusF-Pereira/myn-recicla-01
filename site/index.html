@@ -355,6 +355,16 @@ body>header,main,footer{position:relative;z-index:1}
  <div class="aviso"><b>VM</b> — dá para rodar tudo em container com Chromium headless, sem abrir navegador no PC. Veja o README do Myn-Portable.</div>
 </div></section>
 
+<section id="autor"><div class="wrap">
+ <div class="st"><span class="num">06</span><h2>Created By</h2><span class="traco"></span><span class="nota">sessão do autor</span></div>
+ <div class="card">
+  <h3><svg class="ico"><use href="#i-file"/></svg> Vinicius de Freitas Pereira</h3>
+  <p><a href="https://github.com/ViniciusF-Pereira" target="_blank" rel="noopener">github.com/ViniciusF-Pereira</a></p>
+  <p>LinkedIn: <input id="linkedinUrl" placeholder="cole sua URL do LinkedIn" style="padding:7px;min-width:260px"> <button class="btn sec" id="salvarLinkedin">SALVAR</button></p>
+  <p id="linkedinSalvo" style="font:.75rem var(--mono);color:var(--mut)">não preenchido — campo editável</p>
+ </div>
+</div></section>
+
 <footer class="wrap"><span>Myn — Recicla/01 · de aba descartada a rota reaproveitada · 23/11/2026</span><span>sem chaves · sem Codex · browser only</span><span class="cc">cc</span></footer>
 </main>
 
@@ -437,6 +447,16 @@ async function bcConectar(){
  }catch(e){bcStatus.textContent='desconectado · '+e.message}
 }
 bcConectar();
+
+
+try{
+ const salvo=localStorage.getItem('myn-linkedin')||'';
+ const inp=document.getElementById('linkedinUrl'),out=document.getElementById('linkedinSalvo');
+ if(inp){inp.value=salvo;out.textContent=salvo||'não preenchido — campo editável'}
+ document.getElementById('salvarLinkedin')?.addEventListener('click',()=>{
+  const v=inp.value.trim();localStorage.setItem('myn-linkedin',v);out.textContent=v||'não preenchido';
+ });
+}catch{}
 
 </script>
 </body>

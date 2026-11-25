@@ -349,19 +349,3 @@ $('agExec').onclick=async()=>{
   saida.innerHTML=r.resultados.map(x=>'<div class="pv-linha"><b>'+esc(x.agente)+'</b> · '+esc(x.foco)+' · '+x.ms+'ms · '+esc(x.via)+'<br>'+esc(x.texto).replace(/\n/g,'<br>')+'</div>').join('');
  }catch(e){saida.innerHTML='<div class="pv-linha">Erro: '+esc(e.message)+'</div>'}
 };
-async function carregarAutor(){
- try{
-  const a=await window.myn.sessao.carregar();
-  $('createdBy').innerHTML=window.myn.sessao.markdown(a);
-   if($('autorNome'))$('autorNome').value=a.nome||''; if($('autorLinkedin'))$('autorLinkedin').value=a.linkedin||'';
-  }catch(e){if($('createdBy'))$('createdBy').textContent='created by Vinicius de Freitas · github.com/ViniciusF-Pereira'}
-}
-$('editarAutor')?.addEventListener('click',()=>{const f=$('autorForm');if(f)f.hidden=!f.hidden});
-$('salvarAutor')?.addEventListener('click',async()=>{
- await window.myn.sessao.salvar({nome:$('autorNome').value.trim(),linkedin:$('autorLinkedin').value.trim()});
- const f=$('autorForm');if(f)f.hidden=true;carregarAutor();
-});
-async function esperarMyn(){
- for(let i=0;i<80;i++){if(window.myn?.sessao)return carregarAutor();await new Promise(r=>setTimeout(r,50))}
-}
-esperarMyn();
