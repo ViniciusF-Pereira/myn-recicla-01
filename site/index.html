@@ -442,7 +442,7 @@ function bcAdicionar(ev){
  if(ev.media!==undefined)txt+=' · saúde '+ev.media.toFixed(2);
  if(ev.tipo==='modelos')txt+=' · '+ev.total+' modelos · '+Object.entries(ev.porFonte||{}).map(([k,v])=>k+':'+v).join(' · ')+(ev.erros?' · fontes com erro '+ev.erros:'');
  if(ev.tipo==='arquitetura')txt+=' · '+ev.modulos+' módulos · '+ev.dependencias+' dependências · '+ev.ciclos+' ciclos · '+ev.violacoes+' violações';
- if(ev.tipo==='codigo')txt+=' · '+ev.total+' achados · '+ev.deterministicos+' determinísticos · '+ev.llm+' LLM';
+ if(ev.tipo==='codigo'||ev.tipo==='auditoria_codigo')txt+=' · '+ev.total+' achados · '+ev.deterministicos+' determinísticos · '+ev.llm+' LLM';
  if(ev.tipo==='achado')txt+=' · '+ev.arquivo+' · '+ev.descricao+(ev.reproduzido?' · reproduzido':'');
  if(ev.tipo==='engenharia_aplicada')txt+=' · '+ev.arquivo+' · merge='+ev.merge;
  if(ev.totalKb!==undefined)txt+=' · '+ev.totalKb+' KB · pior '+ev.piorMs+'ms'+(ev.gargalos?.length?' · gargalos: '+ev.gargalos.join(', '):'');
