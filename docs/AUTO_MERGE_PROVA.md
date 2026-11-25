@@ -6,7 +6,7 @@ Execução: 25/11/2026, worker de melhoria, `maxCiclos=8`, `intervaloMs=500`.
 
 | # | Achado | Arquivo | Teste do achado depois | Merge |
 |---|---|---|---|---|
-| 1 | `midia-path-traversal` | `src/midia.mjs` | não reproduz | `true` |
+| 1 | `midia-path-traversal` (hardening de caminho) | `src/midia.mjs` | padrão removido | `true` |
 | 2 | `tesseract-portavel-src-midia-mjs` | `src/midia.mjs` | não reproduz | `true` |
 | 3 | `tesseract-portavel-src-gateway-mjs` | `src/gateway.mjs` | não reproduz | `true` |
 | 4 | `tesseract-portavel-scripts-mapear-mjs` | `scripts/mapear.mjs` | não reproduz | `true` |
@@ -19,6 +19,10 @@ Commits:
 - `f0f9b93` — Tesseract portável em `src/gateway.mjs`
 - `b099add` — Tesseract portável em `scripts/mapear.mjs`
 - `ed34073` — commit limitado ao arquivo da tarefa
+
+## Ressalva de qualidade
+
+O achado de caminho em mídia foi um **hardening**, não um exploit confirmado: `seguro(nome)` já removia separadores antes do join. A auditoria atual reconhece padrões no fonte; ela ainda não substitui testes comportamentais de segurança.
 
 ## Resultado
 

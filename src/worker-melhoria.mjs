@@ -24,7 +24,12 @@ async function git(args) { return String((await run('git', args, { cwd: RAIZ, ti
 
 async function garantirBranch() {
   const atual = await git(['rev-parse', '--abbrev-ref', 'HEAD']);
-  if (atual !== 'worker/auto') await git(['checkout', '-B', 'worker/auto', 'master']).catch(() => git(['checkout', 'worker/auto']));
+  if (atual === 'worker/auto') return;
+  try { await git(['checkout', 'worker/auto']); }
+  catch { await git(['checkout', '-b', 'worker/auto', 'master']); }
+  // Preserva commits anteriores. Só avança quando master é ancestral; divergência para o worker.
+  try { await git(['merge', '--ff-only', 'master']); }
+  catch { throw new Error('worker/auto divergiu de master; preservado para inspeção'); }
 }
 
 async function aplicar(t) {
