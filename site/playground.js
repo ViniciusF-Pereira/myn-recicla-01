@@ -238,6 +238,7 @@ function linhaWorker(ev){
  if(ev.categoria)texto+=' · '+ev.categoria;
  if(ev.modelo)texto+=' · modelo '+ev.modelo;
  if(ev.trechos)texto+=' · '+ev.trechos+' trechos'+(ev.testes?.length?' · '+ev.testes.length+' testes':'');
+ if(ev.envio)texto+=' · envio '+ev.envio.caracteres+' chars → '+ev.envio.endpoint;
  if(ev.objetivo)texto+=' · '+ev.objetivo;
  if(ev.passos)texto+=' · '+ev.passos.join(', ');
  if(ev.removidos)texto+=' · removidos: '+(ev.removidos.join(', ')||'nenhum');

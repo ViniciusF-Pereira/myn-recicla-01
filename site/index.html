@@ -434,6 +434,7 @@ function bcAdicionar(ev){
  if(ev.categoria)txt+=' · '+ev.categoria;
  if(ev.modelo)txt+=' · modelo '+ev.modelo;
  if(ev.trechos)txt+=' · '+ev.trechos+' trechos'+(ev.testes?.length?' · '+ev.testes.length+' testes':'');
+ if(ev.envio)txt+=' · envio '+ev.envio.caracteres+' chars → '+ev.envio.endpoint;
  if(ev.objetivo)txt+=' · '+ev.objetivo;
  if(ev.passos)txt+=' · '+ev.passos.join(', ');
  if(ev.arquivo)txt+=' · '+ev.arquivo;

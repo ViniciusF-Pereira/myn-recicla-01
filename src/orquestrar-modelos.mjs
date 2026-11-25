@@ -31,11 +31,13 @@ export async function carregarMapaModelos() {
 /** Rotas que atendem às capacidades, já ordenadas pelo scoreboard (circuitos abertos ficam por último). */
 export async function escolherPara(tarefa, max = 3, rapido = false) {
   const caps = classificarTarefa(tarefa);
-  const mapa = await carregarMapaModelos();
-  let candidatos = mapa.filter((r) => r.capacidades.some((c) => caps.includes(c)) && !r.confirmacao);
+  const mapa = (await carregarMapaModelos()).filter((r) => !/google|gemini/i.test(r.id + ' ' + r.nome + ' ' + r.modelo));
+  const plugins = JSON.parse(await readFile(path.join(RAIZ, 'config/plugins.json'), 'utf8')).plugins
+    .filter((p) => !/google|gemini/i.test(p.id + ' ' + p.nome));
+  const idsDisponiveis = new Set(plugins.map((p) => p.id));
+  let candidatos = mapa.filter((r) => idsDisponiveis.has(r.id) && r.capacidades.some((c) => caps.includes(c)) && !r.confirmacao);
   if (rapido) {
     // Web-only: NUNCA usar geradores locais (PIL/ffmpeg/edge-tts). Somente APIs online free.
-    const plugins = JSON.parse(await readFile(path.join(RAIZ, 'config/plugins.json'), 'utf8')).plugins;
     const ids = new Set(plugins.filter((p) => p.acao === 'api').map((p) => p.id));
     const rapidos = mapa.filter((r) => ids.has(r.id) && !r.confirmacao && r.capacidades.some((c) => caps.includes(c)));
     const casados = candidatos.filter((r) => ids.has(r.id));
@@ -69,11 +71,12 @@ export async function orquestrar({ tarefa, gateway, trava, plugins, max = 3, rap
     return { rota: rota.id, nome: rota.nome, modelo: rota.modelo, ok: d.ok, resposta: texto, nota: avaliar(texto), ms: Date.now() - t };
   });
   const resultados = await Promise.all(promessas);
-  if (!resultados.length) {
+  const sucessos = resultados.filter((r) => r.ok && String(r.resposta || '').trim());
+  if (!sucessos.length) {
     const deterministico = { rota: 'deterministico', nome: 'Plano base (sem rede)', ok: true,
       resposta: 'APIs online indisponíveis. Plano determinístico: ' + classificarTarefa(tarefa).join(', '), nota: 0.5, ms: 0 };
-    return { tarefa, capacidades: classificarTarefa(tarefa), ms: Date.now() - inicio, vencedor: deterministico, resultados: [deterministico], via: 'deterministico' };
+    return { tarefa, capacidades: classificarTarefa(tarefa), ms: Date.now() - inicio, vencedor: deterministico, resultados: [...resultados, deterministico], via: 'deterministico' };
   }
-  const vencedor = [...resultados].sort((a, b) => b.nota - a.nota)[0] || null;
+  const vencedor = [...sucessos].sort((a, b) => b.nota - a.nota)[0] || null;
   return { tarefa, capacidades: classificarTarefa(tarefa), ms: Date.now() - inicio, vencedor, resultados };
 }

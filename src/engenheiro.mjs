@@ -104,7 +104,12 @@ ${testes.length ? testes.map((t) => '\n--- ' + t.arquivo + ' ---\n' + t.texto).j
   const dados = await resposta.json();
   const texto = dados.choices?.[0]?.message?.content;
   const proposta = validar(extrairJson(texto), arquivo);
-  return { arquivo, categoria, modelo: dados.model || MODELO, contexto: { trechos: contexto.trechos, testes: testes.map((t) => t.arquivo) }, ...proposta };
+  return {
+    arquivo, categoria, modelo: dados.model || MODELO,
+    contexto: { trechos: contexto.trechos, testes: testes.map((t) => t.arquivo) },
+    envio: { endpoint: ENDPOINT, modelo: dados.model || MODELO, caracteres: prompt.length, trechos: contexto.trechos, testes: testes.map((t) => t.arquivo), arquivo },
+    ...proposta,
+  };
 }
 
 export async function aplicarProposta(proposta) {

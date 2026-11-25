@@ -68,6 +68,10 @@ async function verificar(arquivo) {
 const ROTAS = ['pollinations-text-api', 'openrouter', 'brave-leo', 'kimi', 'hugging'];
 
 async function cicloProposta(n) {
+  if (process.env.MYN_ENGENHARIA_ATIVO === '0') {
+    emitir('aguardando', { n, aviso: 'envio externo de código desativado por MYN_ENGENHARIA_ATIVO=0' });
+    return { n, semTarefas: true };
+  }
   const agora = Date.now();
   if (agora - (estado.ultimaPropostaEm || 0) < 120_000) {
     emitir('aguardando', { n, aviso: 'backlog vazio; próxima proposta de engenharia em até 2 min' });
@@ -78,7 +82,7 @@ async function cicloProposta(n) {
   try {
     const p = await gerarProposta();
     await garantirBranch();
-    emitir('proposta', { n, categoria: p.categoria, modelo: p.modelo, titulo: p.titulo, motivo: p.motivo, arquivo: p.arquivo, substituicoes: p.substituicoes.length, trechos: p.contexto?.trechos, testes: p.contexto?.testes });
+    emitir('proposta', { n, categoria: p.categoria, modelo: p.modelo, titulo: p.titulo, motivo: p.motivo, arquivo: p.arquivo, substituicoes: p.substituicoes.length, trechos: p.contexto?.trechos, testes: p.contexto?.testes, envio: p.envio });
     const aplicacao = await aplicarProposta(p);
     arquivoAplicado = aplicacao.arquivo;
     const checagens = await verificar(aplicacao.arquivo);

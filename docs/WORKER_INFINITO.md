@@ -51,6 +51,12 @@ Eventos SSE: `conectado`, `iniciado`, `ciclo_inicio`, `plano`, `branch`, `higien
 ## Visual
 Playground → botão **worker** abre painel com log escuro, cor por tipo de evento, campo de objetivo, INICIAR/PARAR. Cada etapa aparece com timestamp.
 
+## Privacidade do engenheiro (25/11/2026)
+- O worker **não usa o chat da interface nem o orquestrador** para gerar patches. Ele faz POST direto a `https://text.pollinations.ai/openai`.
+- O envio contém trechos de código do arquivo-alvo e testes relacionados, mais instruções pedindo um patch JSON. Não envia fotos.
+- O evento `proposta` mostra endpoint, modelo, quantidade de caracteres, trechos e testes enviados.
+- Use apenas código público/open-source. Para impedir qualquer envio externo, defina `MYN_ENGENHARIA_ATIVO=0`; o worker continua vigiando o backlog local.
+
 ## Engenharia contínua (25/11/2026)
 - **Análise** mede quatro frentes: código/arquivos, desempenho no fio, modelos livres e grafo de dependências.
 - **Melhoria** aplica o backlog verificável. Com backlog vazio, espera 2 minutos e pede ao Pollinations (`openai-fast`) uma proposta de patch para código, infra, modelos ou arquitetura.
