@@ -17,7 +17,7 @@ Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`).
 - `GET /api/arquitetura` → 57 módulos, 78 dependências, 0 ciclos/violações/imports quebrados.
 - Worker de análise: `start` → 1 ciclo → `finalizado`.
 - Git local: branch `master`, commit `base do container`.
-- `node --test` dentro do container → 11/11 testes passando.
+- `node --test` dentro do container → 17/17 testes passando.
 
 ## Infra
 
