@@ -51,6 +51,9 @@ Eventos SSE: `conectado`, `iniciado`, `ciclo_inicio`, `plano`, `branch`, `higien
 ## Visual
 Playground → botão **worker** abre painel com log escuro, cor por tipo de evento, campo de objetivo, INICIAR/PARAR. Cada etapa aparece com timestamp.
 
+## Backlog dinâmico (correção 25/11/2026)
+O worker antigo repetia uma linha em `docs/EVOLUCAO.md` e gerava commits sem melhoria real. Foi substituído por `src/analise.mjs`: a cada ciclo ele lê o projeto, encontra lacunas reais (scripts, docs, exports, config) e gera uma tarefa verificável. `docs/MELHORIAS_APLICADAS.json` guarda o que já foi feito, evitando repetição. Quando não há pendências, ele emite `sem_tarefas` e para de commitar.
+
 ## Validação real (25/11/2026)
 - Teste via SSE: 17 eventos em 2 ciclos: `conectado → iniciado → ciclo_inicio → plano → branch → higienizacao → patch → testes → git → ... → finalizado`.
 - Teste no navegador: 23 linhas no painel, sem erros de console.
