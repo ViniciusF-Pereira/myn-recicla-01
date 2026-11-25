@@ -169,3 +169,8 @@ Módulo do Myn Recicla/01.
 Exports: respostaLocal
 
 Módulo do Myn Recicla/01.
+## token-local.mjs
+
+Exports: emitirToken, validarToken, bearer, ehLoopback
+
+Módulo do Myn Recicla/01.

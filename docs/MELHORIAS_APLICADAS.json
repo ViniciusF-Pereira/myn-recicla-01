@@ -31,5 +31,6 @@
   "modulo-auditoria-codigo",
   "modulo-eventlog",
   "modulo-lock",
-  "modulo-conhecimento-local"
+  "modulo-conhecimento-local",
+  "modulo-token-local"
 ]
