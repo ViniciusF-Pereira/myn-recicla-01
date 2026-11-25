@@ -70,7 +70,6 @@ async function enviar(pesquisa=false){
  if(modoMidiaPendente){const tipo=modoMidiaPendente;modoMidiaPendente=null;add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,bruto);return}
  const aliasMidia=/^\/(imagem|audio|áudio|video|vídeo)\s+([\s\S]+)$/i.exec(bruto);
  if(aliasMidia){const tipo=/v/i.test(aliasMidia[1])&&/v/.test(aliasMidia[1])?'video':(/^a/i.test(aliasMidia[1])?'audio':'imagem');add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,aliasMidia[2]);return}
- if(!/^\//.test(bruto)&&/imagem|imagen|image|foto|desenho/i.test(bruto)){add(esc(bruto),'eu');$('texto').value='';await gerarMidia('imagem',bruto);return}
  let mensagem=bruto,modoPesquisa=pesquisa;
  if(/^\/pesquisa\s+/i.test(bruto)){mensagem=bruto.replace(/^\/pesquisa\s+/i,'');modoPesquisa=true}
  add(esc(mensagem)+(modoPesquisa?' <small class="meta-chat">🔎 pesquisa</small>':''),'eu');
@@ -101,10 +100,19 @@ async function enviar(pesquisa=false){
    }
   }
   if(!iniciado)espera.innerHTML='(sem resposta)';
-  if(/^(i[’']?m (sorry|afraid|not able)|sorry|i can[’']?t|i cannot|desculpe|n[ãa]o posso)/i.test(texto.trim())){
-   espera.innerHTML='<small class="meta-chat">modelo recusou · gerando com o gerador local...</small>';
-   try{const g=await post('/api/midia',{tipo:'imagem',prompt:mensagem,voz:'pt-BR-FranciscaNeural',segundos:6});espera.innerHTML=artifact(g)+'<br><small class="meta-chat">recusa contornada pelo gerador free</small>'}
-   catch(er){espera.className='msg err';espera.textContent='Erro: '+er.message}
+  if(window.myn&&texto){
+   const cmd=window.myn.reparar(texto);
+   if(cmd&&!cmd.acao){const rr=await window.myn.tools.executar(cmd);add('<small class="meta-chat">🔧 TOOL '+esc(cmd.tool)+' → '+(rr.ok?'ok':'falha')+' '+esc(rr.nome||rr.erro||'')+'</small>','ele')}
+  }
+  if(/sorry|afraid|can[’']?t|desculpe|não posso/i.test(texto.trim())){
+   if(window.myn?.llm?.disponivel()){
+    espera.innerHTML='<small class="meta-chat">rota recusou · WebGPU no navegador...</small>';
+    try{
+     let local='';
+     await window.myn.llm.responder(mensagem,(t)=>{local+=t;espera.innerHTML=md(local)+'<span class="cursorzinho">▌</span>';$('msgs').scrollTop=$('msgs').scrollHeight});
+     espera.innerHTML=md(local)+'<br><small class="meta-chat">via WebGPU · '+esc(window.myn.llm.info.modelo)+'</small>';
+    }catch(e){espera.className='msg err';espera.textContent='A rota recusou e o WebGPU não carregou. Troque a rota ou use /pesquisar. ('+String(e.message).slice(0,80)+')'}
+   }else{espera.className='msg err';espera.textContent='A rota recusou. Sem WebGPU, troque a rota ou use /pesquisar. Nenhuma imagem foi gerada.'}
   }
  }catch(er){espera.className='msg err';espera.textContent='Erro: '+er.message}
  finally{ocupado=false;btn.disabled=false}

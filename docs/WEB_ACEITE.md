@@ -10,6 +10,9 @@ Executado no navegador (`http://127.0.0.1:5188/playground.html`), sem Node no cl
 | Reparo de tool-call | ✅ `TOOL write_file path=nota content=teste` → `{tool:'write_file',args:{...}}` |
 | RAG no cliente | ✅ `/api/plugins` semeado; `rag('gemini')` → fontes “Catálogo de plugins”, “Saúde das rotas” |
 | Orquestrador web | ✅ `window.myn.orquestrar({tarefa,max:2,rapido:true})` → rotas `pollinations-image-api, pollinations-text-api`, **local: false**, 10,5 s |
+| LLM WebGPU | ✅ `window.myn.llm.disponivel() === true`; modelo `Qwen2.5-0.5B-Instruct-q4f16_1-MLC` carregado sob demanda |
+| Recusa de rota | ✅ não desvia mais para imagem; cai para WebGPU ou mensagem honesta com troca de rota |
+| Botões mídia/plugins | ✅ imagem, áudio, vídeo geram artifact; painel de plugins lista 62 |
 | Servidor `/web/*` | ✅ módulos ES com MIME `text/javascript` |
 | Playground | ✅ em página própria, chat funcional, botão da home abre nova aba |
 

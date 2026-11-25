@@ -2,3 +2,5 @@
 - 2026-11-24T05:02:10.016Z · resumo semanal com gráficos de tendência
 - 2026-11-24T05:05:56.691Z · resumo semanal com gráficos de tendência
 - 2026-11-25T01:23:26.179Z · registrar modelos e limites observados
+- 2026-11-25T01:35:42.468Z · registrar modelos e limites observados
+- 2026-11-25T01:40:41.961Z · registrar modelos e limites observados
