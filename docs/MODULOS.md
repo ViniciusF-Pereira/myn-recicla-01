@@ -164,3 +164,8 @@ Módulo do Myn Recicla/01.
 Exports: adquirirLock
 
 Módulo do Myn Recicla/01.
+## conhecimento-local.mjs
+
+Exports: respostaLocal
+
+Módulo do Myn Recicla/01.

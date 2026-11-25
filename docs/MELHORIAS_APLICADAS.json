@@ -30,5 +30,6 @@
   "modulo-modelos-pollinations",
   "modulo-auditoria-codigo",
   "modulo-eventlog",
-  "modulo-lock"
+  "modulo-lock",
+  "modulo-conhecimento-local"
 ]
