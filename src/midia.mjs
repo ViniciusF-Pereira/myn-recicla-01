@@ -8,7 +8,7 @@ const executar = promisify(execFile);
 const DADOS = process.env.MYN_DADOS || path.join(process.cwd(), 'dados');
 export const DIR_ARQUIVOS = path.join(DADOS, 'arquivos');
 await mkdir(DIR_ARQUIVOS, { recursive: true });
-const TESSERACT = 'C:/Program Files/Tesseract-OCR/tesseract.exe';
+const TESSERACT = process.env.MYN_TESSERACT || 'tesseract';
 const LIMITE = 12 * 1024 * 1024;
 const seguro = (nome) => String(nome || 'arquivo').normalize('NFD').replace(/[\u0300-\u036f]/g, '')
   .replace(/[^a-zA-Z0-9._-]/g, '_').replace(/^\.+/, '').slice(0, 90) || 'arquivo';
