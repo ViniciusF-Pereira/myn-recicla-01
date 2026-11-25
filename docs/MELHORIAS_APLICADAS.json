@@ -28,5 +28,6 @@
   "modulo-arquitetura",
   "modulo-engenheiro",
   "modulo-modelos-pollinations",
-  "modulo-auditoria-codigo"
+  "modulo-auditoria-codigo",
+  "modulo-eventlog"
 ]

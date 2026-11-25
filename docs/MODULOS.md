@@ -154,3 +154,8 @@ Módulo do Myn Recicla/01.
 Exports: auditarCodigo, reproduzirAchado
 
 Módulo do Myn Recicla/01.
+## eventlog.mjs
+
+Exports: registrarEvento, lerEventos
+
+Módulo do Myn Recicla/01.
