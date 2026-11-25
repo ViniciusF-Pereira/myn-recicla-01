@@ -149,3 +149,8 @@ Módulo do Myn Recicla/01.
 Exports: MODELOS_POLLINATIONS
 
 Módulo do Myn Recicla/01.
+## auditoria-codigo.mjs
+
+Exports: auditarCodigo, reproduzirAchado
+
+Módulo do Myn Recicla/01.

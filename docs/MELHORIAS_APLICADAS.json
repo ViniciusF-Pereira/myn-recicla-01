@@ -27,5 +27,6 @@
   "modulo-modelos-livres",
   "modulo-arquitetura",
   "modulo-engenheiro",
-  "modulo-modelos-pollinations"
+  "modulo-modelos-pollinations",
+  "modulo-auditoria-codigo"
 ]
