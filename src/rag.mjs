@@ -73,3 +73,4 @@ export async function contextoPara(pergunta, limite = 3500) {
   }
   return { texto, fontes: achados.map((a) => a.fonte) };
 }
+export function contarTokens(s){return String(s||"").toLowerCase().split(/\W+/).filter(Boolean).length}

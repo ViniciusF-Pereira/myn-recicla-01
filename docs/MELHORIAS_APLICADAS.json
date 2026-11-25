@@ -12,5 +12,6 @@
   "script-exportar-db",
   "docs-rotas",
   "docs-endpoints",
-  "export-saude-media"
+  "export-saude-media",
+  "export-rag-tokens"
 ]
