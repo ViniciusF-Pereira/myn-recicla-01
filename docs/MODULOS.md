@@ -124,4 +124,8 @@ Módulo do Myn Recicla/01.
 Exports: assinar, status, iniciar, parar
 
 Módulo do Myn Recicla/01.
+## desempenho.mjs
 
+Exports: ORCAMENTO, medirDesempenho
+
+Módulo do Myn Recicla/01.

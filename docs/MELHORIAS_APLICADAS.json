@@ -22,5 +22,6 @@
   "export-stream",
   "export-auto",
   "export-worker",
-  "export-gateway"
+  "export-gateway",
+  "modulo-desempenho"
 ]
