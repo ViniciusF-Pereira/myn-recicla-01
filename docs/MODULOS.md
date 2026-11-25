@@ -129,3 +129,8 @@ Módulo do Myn Recicla/01.
 Exports: ORCAMENTO, medirDesempenho
 
 Módulo do Myn Recicla/01.
+## modelos-livres.mjs
+
+Exports: descobrirModelos, obterModelos
+
+Módulo do Myn Recicla/01.

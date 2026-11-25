@@ -23,5 +23,6 @@
   "export-auto",
   "export-worker",
   "export-gateway",
-  "modulo-desempenho"
+  "modulo-desempenho",
+  "modulo-modelos-livres"
 ]
