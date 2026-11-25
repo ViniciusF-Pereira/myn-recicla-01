@@ -94,6 +94,8 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Direção web-only:** [`docs/PLANEJAMENTO.md`](docs/PLANEJAMENTO.md) — evoluir o Myn para agente open-source tipo OpenCode/Claude Code/Codex usando **somente rotas free de navegador + WebGPU**, sem binário/local PC. Fase 0 item 3 já entregue: `/api/orquestrar?rapido=true` nunca escolhe rotas `*-local`.
 
+**Worker autônomo:** veja [`docs/WORKER_INFINITO.md`](docs/WORKER_INFINITO.md). No Playground, clique em **worker** para abrir o painel ao vivo com cada etapa (plano, rota free, higienização, patch, testes, commit e merge). `INICIAR` / `PARAR` controlam o loop; merge só com `fast-forward` e testes verdes.
+
 Goal mestre para dirigir a entrega completa:
 ```powershell
 node scripts/criar-goal-tudo.mjs
