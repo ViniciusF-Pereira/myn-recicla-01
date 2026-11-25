@@ -14,5 +14,6 @@
   "docs-endpoints",
   "export-saude-media",
   "export-rag-tokens",
-  "export-midia-ext"
+  "export-midia-ext",
+  "export-plugins-grupos"
 ]

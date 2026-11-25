@@ -90,3 +90,4 @@ export function extrairComando(mensagem, plugins) {
   const plugin = encontrarPlugin(plugins, m[1]);
   return plugin ? { plugin, entrada: m[2] } : null;
 }
+export function agruparPorCategoria(l){const g={};for(const p of l||[])(g[p.categoria]=g[p.categoria]||[]).push(p);return g}
