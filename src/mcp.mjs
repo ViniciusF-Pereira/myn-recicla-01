@@ -12,7 +12,7 @@ const B = (desc) => ({ type: 'boolean', description: desc });
 
 export const FERRAMENTAS = [
   T('myn_chat', 'Conversa com o Myn-01. Rotas free, sem chave. Use rota="auto" para escolher a melhor.', [['message', S('Mensagem do usuário')], ['rota', S('auto, brave-leo, zai, openrouter, chatgpt, claude')]], ['message']),
-  T('myn_pesquisar', 'Pesquisa local: RAG nos docs + catálogo de 62 plugins.', [['query', S('Pergunta ou termo')]], ['query']),
+  T('myn_pesquisar', 'Pesquisa local: RAG nos docs + catálogo de 167 plugins.', [['query', S('Pergunta ou termo')]], ['query']),
   T('myn_rotas', 'Lista rotas, saúde (score/circuito) e plugins disponíveis.', [], []),
   T('myn_plugin', 'Executa qualquer plugin por id (/id no chat).', [['id', S('id do plugin')], ['entrada', S('texto de entrada')]], ['id', 'entrada']),
   T('myn_imagem', 'Gera imagem. Pollinations primeiro; se a cota acabar, desenha o sujeito por palavra-chave localmente.', [['prompt', S('O que gerar')]], ['prompt']),
@@ -105,7 +105,7 @@ async function executar(nome, a, base) {
 export async function handleMcp(req, base) {
   const id = req?.id ?? null;
   if (req?.method === 'initialize') {
-    return { jsonrpc: '2.0', id, result: { protocolVersion: '2026-07-28', capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'myn-recyla-01', version: '1.0.0' } } };
+    return { jsonrpc: '2.0', id, result: { protocolVersion: '2026-07-28', capabilities: { tools: { listChanged: false } }, serverInfo: { name: 'myn-Recicla-01', version: '1.0.0' } } };
   }
   if (req?.method === 'ping' || req?.method === 'notifications/initialized') return req.method === 'ping' ? { jsonrpc: '2.0', id, result: {} } : null;
   if (req?.method === 'tools/list') {

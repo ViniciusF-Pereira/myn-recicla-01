@@ -1,8 +1,8 @@
-# Myn — Recyla/01
+# Myn — Recicla/01
 
 **De aba descartada a rota reaproveitada.** Agente portátil que transforma chats e serviços gratuitos da web em rotas utilizáveis — sem chave de API, sem assinatura, sem Codex, sem abrir navegador no PC.
 
-Repo: **https://github.com/ViniciusF-Pereira/myn-recyla-01**
+Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 
 ## Prints
 
@@ -16,7 +16,7 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-recyla-01**
 
 ## O que é
 
-- **62 plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade.
+- **167 plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade.
 - **13 rotas Google** mapeadas por um único login (Gemini, Nano Banana, Google Chat, Messages, ImageFX, NotebookLM, Drive, Meet, AI Studio, Veo…).
 - **Chat com streaming SSE** (primeiro token em ~15 ms), pesquisa com RAG + catálogo, anexos, tabelas markdown e arquivos.
 - **Mídia free**: imagem (Pollinations → desenho local), voz (edge-tts), vídeo (ffmpeg local).
@@ -50,7 +50,7 @@ node scripts/gateway-vm.mjs
 - Escreva e aperte **Enter** → streaming token a token.
 - **🔎 pesquisar** ou `/pesquisa pergunta` → cruza RAG + plugins antes de responder.
 - **🖼 imagem / 🔊 áudio / 🎬 vídeo** → clique com texto no campo gera na hora; com campo vazio fica “armado” para o próximo Enter.
-- **🔌 plugins** → painel com os 62 plugins; clique insere `/id ` no campo.
+- **🔌 plugins** → painel com os 167 plugins; clique insere `/id ` no campo.
 - **🇬 google** → **CONECTAR TUDO (1 login)**: abre o login uma vez, detecta a conta e mapeia as 13 rotas.
 - **📜** → gaveta com histórico, cache e tempos.
 - Comandos: `/plan objetivo`, `/loop objetivo`, `/goal objetivo`, `/id mensagem`. Mensageria exige `/id confirmar: texto`.
@@ -80,8 +80,8 @@ cd "D:\0 - Projetos\WEBdocker.NODEJS"
 ```
 Sobem: site (5188), gateway headless (36877 interno) e Chromium sem janela. Para distribuir:
 ```powershell
-docker save myn-recyla-01 -o myn-recyla-01.tar
-# na outra máquina: docker load -i myn-recyla-01.tar; docker run -d -p 5188:5188 -v recyla-dados:/data myn-recyla-01
+docker save myn-Recicla-01 -o myn-Recicla-01.tar
+# na outra máquina: docker load -i myn-Recicla-01.tar; docker run -d -p 5188:5188 -v Recicla-dados:/data myn-Recicla-01
 ```
 
 ## Verificação (prova)

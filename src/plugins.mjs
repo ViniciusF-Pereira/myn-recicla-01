@@ -57,7 +57,9 @@ export async function executarPlugin({ plugin, entrada, gateway, trava, log = ()
   log({ etapa: 'plugin', id: plugin.id, acao: plugin.acao, prompt: prompt.slice(0, 160) });
   try {
     let resposta = '';
-    if (plugin.acao === 'api') {
+    if (plugin.acao === 'link') {
+      resposta = '[' + plugin.nome + '](' + plugin.url + ')\n\n' + (plugin.limite || '');
+    } else if (plugin.acao === 'api') {
       resposta = (await executarApi(plugin, entrada)).texto;
     } else if (plugin.acao === 'local') {
       resposta = (await executarLocal(plugin, entrada)).texto;

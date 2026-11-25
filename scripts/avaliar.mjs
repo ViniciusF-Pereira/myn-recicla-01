@@ -1,4 +1,4 @@
-/** Bateria de avaliação do Myn Recyla/01. Mede rotas reais e grava docs/AVALIACAO.md. */
+/** Bateria de avaliação do Myn Recicla/01. Mede rotas reais e grava docs/AVALIACAO.md. */
 import { writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -47,7 +47,7 @@ await medir('mcp-tools', async () => {
 
 const ok = resultados.filter((r) => r.ok).length;
 const linhas = [
-  '# Avaliação automática — Myn Recyla/01',
+  '# Avaliação automática — Myn Recicla/01',
   '',
   'Gerada por `node scripts/avaliar.mjs` em ' + new Date().toISOString() + '.',
   '',

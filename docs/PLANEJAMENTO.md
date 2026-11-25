@@ -1,4 +1,4 @@
-# Planejamento — Myn Recyla como agente open-source web-only
+# Planejamento — Myn Recicla como agente open-source web-only
 
 **Diretriz do dono (24/11/2026):** o produto usa **somente rotas FREE de navegador online + WebGPU**. Nada de execução local em PC físico: sem `ffmpeg`, `PIL`, `Tesseract`, binários, CDP na máquina do usuário ou automação de desktop. O computador do usuário roda **apenas o navegador**. Gateway/CDP, se existir, vive em **container hospedado**, nunca no PC.
 
@@ -10,7 +10,7 @@
 
 ## Diagnóstico
 
-O Myn hoje tem o que poucos projetos free têm: 62 plugins, 13 rotas Google, streaming SSE, scoreboard com circuit breaker, RAG, MCP goal autônomo, WEBdocker e documentação com prova. Mas ainda é **um servidor local com um site na frente**. Para virar “um OpenCode que roda no navegador” é preciso mudar o centro de gravidade: o agente passa a viver no browser do usuário, com compute WebGPU e ferramentas online.
+O Myn hoje tem o que poucos projetos free têm: 167 plugins, 13 rotas Google, streaming SSE, scoreboard com circuit breaker, RAG, MCP goal autônomo, WEBdocker e documentação com prova. Mas ainda é **um servidor local com um site na frente**. Para virar “um OpenCode que roda no navegador” é preciso mudar o centro de gravidade: o agente passa a viver no browser do usuário, com compute WebGPU e ferramentas online.
 
 O incidente da consulta ao produto mostra a dívida: quando a API rápida falha, `escolherPara(..., rapido=true)` cai para `config/modelos.json` e escolhe `image-local`. Isso tem que virar: **falha de API → outra API online → resposta determinística honesta**, nunca binário local.
 
@@ -84,7 +84,7 @@ Entrypoints: `site/index.html`, `site/playground.html` e `site/app.mjs` (SPA com
 - **Gateway é SPOF**: token curto, renovação no 401, trava por aba no container; indisponível ⇒ app segue com WebGPU + rotas online diretas.
 
 ## O que NÃO fazer
-- Não portar as 62 plugins cegamente — começar pelas que são API online.
+- Não portar as 167 plugins cegamente — começar pelas que são API online.
 - Não transformar isso em IDE nem reintroduzir CDP/ffmpeg no host.
 - Não usar serviço pago ou chave de API.
 - Não trocar o scoreboard por ML antes de ter falha reproduzível.

@@ -1,4 +1,4 @@
-# Arquitetura — Myn Recyla/01
+# Arquitetura — Myn Recicla/01
 
 ## Ideia
 Transformar abas de IA gratuitas em rotas reaproveitáveis de agente. Nenhuma chave, nenhum serviço pago, nenhum cookie/senha gravado. Tudo passa pelo gateway mediado.
@@ -22,7 +22,7 @@ site (HTML/CSS/canvas)  →  site-server (HTTP/SSE/MCP)  →  módulos src/  →
 | `loop.mjs` | Loop planeja → recupera → age → observa → checkpoint, com `AbortSignal`. |
 | `auto.mjs` | Myn-01 Auto: escolhe rotas, roda loops e faz fallback. |
 | `stream.mjs` | Resposta rápida e streaming SSE via Pollinations, com fallback paralelo entre modelos. |
-| `plugins.mjs` | Runner genérico: navegador, API sem chave, gerador local. 62 plugins. |
+| `plugins.mjs` | Runner genérico: navegador, API sem chave, gerador local. 167 plugins. |
 | `midia.mjs` | PDF (pypdf), OCR (Tesseract), imagem (Pollinations → desenho local), voz (edge-tts), vídeo (ffmpeg). |
 | `historico.mjs` | JSONL + cache com TTL. |
 | `saude.mjs` | Scoreboard: score 0,45*sucesso + 0,35*velocidade + 0,2*recência; circuit breaker 3-estados. |

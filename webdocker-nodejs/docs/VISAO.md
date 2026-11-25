@@ -1,12 +1,12 @@
 # WEBdocker.NODEJS — visão
 
-O projeto roda **no aparelho de quem executa**. A imagem `myn-recyla-01` leva Node.js 22, Chromium headless, gateway mediado, site, RAG, mídia, scoreboard de rotas e MCP. Nada abre janela de navegador no host e nenhuma chave é necessária.
+O projeto roda **no aparelho de quem executa**. A imagem `myn-Recicla-01` leva Node.js 22, Chromium headless, gateway mediado, site, RAG, mídia, scoreboard de rotas e MCP. Nada abre janela de navegador no host e nenhuma chave é necessária.
 
 ## Fluxo de distribuição
 ```
-build.ps1  →  docker build -t myn-recyla-01
-run.ps1    →  docker run -p 5188:5188 -v recyla-dados:/data
-save/load  →  myn-recyla-01.tar para outra máquina
+build.ps1  →  docker build -t myn-Recicla-01
+run.ps1    →  docker run -p 5188:5188 -v Recicla-dados:/data
+save/load  →  myn-Recicla-01.tar para outra máquina
 ```
 
 Cada pessoa executa o container localmente e acessa `http://127.0.0.1:5188`. As rotas ficam no dispositivo dela, não no PC de quem publicou.

@@ -8,7 +8,31 @@ const ROTAS={
  chatgpt:['ChatGPT Web','guest limitado'],
  claude:['Claude Web','pede login']
 };
-$('rota').addEventListener('change',e=>{const [t,s]=ROTAS[e.target.value]||['Myn-01','rota browser'];$('chatTitulo').textContent=t;$('chatSub').textContent=s});
+function tituloRota(id,p){
+ if(id==='auto')return ['Myn-01 Auto','escolhe rotas por capacidade e saúde'];
+ return [p?.nome||ROTAS[id]?.[0]||id, (p?.categoria||'rota')+' · '+(p?.limite||ROTAS[id]?.[1]||'browser')];
+}
+async function popularRotas(){
+ try{
+  const [pl,sa]=await Promise.all([fetch('/api/plugins').then(r=>r.json()),fetch('/api/saude').then(r=>r.json())]);
+  const score=new Map((sa.rotas||[]).map(r=>[r.id,r.score]));
+  const sel=$('rota');sel.innerHTML='';
+  const auto=document.createElement('option');auto.value='auto';auto.textContent='⚡ Myn-01 Auto · todas as rotas';sel.appendChild(auto);
+  const grupos={};for(const p of pl.plugins||[])(grupos[p.categoria]=grupos[p.categoria]||[]).push(p);
+  for(const [cat,ps] of Object.entries(grupos)){
+   const og=document.createElement('optgroup');og.label=cat;
+   for(const p of ps){const o=document.createElement('option');o.value=p.id;const sc=score.get(p.id);o.textContent=p.nome+(sc!==undefined?' · '+sc:'');og.appendChild(o)}
+   sel.appendChild(og);
+  }
+  const p=(pl.plugins||[]).find(x=>x.id===sel.value);
+  const [t,d]=tituloRota(sel.value,p);$('chatTitulo').textContent=t;$('chatSub').textContent=d;
+ }catch(e){$('chatSub').textContent='seletor com rotas padrão · '+(e.message||'')}
+}
+$('rota').addEventListener('change',e=>{
+ const p=(window.__mynPlugins||[]).find(x=>x.id===e.target.value);
+ const [t,d]=tituloRota(e.target.value,p);$('chatTitulo').textContent=t;$('chatSub').textContent=d;
+});
+popularRotas();
 const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function md(t){
  let s=esc(t);
@@ -23,7 +47,7 @@ function md(t){
   return '<div class="tabela-wrap"><table><thead><tr>'+cab.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+corpo.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
  });
  s=s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*]+)\*/g,'$1<em>$2</em>').replace(/_([^_\s][^_]*)_/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>');
- s=s.replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>');
+ s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]+)/g,(m,texto,url,url2)=>url?'<a href="'+url+'" target="_blank" rel="noopener">'+texto+'</a>':'<a href="'+url2+'" target="_blank" rel="noopener">'+url2+'</a>');
  return s.replace(/\n/g,'<br>');
 }
 function add(html,classe){const d=document.createElement('div');d.className='msg '+classe;d.innerHTML=html;$('msgs').appendChild(d);$('msgs').scrollTop=$('msgs').scrollHeight;return d}
@@ -79,10 +103,10 @@ async function enviar(pesquisa=false){
  ocupado=true;const btn=$('enviar');btn.disabled=true;
  const espera=add('<span class="pensando">pensando<span class="pontos">...</span></span>','ele');
  try{
-  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0');
+  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value);
   const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
   if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
-  const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false;
+  const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false,via='';
   for(;;){
    const {done,value}=await leitor.read();if(done)break;
    resto+=dec.decode(value,{stream:true});
@@ -91,12 +115,14 @@ async function enviar(pesquisa=false){
     const m=/^data:\s*(.+)$/m.exec(bloco);if(!m)continue;
     const ev=JSON.parse(m[1]);
     if(ev.inicio){
-     if(ev.fontes?.length||ev.ferramentas?.length){espera.innerHTML='<small class="meta-chat">🔎 '+ev.fontes.length+' fontes · '+ev.ferramentas.length+' ferramentas encontradas</small>';espera.className='msg ele'}
-     continue;
-    }
+      via=ev.via||ev.rota||'';
+      const bits=[];if(ev.rota)bits.push(esc(ev.rota));if(ev.capacidades?.length)bits.push(esc(ev.capacidades.join('/')));if(ev.fontes?.length)bits.push(ev.fontes.length+' fontes');if(ev.ferramentas?.length)bits.push(ev.ferramentas.length+' ferramentas');
+      if(bits.length){espera.innerHTML='<small class="meta-chat">'+bits.join(' · ')+'</small>';espera.className='msg ele'}
+      continue;
+     }
     if(ev.erro)throw new Error(ev.erro);
     if(ev.token){texto+=ev.token;espera.innerHTML=md(texto)+'<span class="cursorzinho">▌</span>';$('msgs').scrollTop=$('msgs').scrollHeight;iniciado=true}
-    if(ev.done){espera.innerHTML=md(texto||ev.texto||'(vazio)');$('msgs').scrollTop=$('msgs').scrollHeight}
+        if(ev.done){const v=ev.via||via;espera.innerHTML=md(texto||ev.texto||'(vazio)')+(v?'<br><small class="meta-chat">via '+esc(v)+'</small>':'');$('msgs').scrollTop=$('msgs').scrollHeight}
    }
   }
   if(!iniciado)espera.innerHTML='(sem resposta)';

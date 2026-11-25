@@ -130,7 +130,7 @@ async function gerarImagemLocal(prompt, largura, altura) {
     'if any(k in p for k in ("skate","skateboard")):',
     ' d.ellipse((cx-S*1.3,cy+S*1.35,cx-S*0.7,cy+S*1.65),fill=INK); d.ellipse((cx+S*0.7,cy+S*1.35,cx+S*1.3,cy+S*1.65),fill=INK)',
     ' d.line((cx-S*1.5,cy+S*1.3,cx+S*1.5,cy+S*1.3),fill=CORAL,width=7)',
-    'd.text((22,20),"MYN / RECYLA-01",fill=CREAM)',
+    'd.text((22,20),"MYN / Recicla-01",fill=CREAM)',
     'label=prompt[:70]',
     'd.rectangle((8,h-38,min(w-8,22+len(label)*7),h-8),fill=CREAM)',
     'd.text((18,h-30),label,fill=INK)',

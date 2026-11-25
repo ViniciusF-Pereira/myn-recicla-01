@@ -16,7 +16,7 @@ async function semear() {
     const docs = [
       { id: 'plugins', titulo: 'Catálogo de plugins', texto: (plugins.plugins || []).map((p) => p.nome + ' ' + p.categoria + ' ' + p.limite).join('\n') },
       { id: 'saude', titulo: 'Saúde das rotas', texto: (saude.rotas || []).map((r) => r.id + ' score ' + r.score + ' ' + r.circuito).join('\n') },
-      { id: 'myn', titulo: 'Myn Recyla', texto: 'Myn Recyla/01: agente web-only sobre rotas gratuitas de navegador e WebGPU. Sem chave, sem serviço pago, sem execução local.' },
+      { id: 'myn', titulo: 'Myn Recicla', texto: 'Myn Recicla/01: agente web-only sobre rotas gratuitas de navegador e WebGPU. Sem chave, sem serviço pago, sem execução local.' },
     ];
     await ragStore.indexar(docs);
   } catch { /* RAG segue vazio até a API voltar */ }

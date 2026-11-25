@@ -1,7 +1,7 @@
-/** Cria o goal mestre que dirige a entrega completa do Myn Recyla, web-only + WebGPU. */
+/** Cria o goal mestre que dirige a entrega completa do Myn Recicla, web-only + WebGPU. */
 const base = process.env.MYN_API_BASE || 'http://127.0.0.1:5188';
 const objetivo = process.env.MYN_GOAL_OBJETIVO || [
-  'ENTREGAR TUDO: transformar o Myn Recyla num agente open-source tipo OpenCode/Claude Code/Codex,',
+  'ENTREGAR TUDO: transformar o Myn Recicla num agente open-source tipo OpenCode/Claude Code/Codex,',
   'SOMENTE rotas free de navegador online + WebGPU, nada de PC local.',
   'F0 fundação web (cortar Node do browser, tools virtuais, rapido sem local);',
   'F1 orquestração (scoreboard no cliente, adaptadores online, gateway/relay hospedado);',

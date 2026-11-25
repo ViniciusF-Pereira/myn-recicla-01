@@ -1,4 +1,4 @@
-# Avaliação automática — Myn Recyla/01
+# Avaliação automática — Myn Recicla/01
 
 Gerada por `node scripts/avaliar.mjs` em 2026-11-24T05:04:59.779Z.
 
@@ -7,7 +7,7 @@ Gerada por `node scripts/avaliar.mjs` em 2026-11-24T05:04:59.779Z.
 | Bateria | Status | Tempo | Detalhe |
 |---|---|---|---|
 | site | OK | 61ms | HTTP 200 |
-| plugins | OK | 6ms | 62 plugins, 13 google |
+| plugins | OK | 6ms | 167 plugins, 13 google |
 | saude | OK | 3ms | 14 rotas pontuadas |
 | google | OK | 32080ms | sem conta · 13 rotas |
 | historico | OK | 5ms | 5 itens |

@@ -1111,6 +1111,1740 @@
       "fonte": "https://gemini.google.com/app",
       "envio": "composer + Enter",
       "prompt": "Create images: {input}"
+    },
+    {
+      "id": "aifreeforever",
+      "nome": "AIFreeForever",
+      "categoria": "chat",
+      "url": "https://aifreeforever.com/search",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "61 modelos chat",
+        "31 imagem",
+        "10 vozes",
+        "sem login"
+      ],
+      "limite": "sem cap diario; anuncio curto e espera entre geracoes",
+      "fonte": "https://aifreeforever.com/search",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "private-ai-tools",
+      "nome": "Private AI Tools",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "152 ferramentas no navegador",
+        "MCP remoto",
+        "sem upload"
+      ],
+      "limite": "free; MCP em https://private-ai-tools.com/mcp",
+      "fonte": "https://private-ai-tools.com/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "zalt-tools",
+      "nome": "Zalt Tools",
+      "categoria": "utilidade",
+      "url": "https://zalt.me/tools/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "64 ferramentas WebGPU",
+        "chat WebLLM",
+        "transcricao Whisper",
+        "TTS Kokoro"
+      ],
+      "limite": "free; modelos baixados na primeira vez",
+      "fonte": "https://zalt.me/blog/64-free-ai-tools",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "venice-ai",
+      "nome": "Venice.ai",
+      "categoria": "chat",
+      "url": "https://venice.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "chat privado",
+        "guest mode",
+        "imagens"
+      ],
+      "limite": "guest com cap menor que conta free",
+      "fonte": "https://taptoagent.com/agents.html",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "nokeep",
+      "nome": "Nokeep",
+      "categoria": "chat",
+      "url": "https://nokeep.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "chat + imagens + video anonimos",
+        "historico no dispositivo"
+      ],
+      "limite": "25 mensagens, 2 imagens e 1 video por dia",
+      "fonte": "https://taptoagent.com/agents.html",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "andi",
+      "nome": "Andi",
+      "categoria": "pesquisa",
+      "url": "https://andi.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "busca com respostas diretas",
+        "fontes"
+      ],
+      "limite": "free via navegador",
+      "fonte": "https://taptoagent.com/agents.html",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "chatgot",
+      "nome": "ChatGot",
+      "categoria": "chat",
+      "url": "https://www.chatgot.io/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "multi-modelo",
+        "PDF Q&A",
+        "imagens"
+      ],
+      "limite": "free com limites; alguns modelos pedem login",
+      "fonte": "https://taptoagent.com/agents.html",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "craiyon",
+      "nome": "Craiyon",
+      "categoria": "imagem",
+      "url": "https://www.craiyon.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "9 imagens por prompt",
+        "sem cadastro"
+      ],
+      "limite": "ilimitado, ~60 s, watermark e anuncios",
+      "fonte": "https://www.thedigitaledgeai.com/2026/10/free-ai-tools-without-login.html",
+      "envio": "composer + Enter",
+      "prompt": "Gere imagens: {input}"
+    },
+    {
+      "id": "p-image-oss",
+      "nome": "P-Image-OSS",
+      "categoria": "imagem",
+      "url": "https://p-image-oss.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "imagens alta resolucao",
+        "edicao com referencia"
+      ],
+      "limite": "free sem cadastro; verifique limites",
+      "fonte": "https://taptoagent.com/agents.html",
+      "envio": "composer + Enter",
+      "prompt": "Gere uma imagem: {input}"
+    },
+    {
+      "id": "meta-ai",
+      "nome": "Meta AI",
+      "categoria": "chat",
+      "url": "https://www.meta.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "chat",
+        "busca web",
+        "geracao de imagem"
+      ],
+      "limite": "web sem login; uso intenso pode pedir conta",
+      "fonte": "https://testedintelligence.com/free-ai-tools-directory/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "you-com",
+      "nome": "You.com",
+      "categoria": "pesquisa",
+      "url": "https://you.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "busca com fontes",
+        "imagens",
+        "escrita"
+      ],
+      "limite": "free com cotas iniciais",
+      "fonte": "https://testedintelligence.com/free-ai-tools-directory/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "poe",
+      "nome": "Poe",
+      "categoria": "chat",
+      "url": "https://poe.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "multiplos bots",
+        "modelos"
+      ],
+      "limite": "~3000 pontos/dia; flagship 250-350 pts/msg",
+      "fonte": "https://testedintelligence.com/free-ai-tools-directory/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "ttsmaker",
+      "nome": "TTSMaker",
+      "categoria": "voz",
+      "url": "https://ttsmaker.com/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "TTS multilíngue",
+        "download ilimitado",
+        "uso comercial"
+      ],
+      "limite": "20.000 caracteres/semana, ~1000 por conversao",
+      "fonte": "https://testedintelligence.com/free-ai-tools-directory/",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "meshy-3d",
+      "nome": "Meshy 3D Text",
+      "categoria": "imagem",
+      "url": "https://www.meshy.ai/",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "texto → modelo 3D",
+        "export"
+      ],
+      "limite": "free sem conta para texto 3D",
+      "fonte": "https://taptoagent.com/agents.html",
+      "envio": "composer + Enter",
+      "prompt": "Crie um modelo 3D: {input}"
+    },
+    {
+      "id": "freetoolsforweb",
+      "nome": "Free Tools for Web",
+      "categoria": "utilidade",
+      "url": "https://freetoolsforweb.com/free-ai-tools",
+      "login": false,
+      "chave": false,
+      "acao": "chat",
+      "capacidades": [
+        "OCR",
+        "upscale",
+        "remover fundo",
+        "voz",
+        "separar vocals"
+      ],
+      "limite": "modelos no navegador; primeiro download 4-100 MB",
+      "fonte": "https://freetoolsforweb.com/free-ai-tools",
+      "envio": "composer + Enter",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-credits",
+      "nome": "Private AI Tools · Credits / open-source",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/credits",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "bibliotecas open-source",
+        "_créditos e licenças"
+      ],
+      "limite": "sem login; permite ver o que roda nos tools",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-vectorizer",
+      "nome": "Image Vectorizer",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-vectorizer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "PNG/JPG/WebP → SVG",
+        "vetor editável"
+      ],
+      "limite": "roda no navegador; sem upload",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-compressor",
+      "nome": "Image Compressor",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-compressor",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "comprimir JPG/PNG/WebP em lote"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-resizer",
+      "nome": "Image Resizer",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-resizer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "redimensionar em lote",
+        "presets redes"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-background-remover",
+      "nome": "Background Remover",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/background-remover",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "remover fundo com IA",
+        "PNG transparente"
+      ],
+      "limite": "modelo baixado na 1ª vez; sem upload",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-upscaler",
+      "nome": "Image Upscaler",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-upscaler",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "upscale 2×/3×/4× com IA"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-eraser",
+      "nome": "Image Eraser",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-eraser",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "apagar objetos/texto com IA"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-segment-anything",
+      "nome": "Segment Anything",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/segment-anything",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "recortar objeto com clique"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-colorizer",
+      "nome": "Image Colorizer",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-colorizer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "colorizar preto e branco"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-face-enhancer",
+      "nome": "AI Face Enhancer",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/face-enhancer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "restaurar rostos borrados"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-face-swap",
+      "nome": "Face Swap",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/face-swap",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "troca de rostos"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-ai-image-detector",
+      "nome": "AI Image Detector",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/ai-image-detector",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "detectar imagem gerada por IA"
+      ],
+      "limite": "Content Credentials + forense",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-logo-maker",
+      "nome": "Logo Maker",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/logo-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "criar logo",
+        "export SVG/PNG/favicon"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-mockup-generator",
+      "nome": "Mockup Generator",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/mockup-generator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "mockups 3D",
+        "até 4K"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-watermark-maker",
+      "nome": "Watermark Maker",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/watermark-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "marca d’água em lote"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-font-identifier",
+      "nome": "Font Identifier",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/font-identifier",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "identificar fonte em imagem"
+      ],
+      "limite": "1576 fontes Google",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-passport-photo",
+      "nome": "Passport Photo Maker",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/passport-photo-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "foto passaporte"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-photo-collage",
+      "nome": "Photo Collage Maker",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/photo-collage-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "colagens grid/mosaico"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-video-compressor",
+      "nome": "Video Compressor",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/video-compressor",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "comprimir/cortar vídeo"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-video-editor",
+      "nome": "Video Editor",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/video-editor",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "timeline multi-faixa",
+        "legendas e música"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-video-converter",
+      "nome": "Video Converter",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/video-converter",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "MP4/WebM/MOV/MKV"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-lut-generator",
+      "nome": "LUT Generator",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/lut-generator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        ".cube e HALD"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-video-upscaler",
+      "nome": "Video Upscaler",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/video-upscaler",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "upscale 2×/4× até 4K"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-video-fps",
+      "nome": "Video FPS Increaser",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/video-fps-increaser",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "interpolação 60/120 fps"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-video-merger",
+      "nome": "Video Merger",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/video-merger",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "juntar vídeos/áudio"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-video-to-gif",
+      "nome": "Video to GIF",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/video-to-gif",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "vídeo → GIF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-gif-maker",
+      "nome": "GIF Maker",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/gif-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "imagens → GIF/MP4"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-subtitle-generator",
+      "nome": "Subtitle Generator",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/subtitle-generator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "legendas ~100 idiomas",
+        "Whisper no browser"
+      ],
+      "limite": "modelo baixado na 1ª vez",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-subtitle-editor",
+      "nome": "Subtitle Editor",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/subtitle-editor",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "SRT/VTT/ASS"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-screen-recorder",
+      "nome": "Screen Recorder",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/screen-recorder",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "gravar tela/janela/aba"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-green-screen",
+      "nome": "Green Screen Video Editor",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/green-screen",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "chroma key no browser"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-teleprompter",
+      "nome": "Teleprompter",
+      "categoria": "video",
+      "url": "https://private-ai-tools.com/teleprompter",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "teleprompter com webcam"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-audio-converter",
+      "nome": "Audio Converter",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/audio-converter",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "MP3/M4A/WAV/FLAC/OGG"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-audio-trimmer",
+      "nome": "Audio Trimmer",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/audio-trimmer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "cortar áudio com fades"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-music-maker",
+      "nome": "Music Maker",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/music-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "drum machine",
+        "piano roll",
+        "synths"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-sheet-music",
+      "nome": "Sheet Music Maker",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/sheet-music-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "partituras",
+        "PDF/MusicXML/MIDI"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-online-piano",
+      "nome": "Online Piano",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/online-piano",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "piano 88 teclas",
+        "MIDI"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-vocal-remover",
+      "nome": "Vocal Remover",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/vocal-remover",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "separar vocais",
+        "Spleeter"
+      ],
+      "limite": "modelo ~63 MB na 1ª vez",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-noise-remover",
+      "nome": "Audio Noise Remover",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/noise-remover",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "limpar ruído RNNoise"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-speech-to-text",
+      "nome": "Speech to Text",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/speech-to-text",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "Whisper ~100 idiomas",
+        "TXT/SRT/JSON"
+      ],
+      "limite": "modelo baixado na 1ª vez",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-text-to-speech",
+      "nome": "Text to Speech",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/text-to-speech",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "Kokoro",
+        "28 vozes",
+        "MP3/WAV"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-voice-recorder",
+      "nome": "Voice Recorder",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/voice-recorder",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "gravar voz MP3/WAV/WebM"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-audio-enhancer",
+      "nome": "Audio Enhancer",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/audio-enhancer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "limpar e normalizar podcast"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-loudness-meter",
+      "nome": "Loudness Meter",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/loudness-meter",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "LUFS/EBU R128"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-ai-music-detector",
+      "nome": "AI Music Detector",
+      "categoria": "voz",
+      "url": "https://private-ai-tools.com/ai-music-detector",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "detectar Suno/Udio"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-pdf-editor",
+      "nome": "PDF Editor",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/pdf-editor",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "editar PDF",
+        "formulários",
+        "redaction"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-document-compare",
+      "nome": "Document Compare",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/document-compare",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        " comparar PDF/Word/texto"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-pdf-to-word",
+      "nome": "PDF to Word",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/pdf-to-word",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "PDF → DOCX editável"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-word-to-pdf",
+      "nome": "Word to PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/word-to-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "DOCX → PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-merge-pdf",
+      "nome": "Merge PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/merge-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "juntar PDFs"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-compress-pdf",
+      "nome": "Compress PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/compress-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "comprimir PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-pdf-to-jpg",
+      "nome": "PDF to JPG",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/pdf-to-jpg",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "PDF → JPG/PNG/WebP"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-to-pdf",
+      "nome": "Image to PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/image-to-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "imagens → PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-split-pdf",
+      "nome": "Split PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/split-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "dividir PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-ocr",
+      "nome": "Private OCR",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/ocr",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "OCR de imagem/PDF",
+        "14 idiomas"
+      ],
+      "limite": "Tesseract 5 no browser, ~7 MB",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-pdf-to-excel",
+      "nome": "PDF to Excel",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/pdf-to-excel",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "tabelas PDF → Excel/CSV"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-sign-pdf",
+      "nome": "Sign PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/sign-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "assinar PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-redact-pdf",
+      "nome": "PDF Redactor",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/redact-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "ocultar dados"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-html-to-pdf",
+      "nome": "HTML to PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/html-to-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "HTML → PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-csv-to-pdf",
+      "nome": "CSV to PDF",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/csv-to-pdf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "CSV → PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-resume-builder",
+      "nome": "Resume Builder",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/resume-builder",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "currículo ATS"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-invoice-generator",
+      "nome": "Invoice Generator",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/invoice-generator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "faturas/recibos",
+        "PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-invoice-scanner",
+      "nome": "Invoice Scanner",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/invoice-scanner",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "extrair Notas fiscais"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-document-translator",
+      "nome": "Document Translator",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/document-translator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "traduzir DOCX/PPTX/PDF/HTML"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-markdown-editor",
+      "nome": "Markdown Editor",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/markdown-editor",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "Markdown → PDF/Word/HTML"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-json-formatter",
+      "nome": "JSON Formatter",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/json-formatter",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "formatar/validar JSON"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-data-format-converter",
+      "nome": "Data Format Converter",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/data-format-converter",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "JSON/YAML/TOML/XML/CSV/INI"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-base64",
+      "nome": "Base64 Encoder/Decoder",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/base64-encoder-decoder",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "texto/arquivos ↔ base64"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-url-encoder",
+      "nome": "URL Encoder/Decoder",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/url-encoder-decoder",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "codificar URLs"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-hash-generator",
+      "nome": "Hash Generator",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/hash-generator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "MD5/SHA-256/BLAKE3/HMAC"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-uuid-generator",
+      "nome": "UUID Generator",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/uuid-generator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "UUID v4/v7/ULID/NanoID"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-regex-tester",
+      "nome": "Regex Tester",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/regex-tester",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "testar regex JS"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-sql-formatter",
+      "nome": "SQL Formatter",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/sql-formatter",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "formatar SQL"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-jwt-decoder",
+      "nome": "JWT Decoder",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/jwt-decoder",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "decodificar/verificar JWT"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-invisible-scanner",
+      "nome": "Invisible Character & Prompt Injection Scanner",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/invisible-character-detector",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "detectar zero-width e prompt injection"
+      ],
+      "limite": "segurança; roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-json-schema-validator",
+      "nome": "JSON Schema Validator",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/json-schema-validator",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "validar JSON Schema",
+        "MCP/OpenAI/Anthropic tools"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-mcp-tester",
+      "nome": "MCP Server Tester",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/mcp-server-tester",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "testar MCP remoto",
+        "JSON-RPC"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-binary-inspector",
+      "nome": "Binary File Inspector",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/binary-file-inspector",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "EXE/DLL/ELF/Mach-O/WASM"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-disassembler",
+      "nome": "Online Disassembler",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/online-disassembler",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "x86/ARM/RISC-V/WASM"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-data-explorer",
+      "nome": "Data Explorer",
+      "categoria": "api",
+      "url": "https://private-ai-tools.com/data-explorer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "CSV/Excel/JSON/Parquet/SQLite",
+        "SQL"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-gis-viewer",
+      "nome": "GIS Viewer",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/gis-viewer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "Shapefile/GeoJSON/KML/GPX"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-chemical-drawer",
+      "nome": "Chemical Structure Drawer",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/chemical-structure-drawer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "SMILES",
+        "3D"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-plot-digitizer",
+      "nome": "Plot Digitizer",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/plot-digitizer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "extrair dados de gráficos"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-curve-fitting",
+      "nome": "Curve Fitting & Statistics",
+      "categoria": "utilidade",
+      "url": "https://private-ai-tools.com/curve-fitting",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "IC50",
+        "t-test",
+        "ANOVA"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-glb-to-stl",
+      "nome": "GLB to STL",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/glb-to-stl",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "GLB/OBJ/FBX/STEP → STL/3MF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-3d-viewer",
+      "nome": "3D Model Viewer",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/3d-model-viewer",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "GLB/STL/OBJ/FBX"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-to-stl",
+      "nome": "Image to STL (Lithophane)",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-to-stl",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "foto → lithophane 3D"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-image-to-dxf",
+      "nome": "Image to DXF",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/image-to-dxf",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "imagem/texto → DXF/SVG/PDF"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-sticker-maker",
+      "nome": "Sticker Maker",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/sticker-maker",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "adesivo die-cut PNG"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
+    },
+    {
+      "id": "pat-laser-engraving",
+      "nome": "Photo to Laser Engraving",
+      "categoria": "imagem",
+      "url": "https://private-ai-tools.com/laser-engraving",
+      "login": false,
+      "chave": false,
+      "acao": "link",
+      "capacidades": [
+        "dither para gravação"
+      ],
+      "limite": "roda no navegador",
+      "fonte": "https://private-ai-tools.com/credits",
+      "envio": "abrir link",
+      "prompt": "{input}"
     }
   ]
 }

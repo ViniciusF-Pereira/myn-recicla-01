@@ -1,4 +1,4 @@
-/** Site Myn - Recyla/01 + API do chat -01, ligada somente ao gateway Browser. */
+/** Site Myn - Recicla/01 + API do chat -01, ligada somente ao gateway Browser. */
 import http from 'node:http';
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
@@ -57,6 +57,7 @@ const servidor = http.createServer(async (req, res) => {
     res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', 'connection': 'keep-alive', 'x-accel-buffering': 'no' });
     const mensagem = String(url.searchParams.get('message') || '').slice(0, 6000);
     const pesquisa = url.searchParams.get('pesquisa') === '1';
+    const rotaId = String(url.searchParams.get('rota') || 'auto') || 'auto';
     if (!mensagem) { res.write('data: ' + JSON.stringify({ erro: 'mensagem vazia' }) + '\n\n'); res.end(); return; }
     let prompt = mensagem;
     let fontes = [];
@@ -81,10 +82,18 @@ const servidor = http.createServer(async (req, res) => {
         }
       } catch { /* segue sem contexto */ }
     }
-    res.write('data: ' + JSON.stringify({ inicio: true, fontes, ferramentas }) + '\n\n');
+    const plugin = rotaId !== 'auto' ? plugins.find((p) => p.id === rotaId) : null;
+    res.write('data: ' + JSON.stringify({ inicio: true, fontes, ferramentas, rota: rotaId,
+      via: plugin ? 'plugin:' + plugin.id : 'auto', capacidades: classificarTarefa(mensagem) }) + '\n\n');
     try {
-      for await (const ev of streamResposta(prompt, 30000, fallbackTexto)) {
-        res.write('data: ' + JSON.stringify(ev) + '\n\n');
+      if (plugin) {
+        const d = await executarPlugin({ plugin, entrada: mensagem, gateway, trava, log: (x) => console.log('[stream-plugin]', JSON.stringify(x)) });
+        registrarSaude(plugin.id, { ok: d.ok, ms: d.ms, erro: d.erro || (d.ok ? '' : 'sem_resposta') });
+        const texto = d.ok ? d.resposta : ('Falha na rota ' + plugin.nome + ': ' + (d.erro || d.resposta));
+        for (let i = 0; i < texto.length; i += 24) res.write('data: ' + JSON.stringify({ token: texto.slice(i, i + 24), via: 'plugin:' + plugin.id }) + '\n\n');
+        res.write('data: ' + JSON.stringify({ done: true, via: 'plugin:' + plugin.id, texto, sucesso: d.ok }) + '\n\n');
+      } else {
+        for await (const ev of streamResposta(prompt, 30000, fallbackTexto)) res.write('data: ' + JSON.stringify(ev) + '\n\n');
       }
     } catch (erro) {
       res.write('data: ' + JSON.stringify({ erro: String(erro.message).slice(0, 160) }) + '\n\n');
@@ -153,9 +162,14 @@ const servidor = http.createServer(async (req, res) => {
       let via = cached?.via || null;
       if (!resposta) {
         if (id === 'auto') {
-          const rapida = await respostaRapida(mensagem, 8000);
-          if (rapida.ok) { resposta = rapida.texto; via = rapida.via; }
-          else via = 'api-indisponivel';
+          const orq = await orquestrar({ tarefa: mensagem, gateway, trava, plugins, max: 2, rapido: true,
+            log: (x) => console.log('[auto-chat]', JSON.stringify(x)) });
+          const vencedor = (orq.resultados || []).filter((r) => r.ok && r.rota !== 'deterministico')
+            .sort((a, b) => (b.nota || 0) - (a.nota || 0))[0];
+          detalhes = { rotaVencedora: vencedor?.rota || null, sucesso: Boolean(vencedor),
+            tentativas: (orq.resultados || []).map((t) => t.rota), capacidades: orq.capacidades };
+          if (vencedor) { resposta = vencedor.resposta; via = 'auto:' + vencedor.rota; }
+          else via = 'auto-sem-rota';
         }
         if (!resposta) {
           // Fallback: uma única rota, teto de 30 s — nunca 3 rotas × 60 s.
@@ -449,4 +463,4 @@ const servidor = http.createServer(async (req, res) => {
   } catch { res.writeHead(404); res.end('não encontrado'); }
 });
 
-servidor.listen(PORTA, HOST, () => console.log('Myn - Recyla/01 em http://' + HOST + ':' + PORTA));
+servidor.listen(PORTA, HOST, () => console.log('Myn - Recicla/01 em http://' + HOST + ':' + PORTA));
