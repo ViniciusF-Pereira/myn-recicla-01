@@ -78,3 +78,4 @@ export async function* streamResposta(mensagem, prazoMs = 30000, fallbackTexto =
   for (let i = 0; i < texto.length; i += 24) yield { token: texto.slice(i, i + 24), via: rapida.via || 'fallback' };
   yield { done: true, via: rapida.via || 'fallback', texto };
 }
+export function modeloPadraoStream(){return "pollinations:openai"}
