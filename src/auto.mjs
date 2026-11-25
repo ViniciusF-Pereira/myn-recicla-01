@@ -48,3 +48,4 @@ export async function executarAuto({ objetivo, gateway, config, ferramentas, tra
   }
   return { modo: 'auto', objetivo, rotaVencedora: null, tentativas, fontes: ctx.fontes, sucesso: false };
 }
+export function rotasDoAuto(r){return (r?.tentativas||[]).map(t=>t.rota)}
