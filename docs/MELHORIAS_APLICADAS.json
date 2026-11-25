@@ -1,5 +1,6 @@
 [
   "script-verificar",
   "script-relatorio",
-  "script-limpar"
+  "script-limpar",
+  "src-versao"
 ]
