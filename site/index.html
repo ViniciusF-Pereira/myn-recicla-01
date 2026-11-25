@@ -411,13 +411,17 @@ function bcAdicionar(ev){
  while(bcLinhas.children.length>60)bcLinhas.removeChild(bcLinhas.firstChild);
  bcLinhas.scrollTop=bcLinhas.scrollHeight;
 }
+let bcModeloAtual='';
 function bcAtualizarModelo(ev){
- let texto=null;
  if(ev.passos){
   const ids=ev.passos.map(p=>String(p).split('→').pop().trim());
   const id=ids.find(x=>mapaModelos[x]);
-  if(id)texto='modelo: '+mapaModelos[id];
+  if(id)bcModeloAtual='modelo: '+mapaModelos[id];
  }
+ const via=ev.via?'via: '+ev.via:'';
+ const texto=[bcModeloAtual,via].filter(Boolean).join(' · ');
+ if(texto)bcModelo.textContent=texto;
+}
  if(!texto&&ev.via)texto='via: '+ev.via;
  if(texto)bcModelo.textContent=texto;
 }
