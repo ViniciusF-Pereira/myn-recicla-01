@@ -1,0 +1,23 @@
+name: Validar Myn Recicla
+
+on:
+  push:
+    branches: [master, worker/auto]
+  pull_request:
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm test
+
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t myn-recicla-01:ci .
+      - run: docker run --rm myn-recicla-01:ci node --test

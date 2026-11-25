@@ -5,6 +5,7 @@
   "type": "module",
   "description": "Myn mínimo, portátil, somente com rotas Browser (gateway mediado). Sem chaves de API.",
   "scripts": {
+    "test": "node --test",
     "smoke": "node scripts/smoke.mjs",
     "tarefa": "node scripts/tarefa-longa.mjs",
     "orquestrar": "node scripts/orquestrar.mjs"
