@@ -215,6 +215,17 @@ body>header,main,footer{position:relative;z-index:1}
 .plugin-btn code{font:600 .68rem var(--mono);color:var(--azul2);background:var(--azucl);padding:2px 5px;border-radius:3px;white-space:nowrap}
 .plugin-btn small{color:var(--mut);font:.7rem var(--sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card.hidden{display:none}
+.bancada{border:1px solid var(--tinta);border-radius:9px;background:var(--card);box-shadow:8px 9px 0 rgba(31,111,224,.13);overflow:hidden;margin-top:16px}
+.bc-topo{display:flex;align-items:center;gap:10px;padding:11px 15px;background:var(--azul);color:#fff;flex-wrap:wrap}
+.bc-topo b{font:600 .82rem var(--sans)}
+.bc-dot{width:9px;height:9px;border-radius:50%;background:#7dffb2;box-shadow:0 0 0 4px rgba(125,255,178,.25);animation:bc-pulso 1.4s infinite}
+@keyframes bc-pulso{50%{opacity:.35}}
+.bc-modelo{margin-left:auto;font:600 .66rem var(--mono);background:rgba(255,255,255,.14);padding:5px 9px;border-radius:99px}
+.bc-linhas{height:210px;overflow:auto;padding:10px 14px;background:#0d1420;color:#dbe6f0;font:600 .7rem/1.6 var(--mono)}
+.bc-linha{padding:4px 0;border-bottom:1px solid rgba(255,255,255,.07);white-space:pre-wrap;overflow-wrap:anywhere}
+.bc-linha.ok{border-left:3px solid #37d67a;padding-left:8px}
+.bc-linha.git{border-left:3px solid #7aa2ff;padding-left:8px}
+.bc-linha.erro{border-left:3px solid #ff6b6b;color:#ffd6d6;padding-left:8px}
 </style>
 </head>
 <body>
@@ -281,6 +292,15 @@ body>header,main,footer{position:relative;z-index:1}
 </div></section>
 
 
+
+<section id="bancada"><div class="wrap">
+ <div class="st"><span class="num">01</span><h2>Bancada viva</h2><span class="traco"></span><span class="nota">worker autônomo · rotas free</span></div>
+ <p class="sub">O Myn reciclando o próprio código em tempo real: plano, rota, patch, testes, commit e merge. Cada etapa aparece aqui — incluindo o modelo acionado.</p>
+ <div class="bancada">
+  <div class="bc-topo"><span class="bc-dot"></span><b id="bcStatus">conectando...</b><span class="bc-modelo" id="bcModelo">modelo: —</span><a class="btn sec" href="playground.html" target="_blank" rel="noopener">ABRIR PLAYGROUND</a></div>
+  <div class="bc-linhas" id="bcLinhas"><div class="bc-linha">aguardando eventos...</div></div>
+ </div>
+</div></section>
 
 <section id="catalogo"><div class="wrap">
  <div class="st"><span class="num">02</span><h2>Catálogo de material reciclável</h2><span class="traco"></span><span class="nota">26 espécimes</span></div>
@@ -369,6 +389,56 @@ document.querySelectorAll('#tabsVitrine .aba').forEach(b=>b.onclick=()=>{
  document.querySelectorAll('#tabsVitrine .aba').forEach(x=>x.classList.remove('on'));b.classList.add('on');
  document.querySelectorAll('#extras .card[data-cat]').forEach(c=>c.classList.toggle('hidden',b.dataset.c!=='todos'&&c.dataset.cat!==b.dataset.c));
 });
+
+const bcLinhas=$('bcLinhas'),bcStatus=$('bcStatus'),bcModelo=$('bcModelo');
+const mapaModelos={};
+fetch('/api/modelos').then(r=>r.json()).then(d=>{for(const r of (d.rotas||[]))mapaModelos[r.id]=r.modelo}).catch(()=>{});
+function bcAdicionar(ev){
+ const d=document.createElement('div');
+ d.className='bc-linha'+(/erro|falha|revertido/.test(ev.tipo)?' erro':/git|commit|merge|branch/.test(ev.tipo)?' git':/testes|ok/.test(ev.tipo)?' ok':'');
+ let txt=ev.tipo;
+ if(ev.n)txt+=' #'+ev.n;
+ if(ev.objetivo)txt+=' · '+ev.objetivo;
+ if(ev.passos)txt+=' · '+ev.passos.join(', ');
+ if(ev.arquivo)txt+=' · '+ev.arquivo;
+ if(ev.removidos)txt+=' · limpos: '+(ev.removidos.join(', ')||'nenhum');
+ if(ev.checagens)txt+=' · '+ev.checagens.map(c=>c.arquivo+':'+(c.ok?'ok':'FALHA')).join(' ');
+ if(ev.merge!==undefined)txt+=' · merge='+ev.merge;
+ if(ev.motivo)txt+=' · '+ev.motivo;
+ if(ev.erro)txt+=' · '+ev.erro;
+ d.textContent=ev.t+' · '+txt;
+ bcLinhas.appendChild(d);
+ while(bcLinhas.children.length>60)bcLinhas.removeChild(bcLinhas.firstChild);
+ bcLinhas.scrollTop=bcLinhas.scrollHeight;
+}
+function bcAtualizarModelo(ev){
+ let texto=null;
+ if(ev.passos){
+  const ids=ev.passos.map(p=>String(p).split('→').pop().trim());
+  const id=ids.find(x=>mapaModelos[x]);
+  if(id)texto='modelo: '+mapaModelos[id];
+ }
+ if(!texto&&ev.via)texto='via: '+ev.via;
+ if(texto)bcModelo.textContent=texto;
+}
+async function bcConectar(){
+ try{
+  const r=await fetch('/api/worker/stream');
+  const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
+  for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/
+
+/);resto=blocos.pop()||'';
+   for(const b of blocos){const m=/^data:s*(.+)$/m.exec(b);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}
+    bcAdicionar(ev);bcAtualizarModelo(ev);
+    if(ev.tipo==='conectado'||ev.tipo==='iniciado')bcStatus.textContent='ao vivo · ciclo '+(ev.status?.ciclos??0);
+    if(ev.tipo==='ciclo_inicio')bcStatus.textContent='trabalhando · ciclo '+ev.n;
+    if(ev.tipo==='finalizado'||ev.tipo==='parando')bcStatus.textContent='parado · '+ev.ciclos+' ciclos';
+   }
+  }
+ }catch(e){bcStatus.textContent='desconectado · '+e.message}
+}
+bcConectar();
+
 </script>
 </body>
 </html>
