@@ -23,7 +23,7 @@ function normalizarPollinations(lista) {
 export function normalizarOpenRouter(dados) {
   return (dados?.data || [])
     .filter((m) => {
-      const gratuito = String(m.id).endsWith(':free') || (m.pricing?.prompt === '0' && m.pricing?.completion === '0');
+      const gratuito = String(m.id).endsWith(':free') || (String(m.pricing?.prompt) === '0' && String(m.pricing?.completion) === '0');
       const naoGoogle = !/google|gemini/i.test(String(m.id) + ' ' + String(m.name));
       return gratuito && naoGoogle;
     })
