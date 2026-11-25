@@ -8,5 +8,6 @@
   "doc-limites",
   "doc-indice",
   "config-app",
-  "script-validar-config"
+  "script-validar-config",
+  "script-exportar-db"
 ]
