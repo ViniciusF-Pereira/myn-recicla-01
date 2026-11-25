@@ -19,7 +19,8 @@ const CSS = `
 .wa-msgs{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:9px;background:repeating-linear-gradient(0deg,rgba(31,111,224,.025) 0 1px,transparent 1px 5px)}
 .wa-msg{max-width:88%;padding:9px 11px;border-radius:12px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:.86rem}.wa-msg.user{align-self:flex-end;background:#1f6fe0;color:#fff;border-bottom-right-radius:3px}.wa-msg.bot{align-self:flex-start;background:#fff;border:1px solid #cfe0ea;border-bottom-left-radius:3px}.wa-msg.erro{background:#fff0ec;border-color:#e7a18f;color:#8a2f1c}
 .wa-tool{align-self:center;background:#17324d;color:#cdefff;border-radius:99px;padding:5px 10px;font:600 .66rem ui-monospace,monospace;display:flex;align-items:center;gap:7px}.wa-tool:after{content:"...";letter-spacing:2px;animation:wa-pontos 1s infinite}
-.wa-form{display:flex;gap:7px;padding:10px;border-top:1px solid #d7e5ef;background:#fff}.wa-form input{flex:1;min-width:0;border:1px solid #b9cedd;border-radius:9px;padding:9px 10px;outline:none;background:#f8fcff;color:#17324d}.wa-form input:focus{border-color:#1f6fe0;box-shadow:0 0 0 3px rgba(31,111,224,.12)}.wa-form button{border:0;border-radius:9px;padding:8px 11px;cursor:pointer;background:#1f6fe0;color:#fff;font-weight:700}.wa-form button.sec{background:#eaf5ff;color:#1f6fe0;border:1px solid #b9cedd}.wa-form button:disabled{opacity:.45;cursor:not-allowed}
+.wa-acoes{display:flex;gap:5px;padding:7px 10px;overflow:auto;border-bottom:1px solid #d7e5ef;background:#fff}.wa-acoes button{flex:0 0 auto;border:1px solid #b9cedd;background:#eaf5ff;color:#174a7c;border-radius:99px;padding:5px 9px;cursor:pointer;font:600 .66rem ui-monospace,monospace}.wa-acoes button:hover{background:#1f6fe0;color:#fff}
+.wa-form{display:flex;gap:7px;padding:10px;border-top:1px solid #d7e5ef;background:#fff}.wa-form input{flex:1;min-width:0;border:1px solid #b9cedd;border-radius:9px;padding:9px 10px;outline:none;background:#f8fcff;color:#17324d}.wa-form input:focus{border-color:#1f6fe0;box-shadow:0 0 0 3px rgba(31,111,224,.12)}.wa-form button{border:0;border-radius:9px;padding:8px 11px;cursor:pointer;background:#1f6fe0;color:#fff;font-weight:700}.wa-form button.sec{background:#eaf5ff;color:#1f6fe0;border:1px solid #b9cedd}.wa-form button.cancel{background:#fff0ec;color:#a13c28}.wa-form button:disabled{opacity:.45;cursor:not-allowed}
 .wa-root .wa-oculto{display:none!important}
 @keyframes wa-flutuar{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
 @keyframes wa-pulso{0%{transform:scale(.85);opacity:.65}100%{transform:scale(1.45);opacity:0}}
@@ -35,7 +36,8 @@ let ferramentas = [];
 let apresentado = sessionStorage.getItem('work-apresentado') === '1';
 let somAtivo = localStorage.getItem('work-som') !== '0';
 let vozAtiva = localStorage.getItem('work-voz') !== '0';
-let audioCtx = null, reconhecimento = null, ocupado = false;
+let audioCtx = null, reconhecimento = null, ocupado = false, controleAtual = null;
+const HISTORICO = 'work-chat-v1';
 
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
@@ -76,8 +78,8 @@ function apresentar(forcar = false) {
   if (!document.querySelector('#waMsgs .wa-msg.bot')) msg(INTRO, 'bot');
 }
 
-async function rpc(metodo, params = {}) {
-  const r = await fetch('/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: metodo, params }), signal: AbortSignal.timeout(180000) });
+async function rpc(metodo, params = {}, signal) {
+  const r = await fetch('/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: metodo, params }), signal: signal || AbortSignal.timeout(180000) });
   const d = await r.json();
   if (d.error) throw new Error(d.error.message || 'erro MCP');
   return d.result;
@@ -86,7 +88,7 @@ async function rpc(metodo, params = {}) {
 function abrir() { apresentar(); document.getElementById('work-assistente')?.classList.add('aberto'); document.getElementById('waPainel')?.classList.add('on'); document.getElementById('waBolha')?.classList.add('wa-oculto'); setTimeout(() => document.getElementById('waInput')?.focus(), 80); tocarSom(); }
 function fechar() { document.getElementById('work-assistente')?.classList.remove('aberto'); document.getElementById('waPainel')?.classList.remove('on'); document.getElementById('waBolha')?.classList.remove('wa-oculto'); }
 
-function msg(texto, tipo = 'bot') {
+function msg(texto, tipo = 'bot', persistir = true) {
   const area = document.getElementById('waMsgs');
   const el = document.createElement('div'); el.className = 'wa-msg ' + tipo;
   const imagens = String(texto).match(/!\[[^\]]*\]\(([^)]+)\)/g) || [];
@@ -97,6 +99,11 @@ function msg(texto, tipo = 'bot') {
     if (url && /^https?:\/\//.test(url)) { const img = document.createElement('img'); img.src = url; img.alt = 'mídia gerada'; img.style.cssText = 'max-width:100%;border-radius:8px;margin-top:7px'; el.appendChild(img); }
   }
   area?.appendChild(el); area?.scrollTo({ top: area.scrollHeight, behavior: 'smooth' });
+  if (persistir) try {
+    const h = JSON.parse(localStorage.getItem(HISTORICO) || '[]');
+    h.push({ tipo, texto: limpo });
+    localStorage.setItem(HISTORICO, JSON.stringify(h.slice(-40)));
+  } catch { /* armazenamento indisponível */ }
 }
 
 function estado(texto, modo = 'online') {
@@ -112,7 +119,7 @@ async function ferramenta(nome, args = {}) {
   estado('🔧 ' + nome, 'pensando');
   const chip = document.createElement('div'); chip.className = 'wa-tool'; chip.textContent = '🔧 ' + nome;
   document.getElementById('waMsgs')?.appendChild(chip);
-  const result = await rpc('tools/call', { name: nome, arguments: args });
+  const result = await rpc('tools/call', { name: nome, arguments: args }, controleAtual?.signal);
   chip.remove();
   const texto = result?.content?.map((c) => c.text || '').join('\n') || 'Concluído.';
   if (result?.isError) throw new Error(texto);
@@ -148,15 +155,24 @@ function decidir(texto) {
 
 async function enviar(texto) {
   if (!texto.trim() || ocupado) return;
-  ocupado = true; document.getElementById('waSend').disabled = true;
+  ocupado = true; controleAtual = new AbortController();
+  document.getElementById('waSend').disabled = true;
+  document.getElementById('waCancelar').disabled = false;
   msg(texto, 'user');
   try {
     const pagina = interagirPagina(texto);
     if (pagina) { estado('🧭 interagir_pagina', 'pensando'); await new Promise((r) => setTimeout(r, 450)); msg(pagina); falar(pagina); }
     else { const d = decidir(texto); const resposta = await ferramenta(d.nome, d.args); msg(resposta); falar(resposta); }
     estado('online · ' + ferramentas.length + ' ferramentas MCP');
-  } catch (e) { msg('Não consegui concluir: ' + e.message, 'erro'); estado('offline · ' + e.message); }
-  finally { ocupado = false; document.getElementById('waSend').disabled = false; document.getElementById('waInput').focus(); }
+  } catch (e) {
+    if (controleAtual?.signal.aborted) { msg('Chamada cancelada.', 'erro'); estado('online · ' + ferramentas.length + ' ferramentas MCP'); }
+    else { msg('Não consegui concluir: ' + e.message, 'erro'); estado('offline · ' + e.message); }
+  } finally {
+    ocupado = false; controleAtual = null;
+    document.getElementById('waSend').disabled = false;
+    document.getElementById('waCancelar').disabled = true;
+    document.getElementById('waInput').focus();
+  }
 }
 
 function iniciarVoz() {
@@ -181,14 +197,27 @@ export function iniciarAssistente() {
    </button>
    <button class="wa-bolha" id="waBolha"><b>WORK · assistente MCP</b><span>Clique e fale comigo</span></button>
    <section class="wa-painel" id="waPainel" aria-label="Mini chat do WORK">
-    <div class="wa-topo"><b>WORK /01</b><small id="waTools">conectando MCP...</small><button id="waSom" title="Ativar/desativar som">${somAtivo ? '🔔' : '🔕'}</button><button id="waVoz" title="Ativar/desativar voz">${vozAtiva ? '🗣' : '🤐'}</button><button id="waFechar" aria-label="Fechar">✕</button></div>
+    <div class="wa-topo"><b>WORK /01</b><small id="waTools">conectando MCP...</small><button id="waSom" title="Ativar/desativar som">${somAtivo ? '🔔' : '🔕'}</button><button id="waVoz" title="Ativar/desativar voz">${vozAtiva ? '🗣' : '🤐'}</button><button id="waLimpar" title="Limpar conversa">🧹</button><button id="waFechar" aria-label="Fechar">✕</button></div>
     <div class="wa-status"><span class="wa-led"></span><span id="waStatus">online</span></div>
+    <div class="wa-acoes"><button data-acao="quais são as rotas?">ver rotas</button><button data-acao="pesquise worker">pesquisar</button><button data-acao="ir para catálogo">ir ao catálogo</button><button data-acao="explique o que é o Myn">sobre o Myn</button></div>
     <div class="wa-msgs" id="waMsgs"><div class="wa-msg bot">Oi, eu sou o WORK. Posso conversar, pesquisar, consultar rotas, gerar mídia e navegar pela página. As ferramentas MCP aparecem aqui enquanto eu uso.</div></div>
-    <form class="wa-form" id="waForm"><input id="waInput" autocomplete="off" placeholder="Escreva ou use o microfone..."><button type="button" class="sec" id="waMic" title="Falar">🎙</button><button id="waSend" type="submit">ENVIAR</button></form>
+    <form class="wa-form" id="waForm"><input id="waInput" autocomplete="off" placeholder="Escreva ou use o microfone..."><button type="button" class="sec" id="waMic" title="Falar">🎙</button><button type="button" class="cancel" id="waCancelar" title="Cancelar chamada" disabled>■</button><button id="waSend" type="submit">ENVIAR</button></form>
    </section>`;
   document.body.appendChild(root);
+  try {
+    const historico = JSON.parse(localStorage.getItem(HISTORICO) || '[]');
+    for (const m of historico.slice(-40)) msg(m.texto, m.tipo === 'user' ? 'user' : 'bot', false);
+  } catch { /* sem histórico */ }
   document.getElementById('waOlho').onclick = abrir; document.getElementById('waBolha').onclick = abrir; document.getElementById('waFechar').onclick = fechar;
   document.getElementById('waForm').onsubmit = (e) => { e.preventDefault(); const input = document.getElementById('waInput'); enviar(input.value); input.value = ''; };
+  document.querySelectorAll('.wa-acoes button').forEach((b) => { b.onclick = () => enviar(b.dataset.acao); });
+  document.getElementById('waCancelar').onclick = () => controleAtual?.abort();
+  document.getElementById('waLimpar').onclick = () => {
+    localStorage.removeItem(HISTORICO);
+    const area = document.getElementById('waMsgs'); area.innerHTML = '';
+    msg(INTRO, 'bot');
+    estado('online · conversa limpa');
+  };
   document.getElementById('waSom').onclick = (e) => { somAtivo = !somAtivo; localStorage.setItem('work-som', somAtivo ? '1' : '0'); e.currentTarget.textContent = somAtivo ? '🔔' : '🔕'; if (somAtivo) tocarSom(); };
   document.getElementById('waVoz').onclick = (e) => { vozAtiva = !vozAtiva; localStorage.setItem('work-voz', vozAtiva ? '1' : '0'); e.currentTarget.textContent = vozAtiva ? '🗣' : '🤐'; if (vozAtiva) falar(INTRO); else speechSynthesis?.cancel(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fechar(); });
@@ -203,7 +232,7 @@ export function iniciarAssistente() {
     setTimeout(() => { apresentar(); falar(INTRO); }, 650);
   }, { once: true });
   rpc('tools/list').then((r) => { ferramentas = r.tools || []; document.getElementById('waTools').textContent = ferramentas.length + ' tools MCP'; estado('online · ' + ferramentas.length + ' ferramentas MCP'); }).catch((e) => { document.getElementById('waTools').textContent = 'MCP offline'; estado('MCP offline · ' + e.message); });
-  window.WORK = { abrir, fechar, apresentar, ferramentas: () => ferramentas, enviar };
+  window.WORK = { abrir, fechar, apresentar, cancelar: () => controleAtual?.abort(), ferramentas: () => ferramentas, enviar };
 }
 
 iniciarAssistente();

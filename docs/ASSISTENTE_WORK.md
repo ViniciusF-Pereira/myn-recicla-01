@@ -12,6 +12,9 @@ O WORK aparece flutuante na home, no Playground, no mapa de evidências e no pai
 - entrada por voz com `SpeechRecognition` quando disponível;
 - integração real com `/mcp`;
 - indicação da ferramenta MCP em uso durante a execução;
+- botão para cancelar a chamada em andamento;
+- ações rápidas (rotas, pesquisa, catálogo, sobre);
+- histórico persistente das últimas 40 mensagens no navegador;
 - navegação local pela página (`ir para catálogo`, `abrir playground`, etc.);
 - renderização de imagem retornada pelas ferramentas de mídia.
 
@@ -37,8 +40,21 @@ Google/Gemini não fazem parte do catálogo.
 - Ferramentas de chat podem acionar provedores free externos; isso é inerente à rota escolhida.
 - O WORK não envia código-fonte para LLM no fluxo padrão dos workers.
 
+## Validação executada
+
+- `myn_rotas`: 154 plugins, saúde retornada.
+- `myn_pesquisar`: documento `docs/WORKER_INFINITO.md`.
+- `myn_chat`: identidade e resumo local.
+- `myn_imagem`: JPEG gerado.
+- `myn_audio`: MP3 gerado.
+- `myn_video`: MP4 de 3 segundos gerado.
+- `myn_documento`: TXT extraído com 20 caracteres.
+- Cancelamento: chamada lenta interrompida e estado restaurado.
+- Histórico: mensagens mantidas após recarregar a página.
+
 ## Atalhos
 
 - `WORK.abrir()` / `WORK.fechar()`
 - `WORK.enviar("texto")`
+- `WORK.cancelar()`
 - `WORK.ferramentas()`
