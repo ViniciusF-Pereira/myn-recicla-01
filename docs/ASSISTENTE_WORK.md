@@ -6,6 +6,7 @@ O WORK aparece flutuante na home, no Playground, no mapa de evidências e no pai
 
 - mascote com olhos, piscadas, movimento de pupilas, flutuação e halo;
 - som de chamada gerado por Web Audio API;
+- apresentação automática na bolha e narrada no primeiro gesto/voz ativada;
 - bolha clicável e mini-chat;
 - respostas por voz com `SpeechSynthesis` do navegador;
 - entrada por voz com `SpeechRecognition` quando disponível;
