@@ -8,11 +8,12 @@ import { readFile } from 'node:fs/promises';
 test('OpenRouter só considera gratuito quando ambas as direções são zero', () => {
   const r = normalizarOpenRouter({ data: [
     { id: 'x/free', name: 'Free', pricing: { prompt: '0', completion: '0' } },
+    { id: 'x/numeric-free', name: 'Numeric', pricing: { prompt: 0, completion: 0 } },
     { id: 'x/suffix:free', name: 'Suffix', pricing: { prompt: '0.1', completion: '0.2' } },
     { id: 'x/paid', name: 'Paid', pricing: { prompt: '0', completion: '0.0001' } },
     { id: 'google/gemini:free', name: 'Google', pricing: { prompt: '0', completion: '0' } },
   ] });
-  assert.deepEqual(r.map((m) => m.id), ['x/free', 'x/suffix:free']);
+  assert.deepEqual(r.map((m) => m.id), ['x/free', 'x/numeric-free', 'x/suffix:free']);
 });
 
 test('tarefa textual nunca escolhe gerador de imagem no modo rápido', async () => {

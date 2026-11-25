@@ -74,15 +74,16 @@ node scripts/gateway-vm.mjs
 ## WEBdocker.NODEJS
 
 ```powershell
-cd "D:\0 - Projetos\WEBdocker.NODEJS"
-.\build.ps1
-.\run.ps1
+cd "D:\0 - Projetos\Myn-Portable"
+docker build -t myn-recicla-01:dev .
+docker run -d --name myn-recicla-01 -p 5188:5188 -v myn-recicla-dados:/data myn-recicla-01:dev
 ```
 Sobem: site (5188), gateway headless (36877 interno) e Chromium sem janela. Para distribuir:
 ```powershell
-docker save myn-Recicla-01 -o myn-Recicla-01.tar
-# na outra máquina: docker load -i myn-Recicla-01.tar; docker run -d -p 5188:5188 -v Recicla-dados:/data myn-Recicla-01
+docker save myn-recicla-01:dev -o myn-recicla-01.tar
+# na outra máquina: docker load -i myn-recicla-01.tar; docker run -d -p 5188:5188 -v myn-recicla-dados:/data myn-recicla-01:dev
 ```
+Validação executada em [`docs/DOCKER_VALIDACAO.md`](docs/DOCKER_VALIDACAO.md): build, web, APIs, worker, Git, renovação de token, volume e 11 testes.
 
 ## Verificação (prova)
 
