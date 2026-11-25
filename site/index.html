@@ -226,6 +226,24 @@ body>header,main,footer{position:relative;z-index:1}
 .bc-linha.ok{border-left:3px solid #37d67a;padding-left:8px}
 .bc-linha.git{border-left:3px solid #7aa2ff;padding-left:8px}
 .bc-linha.erro{border-left:3px solid #ff6b6b;color:#ffd6d6;padding-left:8px}
+.autor-card{border:1px solid var(--tinta);border-radius:12px;background:var(--card);box-shadow:9px 11px 0 rgba(31,111,224,.13);overflow:hidden;margin-top:16px}
+.autor-topo{display:flex;gap:18px;align-items:center;padding:20px 22px;background:linear-gradient(120deg,var(--azucl),#fff 65%);border-bottom:1px solid var(--linha);flex-wrap:wrap}
+.autor-topo img{width:96px;height:96px;object-fit:cover;border-radius:50%;border:3px solid var(--azul);box-shadow:0 6px 0 var(--mostardacl)}
+.autor-topo h3{margin:0;font:600 1.5rem var(--serif);letter-spacing:-.02em}
+.autor-bio{font:.88rem var(--sans);color:var(--mut);max-width:60ch;margin:4px 0 8px}
+.autor-links{display:flex;gap:8px;flex-wrap:wrap}
+.autor-links a{font:600 .68rem var(--mono);border:1px solid var(--azul2);border-radius:99px;padding:5px 11px;color:var(--azul2);background:#fff;text-decoration:none}
+.autor-links a:hover{background:var(--azul);color:#fff}
+.autor-numeros{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--linha);border-bottom:1px solid var(--linha)}
+.autor-numeros div{background:var(--card);padding:14px;text-align:center}
+.autor-numeros b{display:block;font:600 1.5rem var(--serif);color:var(--azul2)}
+.autor-numeros small{font:600 .6rem var(--mono);color:var(--mut);text-transform:uppercase;letter-spacing:.08em}
+.autor-repos{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding:16px}
+.autor-repo{border:1px solid var(--linha);border-radius:8px;padding:10px 12px;background:#fff}
+.autor-repo b{font:.84rem var(--sans);display:block;color:var(--azul2)}
+.autor-repo p{font:.74rem var(--sans);color:var(--mut);margin:3px 0}
+.autor-repo small{font:600 .62rem var(--mono);color:var(--mostarda)}
+.autor-assinatura{padding:10px 18px;border-top:1px dashed var(--linha);font:.72rem var(--mono);color:var(--mut);margin:0}
 </style>
 </head>
 <body>
@@ -356,12 +374,17 @@ body>header,main,footer{position:relative;z-index:1}
 </div></section>
 
 <section id="autor"><div class="wrap">
- <div class="st"><span class="num">06</span><h2>Created By</h2><span class="traco"></span><span class="nota">sessão do autor</span></div>
- <div class="card">
-  <h3><svg class="ico"><use href="#i-file"/></svg> Vinicius de Freitas Pereira</h3>
-  <p><a href="https://github.com/ViniciusF-Pereira" target="_blank" rel="noopener">github.com/ViniciusF-Pereira</a></p>
-  <p>LinkedIn: <input id="linkedinUrl" placeholder="cole sua URL do LinkedIn" style="padding:7px;min-width:260px"> <button class="btn sec" id="salvarLinkedin">SALVAR</button></p>
-  <p id="linkedinSalvo" style="font:.75rem var(--mono);color:var(--mut)">não preenchido — campo editável</p>
+ <div class="st"><span class="num">06</span><h2>Created By</h2><span class="traco"></span><span class="nota">quem reciclou isso</span></div>
+ <div class="autor-card">
+  <div class="autor-topo">
+   <img id="autorFoto" src="" alt="foto do autor">
+   <div><h3 id="autorNome">Vinicius de Freitas</h3><p id="autorBio" class="autor-bio">Data Analyst · Fraud & Risk · Data Engineering · AI Agents · Building Myncellium</p>
+    <div class="autor-links"><a id="autorGithub" href="https://github.com/ViniciusF-Pereira" target="_blank" rel="noopener">GitHub</a><a id="autorLinkedin" href="https://www.linkedin.com/in/f-vinicius/" target="_blank" rel="noopener">LinkedIn</a><a id="autorSite" href="https://www.Myncellium.com" target="_blank" rel="noopener">Myncellium</a></div>
+   </div>
+  </div>
+  <div class="autor-numeros" id="autorNumeros"><div><b>—</b><small>repos</small></div><div><b>—</b><small>seguidores</small></div><div><b>—</b><small>seguindo</small></div><div><b>—</b><small>no GitHub desde</small></div></div>
+  <div class="autor-repos" id="autorRepos"></div>
+  <p class="autor-assinatura">Myn Recyla/01 · de aba descartada a rota reaproveitada · <span id="autorAtualizado">—</span></p>
  </div>
 </div></section>
 
@@ -449,14 +472,22 @@ async function bcConectar(){
 bcConectar();
 
 
-try{
- const salvo=localStorage.getItem('myn-linkedin')||'';
- const inp=document.getElementById('linkedinUrl'),out=document.getElementById('linkedinSalvo');
- if(inp){inp.value=salvo;out.textContent=salvo||'não preenchido — campo editável'}
- document.getElementById('salvarLinkedin')?.addEventListener('click',()=>{
-  const v=inp.value.trim();localStorage.setItem('myn-linkedin',v);out.textContent=v||'não preenchido';
- });
-}catch{}
+(async()=>{
+ const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+ try{
+  const p=await fetch('perfil.json').then(r=>r.json());
+  if(p.avatar_url)document.getElementById('autorFoto').src=p.avatar_url;
+  if(p.name)document.getElementById('autorNome').textContent=p.name.trim();
+  if(p.bio)document.getElementById('autorBio').textContent=p.bio.trim();
+  if(p.html_url)document.getElementById('autorGithub').href=p.html_url;
+  if(p.linkedin)document.getElementById('autorLinkedin').href='https://'+p.linkedin;
+  if(p.company)document.getElementById('autorSite').href=p.company;
+  const ano=new Date(p.created_at||'2021-09-28').getFullYear();
+  document.getElementById('autorNumeros').innerHTML=[p.public_repos,p.followers,p.following,ano].map((v,i)=>'<div><b>'+v+'</b><small>'+['repos','seguidores','seguindo','no GitHub desde'][i]+'</small></div>').join('');
+  document.getElementById('autorRepos').innerHTML=(p.repos||[]).map(r=>'<div class="autor-repo"><b>'+esc(r.name)+'</b><p>'+esc(r.description||'sem descrição')+'</p><small>'+esc(r.language||'—')+' · ★ '+r.stargazers_count+' · '+esc(String(r.updated_at||'').slice(0,10))+'</small></div>').join('');
+  document.getElementById('autorAtualizado').textContent='perfil atualizado em '+String(p.atualizadoEm||'').slice(0,10);
+ }catch(e){document.getElementById('autorBio').textContent='Perfil indisponível: '+e.message}
+})();
 
 </script>
 </body>

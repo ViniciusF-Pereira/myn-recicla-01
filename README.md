@@ -94,7 +94,9 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Direção web-only:** [`docs/PLANEJAMENTO.md`](docs/PLANEJAMENTO.md) — evoluir o Myn para agente open-source tipo OpenCode/Claude Code/Codex usando **somente rotas free de navegador + WebGPU**, sem binário/local PC. Fase 0 item 3 já entregue: `/api/orquestrar?rapido=true` nunca escolhe rotas `*-local`.
 
-**Worker autônomo:** veja [`docs/WORKER_INFINITO.md`](docs/WORKER_INFINITO.md). No Playground, clique em **worker** para abrir o painel ao vivo com cada etapa (plano, rota free, higienização, patch, testes, commit e merge). `INICIAR` / `PARAR` controlam o loop; merge só com `fast-forward` e testes verdes.
+**Workers separados:** `docs/WORKER_INFINITO.md`. Análise (`/api/worker-analise/*`) só observa e para quando não há mudança; melhoria (`/api/worker-melhoria/*`) aplica tarefa, roda `node --test`, commita e mergeia **somente docs/config** — código fica em `worker/auto` para revisão. Sem Gemini/Google.
+
+**Created By (seção 06 da home):** `node scripts/atualizar-perfil.mjs` busica dados públicos do GitHub via `gh api` e grava `site/perfil.json` — foto, bio, números, repos e LinkedIn (achado no campo `blog` do GitHub). Sem segredos.
 
 Goal mestre para dirigir a entrega completa:
 ```powershell

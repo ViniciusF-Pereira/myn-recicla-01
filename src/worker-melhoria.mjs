@@ -37,10 +37,11 @@ async function aplicar(t) {
 }
 async function verificar(arquivo) {
   const checagens = [];
-  if (/\.(mjs|js)$/.test(arquivo)) {
-    try { await run(process.execPath, ['--check', path.join(RAIZ, arquivo)]); checagens.push({ arquivo, ok: true }); }
-    catch (e) { checagens.push({ arquivo, ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
-  } else checagens.push({ arquivo, ok: true });
+  // Validação real: testes node --test; sintaxe apenas como piso.
+  try { await run(process.execPath, ['--test', '--test-force-exit'], { cwd: RAIZ, timeout: 60000 }); checagens.push({ arquivo: 'node --test', ok: true }); }
+  catch (e) { checagens.push({ arquivo: 'node --test', ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
+  try { await run(process.execPath, ['--check', path.join(RAIZ, arquivo)]); checagens.push({ arquivo, ok: true }); }
+  catch (e) { checagens.push({ arquivo, ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
   try { await git(['diff', '--check']); checagens.push({ arquivo: 'git diff --check', ok: true }); }
   catch (e) { checagens.push({ arquivo: 'git diff --check', ok: false, erro: String(e.stderr || e.message).slice(0, 240) }); }
   return checagens;
@@ -58,17 +59,7 @@ async function ciclo(n, objetivo) {
   await garantirBranch();
   emitir('branch', { n, branch: await git(['rev-parse', '--abbrev-ref', 'HEAD']) });
 
-  // Confirma prioridade com uma rota free não-Google; falha não impede a melhoria determinística.
-  let via = 'analise-local';
-  const plugins = await carregarPlugins();
-  const rotaId = ROTAS.find((id) => plugins.some((p) => p.id === id)) || ROTAS[0];
-  const plugin = plugins.find((p) => p.id === rotaId);
-  if (plugin) {
-    try {
-      const r = await executarPlugin({ plugin, entrada: 'Confirme a prioridade: ' + t.titulo + '. Responda OK.' });
-      if (r.ok) via = rotaId;
-    } catch { /* segue local */ }
-  }
+  const via = 'analise-local';
   emitir('patch', { n, id: t.id, titulo: t.titulo, arquivo: t.alvo, via });
   const arquivo = await aplicar(t);
   const checagens = await verificar(arquivo);
@@ -84,9 +75,14 @@ async function ciclo(n, objetivo) {
   if (sujo) {
     await git(['add', '-A']);
     await git(['commit', '-m', 'worker: ' + t.titulo + ' (ciclo ' + n + ')']);
-    await git(['checkout', 'master']);
-    try { await git(['merge', '--ff-only', 'worker/auto']); merge = true; }
-    catch { await git(['merge', '--abort']).catch(() => undefined); }
+    const seguro = /^(docs\/|config\/)/.test(t.alvo);
+    if (seguro) {
+      await git(['checkout', 'master']);
+      try { await git(['merge', '--ff-only', 'worker/auto']); merge = true; }
+      catch { await git(['merge', '--abort']).catch(() => undefined); }
+    } else {
+      emitir('revisao', { n, arquivo: t.alvo, aviso: 'codigo permanece em worker/auto para revisao' });
+    }
     await marcar(t.id);
   }
   emitir('git', { n, merge, tarefa: t.id });

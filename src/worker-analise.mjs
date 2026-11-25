@@ -54,22 +54,30 @@ async function ciclo(n, objetivo) {
   if (media < 0.7) achados.push('saude media baixa: ' + media);
   if (arquivos.some((a) => a.todos > 0)) achados.push('marcadores TODO/FIXME presentes');
   if (backlog.analise?.pendentes) achados.push(backlog.analise.pendentes + ' melhorias pendentes');
-  emitir('arquivos', { n, total: arquivos.length, maiores: arquivos.sort((a, b) => b.linhas - a.linhas).slice(0, 5) });
+  const assinatura = arquivos.map((a) => a.arquivo + ':' + a.linhas + ':' + a.todos).join('|');
+  const mudou = assinatura !== estado.ultimaAssinatura;
+  estado.ultimaAssinatura = assinatura;
+  emitir('arquivos', { n, total: arquivos.length, mudou, maiores: arquivos.sort((a, b) => b.linhas - a.linhas).slice(0, 5) });
   emitir('saude', { n, media, rotas: saude });
   emitir('backlog', { n, ...(backlog.analise || {}) });
   emitir('achados', { n, achados, plugins });
-  emitir('analise_fim', { n, score: Math.round((media * 0.5 + Math.max(0, 1 - achados.length / 5) * 0.5) * 100) / 100 });
+  emitir('analise_fim', { n, mudou, score: Math.round((media * 0.5 + Math.max(0, 1 - achados.length / 5) * 0.5) * 100) / 100 });
+  return { mudou, achados };
 }
 
 export async function iniciar({ objetivo = 'analisar codigo e desempenho do Myn Recicla', maxCiclos = Infinity, intervaloMs = 8000 } = {}) {
   if (ativo) return { ok: false, erro: 'worker de analise ja ativo' };
   ativo = true; abortar = false;
-  estado = { ciclos: 0, ultimo: null, iniciadoEm: new Date().toISOString(), objetivo: String(objetivo).slice(0, 500) };
+  estado = { ciclos: 0, ultimo: null, ultimaAssinatura: '', iniciadoEm: new Date().toISOString(), objetivo: String(objetivo).slice(0, 500) };
   emitir('iniciado', { objetivo: estado.objetivo, intervaloMs });
   let n = 0;
   while (ativo && !abortar && n < maxCiclos) {
     n++; estado.ciclos = n;
-    await ciclo(n, estado.objetivo);
+    const r = await ciclo(n, estado.objetivo);
+    if (r && r.mudou === false) {
+      emitir('inalterado', { n, aviso: 'nenhuma mudança desde o último ciclo' });
+      break;
+    }
     if (abortar) break;
     await new Promise((r) => setTimeout(r, Math.max(1000, intervaloMs)));
   }

@@ -1,0 +1,76 @@
+{
+  "avatar_url": "https://avatars.githubusercontent.com/u/91574553?v=4",
+  "bio": "Data Analyst | Fraud & Risk | Data Engineering | AI Agents | Building Myncellium\r\n\r\n",
+  "blog": "https://www.linkedin.com/in/f-vinicius/",
+  "company": "https://www.Myncellium.com",
+  "created_at": "2021-09-28T23:11:44Z",
+  "followers": 8,
+  "following": 15,
+  "html_url": "https://github.com/ViniciusF-Pereira",
+  "location": "Brasil",
+  "login": "ViniciusF-Pereira",
+  "name": "Vinicius de Freitas ",
+  "public_repos": 26,
+  "updated_at": "2026-11-12T20:31:31Z",
+  "linkedin": "linkedin.com/in/f-vinicius/",
+  "repos": [
+    {
+      "description": "projeto empreendedorismo em PHP",
+      "fork": false,
+      "html_url": "https://github.com/ViniciusF-Pereira/projetoEmprededorismo_php",
+      "language": "PHP",
+      "name": "projetoEmprededorismo_php",
+      "stargazers_count": 1,
+      "updated_at": "2026-11-18T23:28:59Z"
+    },
+    {
+      "description": null,
+      "fork": false,
+      "html_url": "https://github.com/ViniciusF-Pereira/ProjetoEmprendedorismo",
+      "language": "PHP",
+      "name": "ProjetoEmprendedorismo",
+      "stargazers_count": 1,
+      "updated_at": "2026-11-18T23:28:57Z"
+    },
+    {
+      "description": null,
+      "fork": false,
+      "html_url": "https://github.com/ViniciusF-Pereira/ViniciusF-Pereira",
+      "language": null,
+      "name": "ViniciusF-Pereira",
+      "stargazers_count": 1,
+      "updated_at": "2022-05-08T06:32:44Z"
+    },
+    {
+      "description": null,
+      "fork": false,
+      "html_url": "https://github.com/ViniciusF-Pereira/Advance",
+      "language": "CSS",
+      "name": "Advance",
+      "stargazers_count": 0,
+      "updated_at": "2026-11-18T23:28:59Z"
+    },
+    {
+      "description": null,
+      "fork": false,
+      "html_url": "https://github.com/ViniciusF-Pereira/atv_Bhaskara_23.03",
+      "language": "C#",
+      "name": "atv_Bhaskara_23.03",
+      "stargazers_count": 0,
+      "updated_at": "2022-03-28T11:10:53Z"
+    },
+    {
+      "description": null,
+      "fork": false,
+      "html_url": "https://github.com/ViniciusF-Pereira/Calculadora_Basica",
+      "language": "HTML",
+      "name": "Calculadora_Basica",
+      "stargazers_count": 0,
+      "updated_at": "2022-09-09T14:20:19Z"
+    }
+  ],
+  "projeto": "Myn Recyla/01",
+  "assinatura": "Vinicius de Freitas — Myn Recyla/01",
+  "atualizadoEm": "2026-11-25T13:39:02.700Z",
+  "fonte": "https://api.github.com/users/ViniciusF-Pereira"
+}

@@ -29,7 +29,15 @@ export async function avaliar(codigo, agente, rota = 'auto') {
 
 export async function avaliarTodos(codigo) {
   const gpu = capacidade();
-  const resultados = [];
-  for (const a of AGENTES) resultados.push(await avaliar(codigo, a.id));
-  return { gpu, resultados };
+  // Paralelismo real dentro do Myn: três agentes ao mesmo tempo.
+  const resultados = await Promise.all(AGENTES.map((a) => avaliar(codigo, a.id)));
+  const tarefas = resultados.map((r) => ({
+    id: 'agente-' + r.agente + '-' + Date.now().toString(36),
+    titulo: 'achado do agente ' + r.agente + ': ' + r.texto.slice(0, 90),
+    agente: r.agente,
+    texto: r.texto,
+    via: r.via,
+  }));
+  for (const t of tarefas) await inserir('metricas', { chave: 'tarefa:' + t.id, ...t });
+  return { gpu, resultados, tarefas };
 }

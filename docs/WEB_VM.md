@@ -1,12 +1,14 @@
-# VM web, DB leve e agentes — Myn Recicla/01
+# Sandbox web, DB local e agentes — Myn Recicla/01
+
+**Nomes honestos:** é um **sandbox Web Worker** (não uma VM completa) e um **DB local IndexedDB, espelhável em SQLite** (não é SQLite rodando no navegador).
 
 Camada 100% browser: nada roda no PC do usuário além do navegador.
 
 ## DB leve
-`web/db/leve.mjs` — IndexedDB com esquema compatível com SQLite (tabelas `eventos`, `metricas`, `agentes`, `cache`, `arquivos`, `sessoes`). Exporta `inserir`, `listar`, `obter`, `contar`, `limpar`, `exportar`, `importar`. Pode ser espelhado no servidor no futuro.
+`web/db/leve.mjs` — **DB local em IndexedDB, espelhável em SQLite** (tabelas `eventos`, `metricas`, `agentes`, `cache`, `arquivos`, `sessoes`). Exporta `inserir`, `listar`, `obter`, `contar`, `limpar`, `exportar`, `importar`. Não é SQLite no navegador; o formato de exportação pode ser migrado para SQLite quando hospedado.
 
 ## VM web escalável
-`web/vm/vm.mjs` — Web Worker isolado (sandbox), com:
+`web/vm/vm.mjs` — **sandbox em Web Worker** (isolamento de worker, não uma VM de sistema), com:
 - `executar(op, args)` — `eco`, `soma`, `mapa`, `hash`, `analisar`;
 - HD virtual em IndexedDB (`gravar`, `HD`);
 - cache próprio (`gravarCache`, `cache`);
