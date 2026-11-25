@@ -134,3 +134,8 @@ Módulo do Myn Recicla/01.
 Exports: descobrirModelos, obterModelos
 
 Módulo do Myn Recicla/01.
+## arquitetura.mjs
+
+Exports: auditarArquitetura
+
+Módulo do Myn Recicla/01.

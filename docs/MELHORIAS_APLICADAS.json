@@ -24,5 +24,6 @@
   "export-worker",
   "export-gateway",
   "modulo-desempenho",
-  "modulo-modelos-livres"
+  "modulo-modelos-livres",
+  "modulo-arquitetura"
 ]
