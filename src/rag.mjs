@@ -1,14 +1,13 @@
 /** RAG mínimo, sem dependências: índice local de notas/relatórios com TF-IDF e citação por arquivo. */
 import { readdir, readFile, stat } from 'node:fs/promises';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-const RAIZ = 'D:/0 - Projetos';
+const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FONTES = [
-  path.join(RAIZ, 'research_notes'),
-  path.join(RAIZ, 'reports'),
-  path.join(RAIZ, 'Myncellium', 'docs', 'brain'),
-  path.join(RAIZ, 'Myn-Portable', 'docs'),
-  path.join(RAIZ, 'Myn-Portable', 'README.md'),
+  path.join(RAIZ, 'docs'),
+  path.join(RAIZ, 'README.md'),
+  ...String(process.env.MYN_RAG_FONTES || '').split(path.delimiter).map((p) => p.trim()).filter(Boolean),
 ];
 const PARAR = new Set('de da do e em um uma para com que no na os as ao a o se por ou como mais muito está são foi ser pelo pela pelos pelas deste desta deste do disto que qual quais onde quando quem cujo'.split(' '));
 let indice = null;

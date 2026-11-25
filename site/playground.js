@@ -229,53 +229,14 @@ document.querySelectorAll('#tabsPlugins .aba').forEach(b=>b.onclick=()=>{
 
 
 
-const painelG=$('painelGoogle');
-async function carregarGoogle(){
- $('listaGoogle').innerHTML='<div class="passo-linha">sondando rotas no navegador logado...</div>';
- try{
-  const d=await (await fetch('/api/google')).json();
-  const estado=d.rotas.map(r=>'<button class="plugin-btn" data-id="'+esc(r.id)+'"><code>/'+esc(r.id)+'</code><span>'+esc(r.nome)+'</span><small>'+esc(r.estado)+'</small></button>').join('');
-  $('listaGoogle').innerHTML='<div class="plugin-grupo"><b>conta: '+esc(d.conta||'não detectada')+' · '+d.rotas.length+' rotas</b>'+estado+'</div><div class="passo-linha">sondagem: '+esc(String(d.em).slice(11,19))+' · use /id mensagem no chat</div>';
-  const btn=document.createElement('button');btn.className='btn';btn.id='conectarGoogle';btn.textContent='⚡ CONECTAR TUDO (1 login)';
-  btn.onclick=async()=>{
-   btn.disabled=true;
-   try{
-    await post('/api/google/login',{});
-    let tentativa=0;
-    while(tentativa<40){
-     $('listaGoogle').innerHTML='<div class="passo-linha">Entre na janela do Brave que abriu... verificando ('+(tentativa+1)+'/40)</div>';
-     await new Promise(r=>setTimeout(r,4000));
-     const g=await (await fetch('/api/google?novo=1&t='+Date.now())).json();
-     if(g.conta){
-      const ok=g.rotas.filter(r=>r.estado!=='login'&&r.estado!=='erro');
-      $('listaGoogle').innerHTML='<div class="plugin-grupo"><b>✓ conectado: '+esc(g.conta)+' · '+ok.length+'/'+g.rotas.length+' rotas ativas</b>'+
-       g.rotas.map(r=>'<button class="plugin-btn" data-id="'+esc(r.id)+'"><code>/'+esc(r.id)+'</code><span>'+esc(r.nome)+'</span><small>'+esc(r.estado)+'</small></button>').join('')+'</div><div class="passo-linha">todas as rotas herdam a mesma sessão. use /id mensagem no chat.</div>';
-      document.querySelectorAll('#listaGoogle .plugin-btn').forEach(b=>b.onclick=()=>{const t=$('texto');t.value='/'+b.dataset.id+' '+t.value;t.focus();painelG.classList.remove('on')});
-      btn.disabled=false;btn.textContent='✓ CONECTADO';return;
-     }
-     tentativa++;
-    }
-    $('listaGoogle').innerHTML='<div class="passo-linha">Não detectei login em ~160 s. Entre na janela do Brave e tente de novo.</div>';
-   }catch(e){$('listaGoogle').innerHTML='<div class="passo-linha">Erro: '+esc(e.message)+'</div>'}
-   btn.disabled=false;
-  };
-  $('listaGoogle').appendChild(btn);
-  document.querySelectorAll('#listaGoogle .plugin-btn').forEach(b=>b.onclick=()=>{
-   const t=$('texto');t.value='/'+b.dataset.id+' '+t.value;t.focus();painelG.classList.remove('on');
-  });
- }catch(e){$('listaGoogle').innerHTML='<div class="passo-linha">Erro: '+esc(e.message)+'</div>'}
-}
-$('btnGoogle').onclick=()=>{painelG.classList.toggle('on');if(painelG.classList.contains('on'))carregarGoogle()};
-$('fecharGoogle').onclick=()=>painelG.classList.remove('on');
-document.addEventListener('click',e=>{if(painelG.classList.contains('on')&&!painelG.contains(e.target)&&e.target!==$('btnGoogle')&&!$('btnGoogle').contains(e.target))painelG.classList.remove('on')});
-
-
 const painelWorker=$('painelWorker'), logWorker=$('workerLog');
 function linhaWorker(ev){
  const d=document.createElement('div');
  d.className='pw-linha'+(/erro|falha|revertido/.test(ev.tipo)?' erro':/git|commit|merge|branch/.test(ev.tipo)?' git':/higienizacao/.test(ev.tipo)?' higienizacao':/ok|testes/.test(ev.tipo)?' ok':'');
  let texto=(ev.worker?'['+ev.worker+'] ':'')+ev.tipo;
  if(ev.n!==undefined)texto+=' #'+ev.n;
+ if(ev.categoria)texto+=' · '+ev.categoria;
+ if(ev.modelo)texto+=' · modelo '+ev.modelo;
  if(ev.objetivo)texto+=' · '+ev.objetivo;
  if(ev.passos)texto+=' · '+ev.passos.join(', ');
  if(ev.removidos)texto+=' · removidos: '+(ev.removidos.join(', ')||'nenhum');

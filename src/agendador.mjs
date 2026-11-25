@@ -6,7 +6,7 @@ import { respostaRapida } from './stream.mjs';
 import { orquestrar } from './orquestrar-modelos.mjs';
 import { appendFile } from 'node:fs/promises';
 
-const ARQ = process.env.MYN_AGENDAS || path.join(process.cwd(), 'dados', 'agendamentos.json');
+const ARQ = process.env.MYN_AGENDAS || path.join(process.env.MYN_DADOS || path.join(process.cwd(), 'dados'), 'agendamentos.json');
 const BASE = process.env.MYN_API_BASE || 'http://127.0.0.1:5188';
 let goals = [];
 try { goals = JSON.parse(await readFile(ARQ, 'utf8')); } catch { goals = []; }

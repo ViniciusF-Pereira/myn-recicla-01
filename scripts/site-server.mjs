@@ -15,10 +15,12 @@ import { buscarFilmes } from '../src/filmes.mjs';
 import { carregarPlugins, listaPublica, executarPlugin, extrairComando } from '../src/plugins.mjs';
 import { respostaRapida, streamResposta } from '../src/stream.mjs';
 import { contextoPara } from '../src/rag.mjs';
-import { carregarRotasGoogle, sondarGoogle, rodarRotaGoogle } from '../src/google.mjs';
+
 import { registrar as registrarSaude, relatorio as relatorioSaude, escolherRotas } from '../src/saude.mjs';
 import { orquestrar, classificarTarefa } from '../src/orquestrar-modelos.mjs';
 import { medirDesempenho } from '../src/desempenho.mjs';
+import { obterModelos } from '../src/modelos-livres.mjs';
+import { auditarArquitetura } from '../src/arquitetura.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
@@ -32,9 +34,8 @@ const config = await carregarConfigAsync(path.join(raiz, 'config/rotas.json'));
 if (process.env.MYN_GATEWAY_TOKEN_FILE) config.gateway.tokenFile = process.env.MYN_GATEWAY_TOKEN_FILE;
 const gateway = criarGateway(config.gateway);
 const trava = criarTrava();
-const plugins = await carregarPlugins();
-const rotasGoogle = await carregarRotasGoogle();
-let cacheGoogle = null;
+// Política do produto: sem Google/Gemini, inclusive no catálogo público.
+const plugins = (await carregarPlugins()).filter((p) => !/google|gemini/i.test([p.id, p.nome, p.url, p.categoria].join(' ')));
 const PORTA = Number(process.env.PORT || 5188);
 const HOST = process.env.MYN_HOST || '127.0.0.1';
 
@@ -100,8 +101,17 @@ async function lerModelosConfig() {
   return cacheModelos.dados;
 }
 
+function dentroDe(base, alvo) {
+  const rel = path.relative(base, alvo);
+  return Boolean(rel) && !rel.startsWith('..') && !path.isAbsolute(rel);
+}
+
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  res.setHeader('x-content-type-options', 'nosniff');
+  res.setHeader('x-frame-options', 'DENY');
+  res.setHeader('referrer-policy', 'no-referrer');
+  res.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
   const workerRotas = {
     analise: { iniciar: iniciarAnalise, parar: pararAnalise, status: statusAnalise, assinar: assinarAnalise },
     melhoria: { iniciar: iniciarMelhoria, parar: pararMelhoria, status: statusMelhoria, assinar: assinarMelhoria },
@@ -193,11 +203,20 @@ const servidor = http.createServer(async (req, res) => {
     return;
   }
   if (url.pathname === '/api/chat/stream' && req.method === 'GET') {
-    res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', 'connection': 'keep-alive', 'x-accel-buffering': 'no' });
     const mensagem = String(url.searchParams.get('message') || '').slice(0, 6000);
     const pesquisa = url.searchParams.get('pesquisa') === '1';
     const rotaId = String(url.searchParams.get('rota') || 'auto') || 'auto';
-    if (!mensagem) { res.write('data: ' + JSON.stringify({ erro: 'mensagem vazia' }) + '\n\n'); res.end(); return; }
+    if (!mensagem) {
+      res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache' });
+      res.write('data: ' + JSON.stringify({ erro: 'mensagem vazia' }) + '\n\n'); res.end(); return;
+    }
+    const pluginSelecionado = rotaId !== 'auto' ? plugins.find((p) => p.id === rotaId) : null;
+    if (pluginSelecionado?.confirmacao && !/^confirmar\s*:/i.test(mensagem)) {
+      res.writeHead(409, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: 'confirmation_required', rota: rotaId, aviso: 'Repita com confirmar: antes da mensagem. Nada foi enviado.' }));
+      return;
+    }
+    res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', 'connection': 'keep-alive', 'x-accel-buffering': 'no' });
     let anexos = [];
     try { anexos = JSON.parse(String(url.searchParams.get('anexos') || '[]')).slice(0, 6); } catch { anexos = []; }
     anexos = anexos.map((x) => ({ nome: String(x?.nome || 'imagem').slice(0, 80), url: String(x?.url || ''), texto: String(x?.texto || '').slice(0, 500) }));
@@ -237,13 +256,14 @@ const servidor = http.createServer(async (req, res) => {
         ]);
       } catch { imagemPesquisa = null; }
     }
-    const plugin = rotaId !== 'auto' ? plugins.find((p) => p.id === rotaId) : null;
+    const plugin = pluginSelecionado;
     const imagens = [...imagensAnexadas, ...(imagemPesquisa ? [{ url: imagemPesquisa.url, nome: imagemPesquisa.nome, fonte: imagemPesquisa.fonte }] : [])];
     res.write('data: ' + JSON.stringify({ inicio: true, fontes, ferramentas, rota: rotaId, imagens,
       via: plugin ? 'plugin:' + plugin.id : 'auto', capacidades: classificarTarefa(mensagem) }) + '\n\n');
     try {
       if (plugin) {
-        const d = await executarPlugin({ plugin, entrada: mensagem + contextoAnexos, gateway, trava, log: (x) => console.log('[stream-plugin]', JSON.stringify(x)) });
+        const entradaPlugin = (plugin.confirmacao ? mensagem.replace(/^confirmar\s*:/i, '').trim() : mensagem) + contextoAnexos;
+        const d = await executarPlugin({ plugin, entrada: entradaPlugin, gateway, trava, log: (x) => console.log('[stream-plugin]', JSON.stringify(x)) });
         registrarSaude(plugin.id, { ok: d.ok, ms: d.ms, erro: d.erro || (d.ok ? '' : 'sem_resposta') });
         const texto = d.ok ? d.resposta : ('Falha na rota ' + plugin.nome + ': ' + (d.erro || d.resposta));
         for (let i = 0; i < texto.length; i += 24) res.write('data: ' + JSON.stringify({ token: texto.slice(i, i + 24), via: 'plugin:' + plugin.id }) + '\n\n');
@@ -493,41 +513,9 @@ const servidor = http.createServer(async (req, res) => {
     } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
     return;
   }
-  if (url.pathname === '/api/google' && req.method === 'GET') {
-    try {
-      const novo = url.searchParams.get('novo') === '1';
-      if (novo || !cacheGoogle || Date.now() - cacheGoogle.emMs > 5 * 60_000) {
-        cacheGoogle = await sondarGoogle({ gateway, trava, rotas: rotasGoogle });
-        cacheGoogle.emMs = Date.now();
-      }
-      const { emMs, ...dados } = cacheGoogle;
-      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(dados));
-    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
-    return;
-  }
-  if (url.pathname === '/api/google/login' && req.method === 'POST') {
-    try {
-      await trava(async () => {
-        await gateway.op('navigate', { url: 'https://accounts.google.com/' });
-        await new Promise((r) => setTimeout(r, 2000));
-      });
-      cacheGoogle = null;
-      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify({ ok: true, aviso: 'Tela de login Google aberta no navegador do gateway. Entre uma vez; as 11 rotas herdam a sessão.' }));
-    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
-    return;
-  }
-  if (url.pathname === '/api/google' && req.method === 'POST') {
-    try {
-      let corpo = ''; for await (const p of req) corpo += p;
-      const { id, entrada } = JSON.parse(corpo);
-      if (!id || !entrada) throw new Error('id e entrada obrigatórios');
-      const d = await rodarRotaGoogle({ id, entrada, gateway, trava, plugins });
-      await registrar('google', { input: String(entrada).slice(0, 300), output: String(d.resposta || d.aviso || '').slice(0, 400), rota: id });
-      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-      res.end(JSON.stringify(d));
-    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+  if (url.pathname === '/api/google' || url.pathname === '/api/google/login') {
+    res.writeHead(410, { 'content-type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify({ error: 'google_removido', aviso: 'Este produto não usa Google/Gemini.' }));
     return;
   }
   if (req.method === 'POST' && url.pathname === '/api/plan') {
@@ -601,6 +589,24 @@ const servidor = http.createServer(async (req, res) => {
     }
     return;
   }
+  if (url.pathname === '/api/modelos/descobertos' && req.method === 'GET') {
+    try {
+      const dados = await obterModelos({ forcar: url.searchParams.get('novo') === '1' });
+      enviarJson(req, res, dados);
+    } catch (erro) {
+      res.writeHead(502, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) }));
+    }
+    return;
+  }
+  if (url.pathname === '/api/arquitetura' && req.method === 'GET') {
+    try { enviarJson(req, res, await auditarArquitetura()); }
+    catch (erro) {
+      res.writeHead(500, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) }));
+    }
+    return;
+  }
   if (url.pathname === '/api/plugins' && req.method === 'GET') {
     enviarJson(req, res, { total: plugins.length, plugins: listaPublica(plugins), comando: 'Use /id mensagem no chat' });
     return;
@@ -621,20 +627,35 @@ const servidor = http.createServer(async (req, res) => {
   }
   if (url.pathname.startsWith('/web/')) {
     const alvo = path.join(raiz, url.pathname.replace(/^\/+/, ''));
-    if (!alvo.startsWith(path.join(raiz, 'web'))) { res.writeHead(403); res.end(); return; }
+    if (!dentroDe(path.join(raiz, 'web'), alvo)) { res.writeHead(403); res.end(); return; }
     await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || TIPOS['.js']);
     return;
   }
   if (url.pathname.startsWith('/outputs/')) {
     const alvo = path.join(raiz, url.pathname.replace(/^\/+/, ''));
-    if (!alvo.startsWith(path.join(raiz, 'outputs'))) { res.writeHead(403); res.end(); return; }
+    if (!dentroDe(path.join(raiz, 'outputs'), alvo)) { res.writeHead(403); res.end(); return; }
     await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || TIPOS['.jpg'] || 'image/jpeg');
     return;
   }
   const arquivo = url.pathname === '/' ? 'index.html' : url.pathname.replace(/^\/+/, '');
   const alvo = path.join(site, arquivo);
-  if (!alvo.startsWith(site)) { res.writeHead(403); res.end(); return; }
+  if (!dentroDe(site, alvo)) { res.writeHead(403); res.end(); return; }
   await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || 'application/octet-stream');
 });
+
+servidor.requestTimeout = 30_000;
+servidor.headersTimeout = 10_000;
+servidor.keepAliveTimeout = 5_000;
+
+function desligar(sinal) {
+  console.log('Encerrando (' + sinal + ')...');
+  try { pararWorker(); } catch { /* já parado */ }
+  try { pararAnalise(); } catch { /* já parado */ }
+  try { pararMelhoria(); } catch { /* já parado */ }
+  servidor.close(() => process.exit(0));
+  setTimeout(() => process.exit(1), 5_000).unref();
+}
+process.once('SIGINT', () => desligar('SIGINT'));
+process.once('SIGTERM', () => desligar('SIGTERM'));
 
 servidor.listen(PORTA, HOST, () => console.log('Myn - Recicla/01 em http://' + HOST + ':' + PORTA));

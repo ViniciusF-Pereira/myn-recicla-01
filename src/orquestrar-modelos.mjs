@@ -37,7 +37,7 @@ export async function escolherPara(tarefa, max = 3, rapido = false) {
     // Web-only: NUNCA usar geradores locais (PIL/ffmpeg/edge-tts). Somente APIs online free.
     const plugins = JSON.parse(await readFile(path.join(RAIZ, 'config/plugins.json'), 'utf8')).plugins;
     const ids = new Set(plugins.filter((p) => p.acao === 'api').map((p) => p.id));
-    const rapidos = mapa.filter((r) => ids.has(r.id) && !r.confirmacao);
+    const rapidos = mapa.filter((r) => ids.has(r.id) && !r.confirmacao && r.capacidades.some((c) => caps.includes(c)));
     const casados = candidatos.filter((r) => ids.has(r.id));
     candidatos = casados.length >= 2 ? casados : [...casados, ...rapidos.filter((r) => !casados.includes(r))];
   }

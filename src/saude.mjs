@@ -2,7 +2,7 @@
 import { writeFile, readFile } from 'node:fs/promises';
 import path from 'node:path';
 
-const ARQ = process.env.MYN_SAUDE || path.join(process.cwd(), 'dados', 'saude.json');
+const ARQ = process.env.MYN_SAUDE || path.join(process.env.MYN_DADOS || path.join(process.cwd(), 'dados'), 'saude.json');
 const LIMITE = 60;
 const FALHAS_PARA_ABRIR = 3;
 const COOLDOWN_MS = 30_000;

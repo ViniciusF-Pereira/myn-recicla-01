@@ -2,15 +2,30 @@
 import http from 'node:http';
 import { spawn } from 'node:child_process';
 import { createHash, randomBytes } from 'node:crypto';
-import { writeFile } from 'node:fs/promises';
+import { writeFile, rename } from 'node:fs/promises';
 
 const PORTA = Number(process.env.PORTA || 36877);
 const DEBUG = Number(process.env.DEBUG_PORTA || 9333);
 const CHROME = process.env.CHROME || '/usr/bin/chromium';
 const PERFIL = process.env.PERFIL || '/tmp/myn-Recicla-chrome';
-const TOKEN_FILE = '/tmp/myn-Recicla-token.txt';
-const TOKEN = process.env.GATEWAY_TOKEN || randomBytes(32).toString('base64url');
-const EXPIRA = Date.now() + Number(process.env.TTL || 30 * 60_000);
+const TOKEN_FILE = process.env.MYN_GATEWAY_TOKEN_FILE || '/tmp/myn-recyla-token.txt';
+const TTL = Math.max(2000, Number(process.env.TTL || 30 * 60_000));
+let tokenAtual = process.env.GATEWAY_TOKEN || randomBytes(32).toString('base64url');
+let tokenAnterior = '', anteriorAte = 0;
+let expira = Date.now() + TTL;
+async function gravarCapability() {
+  const tmp = TOKEN_FILE + '.' + process.pid + '.tmp';
+  await writeFile(tmp, JSON.stringify({ token: tokenAtual, expiresAt: expira }) + '\n');
+  await rename(tmp, TOKEN_FILE);
+}
+async function renovarToken() {
+  tokenAnterior = tokenAtual;
+  anteriorAte = Date.now() + 30_000;
+  if (!process.env.GATEWAY_TOKEN) tokenAtual = randomBytes(32).toString('base64url');
+  expira = Date.now() + TTL;
+  await gravarCapability();
+  console.log('capability renovada; expira=' + new Date(expira).toISOString());
+}
 const ALLOW = new Set((process.env.ALLOW || '127.0.0.1,::1,172.17.0.1').split(','));
 const DOMINIOS = /(^|\.)(chat\.z\.ai|z\.ai|huggingface\.co|openrouter\.ai|chatgpt\.com|claude\.ai|kimi\.com|chat\.mistral\.ai|mistral\.ai|chat\.deepseek\.com|grok\.com|perplexity\.ai|lmarena\.ai|duckduckgo\.com|pollinations\.ai|brave\.com|search\.brave\.com)$/i;
 
@@ -65,8 +80,12 @@ const json = (res, status, obj) => {
 const server = http.createServer(async (req, res) => {
   const remoto = String(req.socket.remoteAddress || '').replace(/^::ffff:/, '');
   if (!ALLOW.has(remoto)) return json(res, 403, { ok: false, error: 'ip_not_allowed' });
-  const ref = Buffer.from('Bearer ' + TOKEN), hdr = Buffer.from(String(req.headers.authorization || ''));
-  if (Date.now() > EXPIRA || ref.length !== hdr.length || !ref.equals(hdr)) return json(res, 401, { ok: false, error: 'unauthorized' });
+  const hdr = Buffer.from(String(req.headers.authorization || ''));
+  const atual = Buffer.from('Bearer ' + tokenAtual);
+  const anterior = tokenAnterior && Date.now() < anteriorAte ? Buffer.from('Bearer ' + tokenAnterior) : null;
+  const autorizado = (atual.length === hdr.length && atual.equals(hdr))
+    || (anterior && anterior.length === hdr.length && anterior.equals(hdr));
+  if (Date.now() > expira || !autorizado) return json(res, 401, { ok: false, error: 'unauthorized' });
   const rota = req.url || '';
   try {
     if (rota === '/v1/browser/targets' && req.method === 'GET') {
@@ -125,5 +144,6 @@ const server = http.createServer(async (req, res) => {
     return json(res, 404, { ok: false, error: 'not_found' });
   } catch (erro) { return json(res, 502, { ok: false, error: String(erro.message).slice(0, 160) }); }
 });
-await writeFile(TOKEN_FILE, JSON.stringify({ token: TOKEN, expiresAt: EXPIRA }) + '\n');
-server.listen(PORTA, '0.0.0.0', () => console.log('GATEWAY HEADLESS VM port=' + PORTA + ' expira=' + new Date(EXPIRA).toISOString()));
+await gravarCapability();
+setInterval(() => renovarToken().catch((e) => console.error('falha ao renovar capability:', e.message)), Math.floor(TTL / 2)).unref();
+server.listen(PORTA, '0.0.0.0', () => console.log('GATEWAY HEADLESS VM port=' + PORTA + ' expira=' + new Date(expira).toISOString()));

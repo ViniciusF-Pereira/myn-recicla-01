@@ -4,6 +4,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { randomBytes } from 'node:crypto';
 import { carregarConfigAsync, criarGateway } from '../src/gateway.mjs';
 
 const executar = promisify(execFile);
@@ -18,7 +19,8 @@ if (process.env.MYN_GATEWAY_TOKEN_FILE) config.gateway.tokenFile = process.env.M
 const gateway = criarGateway(config.gateway);
 const ids = process.argv.slice(2);
 const alvos = ids.length ? base.providers.filter((p) => ids.includes(p.id)) : base.providers;
-const PROBE = 'MYN_MAP responda apenas: OK';
+const NONCE = randomBytes(4).toString('hex').toUpperCase();
+const PROBE = 'MYN_MAP ' + NONCE + ' responda apenas: ALVO-' + NONCE;
 const LOGIN = /fazer login|log in|sign in|entrar|cadastrar|inscrever|sign up/i;
 const cortar = (v, n = 12000) => (v && typeof v === 'object' ? JSON.stringify(v) : String(v ?? '')).slice(0, n);
 const resultados = [];
@@ -55,9 +57,13 @@ for (const p of alvos) {
       ];
       for (const [nome, fn] of seq) { const out = await fn().catch((e) => ({ erro: e.message })); evt(nome, nome === 'type' ? { text: PROBE } : {}, out); }
       await new Promise((x) => setTimeout(x, 400));
-      if (p.send) { const out = await gateway.op('click', p.send).catch((e) => ({ erro: e.message })); evt('click:enviar', p.send, out); }
-      const outEnter = await gateway.op('key', { key: 'Enter' }).catch((e) => ({ erro: e.message }));
-      evt('key:Enter', { key: 'Enter' }, outEnter);
+      if (p.send) {
+        const out = await gateway.op('click', p.send).catch((e) => ({ erro: e.message }));
+        evt('click:enviar', p.send, out);
+      } else {
+        const out = await gateway.op('key', { key: 'Enter' }).catch((e) => ({ erro: e.message }));
+        evt('key:Enter', { key: 'Enter' }, out);
+      }
       r.envio = { probe: PROBE, via: p.send ? 'click' : 'Enter' };
       let respostaBruta = '';
       const fotos = [];
@@ -70,10 +76,12 @@ for (const p of alvos) {
           fotos.push(path.relative(raiz, arquivo).replaceAll('\\', '/'));
         } catch { respostaBruta = await gateway.ler(12000); }
         evt('resposta_bruta_' + (i + 1), { tentativa: i + 1, print: fotos.at(-1) || null }, respostaBruta);
-        if (/OK/i.test(respostaBruta)) break;
+        const respostaNova = respostaBruta.split(/\r?\n/).filter((linha) => !linha.includes('MYN_MAP')).join('\n');
+        if (new RegExp('ALVO-' + NONCE, 'i').test(respostaNova)) break;
       }
       r.respostaBruta = respostaBruta;
-      r.respostaOk = /OK/i.test(respostaBruta);
+      const respostaNova = respostaBruta.split(/\r?\n/).filter((linha) => !linha.includes('MYN_MAP')).join('\n');
+      r.respostaOk = new RegExp('ALVO-' + NONCE, 'i').test(respostaNova);
       r.prints = fotos;
     }
     r.estado = r.respostaOk ? 'utilizavel' : r.loginDetectado ? 'login' : r.composer ? 'sem_resposta' : 'bloqueado';

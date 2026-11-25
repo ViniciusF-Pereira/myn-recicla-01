@@ -5,6 +5,8 @@ import { relatorio } from './saude.mjs';
 import { analisarMelhorias } from './analise.mjs';
 import { carregarPlugins } from './plugins.mjs';
 import { medirDesempenho } from './desempenho.mjs';
+import { obterModelos } from './modelos-livres.mjs';
+import { auditarArquitetura } from './arquitetura.mjs';
 
 const RAIZ = process.cwd();
 let ativo = false, abortar = false;
@@ -49,11 +51,13 @@ async function ciclo(n, objetivo) {
   const listaSaude = relatorio();
   const media = listaSaude.length ? listaSaude.reduce((n, x) => n + x.score, 0) / listaSaude.length : 0;
   const backlog = await analisarMelhorias();
-  let plugins = 0, desempenho = null;
+  let plugins = 0, desempenho = null, modelos = null, arquitetura = null;
   try {
-    [plugins, desempenho] = await Promise.all([
+    [plugins, desempenho, modelos, arquitetura] = await Promise.all([
       carregarPlugins().then((p) => p.length).catch(() => 0),
       medirDesempenho('http://127.0.0.1:5188', 2),
+      obterModelos().catch(() => null),
+      auditarArquitetura().catch(() => null),
     ]);
   } catch { /* métricas opcionais */ }
   const achados = [];
@@ -61,15 +65,20 @@ async function ciclo(n, objetivo) {
   if (arquivos.some((a) => a.todos > 0)) achados.push('marcadores TODO/FIXME presentes');
   if (backlog.analise?.pendentes) achados.push(backlog.analise.pendentes + ' melhorias pendentes');
   if (desempenho?.gargalos?.length) achados.push('gargalos de desempenho: ' + desempenho.gargalos.join(', '));
+  if (modelos?.erros?.length) achados.push('fontes de modelo indisponíveis: ' + modelos.erros.map((e) => e.fonte).join(', '));
+  if (arquitetura?.resumo?.violacoes) achados.push('violações de arquitetura: ' + arquitetura.resumo.violacoes);
   const piorMs = desempenho ? Math.max(...desempenho.medidas.map((m) => m.p50Ms || 0)) : 0;
   const assinatura = arquivos.map((a) => a.arquivo + ':' + a.linhas + ':' + a.todos).join('|')
-    + '|perf:' + (desempenho?.totalKb ?? '?') + ':' + piorMs;
+    + '|perf:' + (desempenho?.totalKb ?? '?') + ':' + piorMs
+    + '|modelos:' + (modelos?.total ?? '?') + ':arq:' + (arquitetura?.resumo?.violacoes ?? '?');
   const mudou = assinatura !== estado.ultimaAssinatura;
   estado.ultimaAssinatura = assinatura;
   emitir('arquivos', { n, total: arquivos.length, mudou, maiores: arquivos.sort((a, b) => b.linhas - a.linhas).slice(0, 5) });
   emitir('saude', { n, media, rotas: saude });
   emitir('backlog', { n, ...(backlog.analise || {}) });
   if (desempenho) emitir('desempenho', { n, totalKb: desempenho.totalKb, piorMs: Math.round(piorMs), gargalos: desempenho.gargalos, medidas: desempenho.medidas });
+  if (modelos) emitir('modelos', { n, total: modelos.total, porFonte: modelos.porFonte, erros: modelos.erros.length, exemplos: modelos.modelos.slice(0, 5).map((m) => m.fonte + ':' + m.id) });
+  if (arquitetura) emitir('arquitetura', { n, ...arquitetura.resumo, violacoes: arquitetura.violacoes.slice(0, 5) });
   emitir('achados', { n, achados, plugins });
   emitir('analise_fim', { n, mudou, score: Math.round((media * 0.5 + Math.max(0, 1 - achados.length / 5) * 0.5) * 100) / 100 });
   return { mudou, achados };

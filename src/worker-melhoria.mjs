@@ -2,6 +2,7 @@
 import { readFile, writeFile, readdir, unlink } from 'node:fs/promises';
 import path from 'node:path';
 import { analisarMelhorias, marcar } from './analise.mjs';
+import { gerarProposta, aplicarProposta } from './engenheiro.mjs';
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
@@ -66,11 +67,47 @@ async function verificar(arquivo) {
 /** Rotas permitidas: Somente free e NÃO Google. */
 const ROTAS = ['pollinations-text-api', 'openrouter', 'brave-leo', 'kimi', 'hugging'];
 
+async function cicloProposta(n) {
+  const agora = Date.now();
+  if (agora - (estado.ultimaPropostaEm || 0) < 120_000) {
+    emitir('aguardando', { n, aviso: 'backlog vazio; próxima proposta de engenharia em até 2 min' });
+    return { n, semTarefas: true };
+  }
+  estado.ultimaPropostaEm = agora;
+  let arquivoAplicado = '';
+  try {
+    const p = await gerarProposta();
+    await garantirBranch();
+    emitir('proposta', { n, categoria: p.categoria, modelo: p.modelo, titulo: p.titulo, motivo: p.motivo, arquivo: p.arquivo, substituicoes: p.substituicoes.length });
+    const aplicacao = await aplicarProposta(p);
+    arquivoAplicado = aplicacao.arquivo;
+    const checagens = await verificar(aplicacao.arquivo);
+    const ok = checagens.every((c) => c.ok);
+    emitir('testes', { n, ok, checagens, proposta: true });
+    if (!ok) {
+      await git(['checkout', '--', aplicacao.arquivo]).catch(() => undefined);
+      emitir('proposta_rejeitada', { n, arquivo: aplicacao.arquivo, motivo: 'testes/sintaxe falharam' });
+      return { n, semTarefas: true };
+    }
+    await git(['add', '--', aplicacao.arquivo]);
+    const pendente = await git(['status', '--porcelain', '--', aplicacao.arquivo]);
+    if (pendente) {
+      await git(['commit', '-m', 'engenharia: ' + p.titulo + ' (' + p.categoria + ')', '--', aplicacao.arquivo]);
+      emitir('proposta_commitada', { n, arquivo: p.arquivo, categoria: p.categoria, modelo: p.modelo, titulo: p.titulo, merge: false, aviso: 'codigo em worker/auto para revisao humana' });
+    }
+    return { n, ok: true, merge: false, tarefa: 'proposta-' + p.categoria };
+  } catch (e) {
+    if (arquivoAplicado) await git(['checkout', '--', arquivoAplicado]).catch(() => undefined);
+    emitir('engenharia_erro', { n, erro: String(e.message).slice(0, 240) });
+    return { n, semTarefas: true };
+  }
+}
+
 async function ciclo(n, objetivo) {
   emitir('ciclo_inicio', { n, objetivo: objetivo.slice(0, 200) });
   const analise = await analisarMelhorias();
   emitir('analise', { n, ...analise.analise });
-  if (!analise.tarefa) { emitir('sem_tarefas', { n }); return { n, semTarefas: true }; }
+  if (!analise.tarefa) return cicloProposta(n);
   const t = analise.tarefa;
   await garantirBranch();
   emitir('branch', { n, branch: await git(['rev-parse', '--abbrev-ref', 'HEAD']) });
@@ -97,9 +134,17 @@ async function ciclo(n, objetivo) {
     await git(['commit', '-m', 'worker: ' + t.titulo + ' (ciclo ' + n + ')', '--', arquivo, 'docs/MELHORIAS_APLICADAS.json']);
     const seguro = /^(docs\/|config\/)/.test(t.alvo);
     if (seguro) {
-      await git(['checkout', 'master']);
-      try { await git(['merge', '--ff-only', 'worker/auto']); merge = true; }
-      catch { await git(['merge', '--abort']).catch(() => undefined); }
+      // A tarefa atual é docs, mas a branch pode conter código de ciclos anteriores.
+      // Só mergeia se TODO o diff da branch for docs/config.
+      const diff = await git(['diff', '--name-only', 'master...worker/auto']);
+      const arquivosDaBranch = diff.split(/\r?\n/).filter(Boolean);
+      const branchSegura = arquivosDaBranch.every((f) => /^(docs|config)\//.test(f));
+      if (!branchSegura) emitir('merge_bloqueado', { n, arquivos: arquivosDaBranch, aviso: 'branch contem codigo; merge automatico cancelado' });
+      else {
+        await git(['checkout', 'master']);
+        try { await git(['merge', '--ff-only', 'worker/auto']); merge = true; }
+        catch { await git(['merge', '--abort']).catch(() => undefined); }
+      }
     } else {
       emitir('revisao', { n, arquivo: t.alvo, aviso: 'codigo permanece em worker/auto para revisao' });
     }

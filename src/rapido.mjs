@@ -1,5 +1,6 @@
 /** Resposta rápida sem chave: Pollinations Text API. Primeiro modelo válido vence. */
-const MODELOS = ['openai', 'gemini', 'deepseek', 'mistral'];
+import { MODELOS_POLLINATIONS } from './modelos-pollinations.mjs';
+const MODELOS = MODELOS_POLLINATIONS;
 // Sem prompt de sistema: instruções vazam na resposta do Pollinations.
 const SISTEMA = '';
 

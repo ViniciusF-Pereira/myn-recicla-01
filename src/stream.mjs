@@ -1,5 +1,6 @@
 /** Resposta rápida e streaming via Pollinations Text API (SSE), sem chave. */
-const MODELOS = ['openai', 'openai', 'gemini', 'deepseek', 'mistral'];
+import { MODELOS_POLLINATIONS } from './modelos-pollinations.mjs';
+const MODELOS = MODELOS_POLLINATIONS;
 
 function valido(texto) {
   const s = String(texto || '').trim();

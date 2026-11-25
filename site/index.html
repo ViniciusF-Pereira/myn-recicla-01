@@ -431,11 +431,15 @@ function bcAdicionar(ev){
  d.className='bc-linha'+(/erro|falha|revertido/.test(ev.tipo)?' erro':/git|commit|merge|branch/.test(ev.tipo)?' git':/testes|ok/.test(ev.tipo)?' ok':'');
  let txt=(ev.worker?'['+ev.worker+'] ':'')+ev.tipo;
  if(ev.n)txt+=' #'+ev.n;
+ if(ev.categoria)txt+=' · '+ev.categoria;
+ if(ev.modelo)txt+=' · modelo '+ev.modelo;
  if(ev.objetivo)txt+=' · '+ev.objetivo;
  if(ev.passos)txt+=' · '+ev.passos.join(', ');
  if(ev.arquivo)txt+=' · '+ev.arquivo;
- if(ev.total!==undefined)txt+=' · '+ev.total+' arquivos'+(ev.mudou===false?' (sem mudança)':'');
+ if(ev.tipo==='arquivos'&&ev.total!==undefined)txt+=' · '+ev.total+' arquivos'+(ev.mudou===false?' (sem mudança)':'');
  if(ev.media!==undefined)txt+=' · saúde '+ev.media.toFixed(2);
+ if(ev.tipo==='modelos')txt+=' · '+ev.total+' modelos · '+Object.entries(ev.porFonte||{}).map(([k,v])=>k+':'+v).join(' · ')+(ev.erros?' · fontes com erro '+ev.erros:'');
+ if(ev.tipo==='arquitetura')txt+=' · '+ev.modulos+' módulos · '+ev.dependencias+' dependências · '+ev.ciclos+' ciclos · '+ev.violacoes+' violações';
  if(ev.totalKb!==undefined)txt+=' · '+ev.totalKb+' KB · pior '+ev.piorMs+'ms'+(ev.gargalos?.length?' · gargalos: '+ev.gargalos.join(', '):'');
  if(ev.achados)txt+=' · '+ev.achados.join('; ');
  if(ev.pendentes!==undefined)txt+=' · pendentes '+ev.pendentes;
@@ -454,6 +458,7 @@ function bcAdicionar(ev){
 }
 let bcModeloAtual='modelo: nenhum (análise local)';
 function bcAtualizarModelo(ev){
+ if(ev.modelo)bcModeloAtual='modelo: '+ev.modelo+' · via Pollinations';
  if(ev.passos){
   const ids=ev.passos.map(p=>String(p).split('→').pop().trim());
   const id=ids.find(x=>mapaModelos[x]);

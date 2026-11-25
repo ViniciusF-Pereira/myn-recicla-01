@@ -1,0 +1,498 @@
+{
+  "atualizadoEm": "2026-11-25T15:54:36.399Z",
+  "total": 34,
+  "porFonte": {
+    "pollinations": 1,
+    "openrouter": 10,
+    "huggingface": 23
+  },
+  "erros": [],
+  "modelos": [
+    {
+      "fonte": "pollinations",
+      "id": "openai-fast",
+      "nome": "openai-fast",
+      "descricao": "GPT-OSS 20B Reasoning LLM (OVH)",
+      "contexto": null,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": true,
+      "tier": "anonymous"
+    },
+    {
+      "fonte": "openrouter",
+      "id": "inclusionai/ling-3.2-flash:free",
+      "nome": "inclusionAI: Ling 3.2 Flash (free)",
+      "descricao": "Ling 3.2 Flash is a hybrid reasoning model from inclusionAI that accepts text and image input, with a 1M-token context window and up to 200 images per request. Thinking can...",
+      "contexto": 1048576,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "baidu/ernie-5.5-flash-preview:free",
+      "nome": "Baidu: ERNIE-5.5-Flash-Preview (free)",
+      "descricao": "ERNIE 5.5 Flash Preview is the latest foundation model in the ERNIE family, with comprehensive improvements in coding, agentic capabilities, knowledge work, and deep research. It has 280 billion total...",
+      "contexto": 1024000,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "liquid/lfm-3-1.7b:free",
+      "nome": "LiquidAI: LFM3-1.7B (free)",
+      "descricao": "A compact 1.7B-parameter text model with a 256K-token context, post-trained for agents, tool calling, and structured outputs. It reasons before it answers. Prompts and outputs may be retained and used...",
+      "contexto": 262144,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "particle-ai/particle-1:free",
+      "nome": "Particle AI: Particle-1 (free)",
+      "descricao": "Particle-1 is a token-efficient agentic coding model from Particle AI, post-trained on DeepSeek V4.1 Flash. It is suited for software engineering work such as terminal workflows, codebase changes, and data...",
+      "contexto": 1048576,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "recursive/flint-v1.0:free",
+      "nome": "Recursive: Flint (free)",
+      "descricao": "Flint is an open-weight mixture-of-experts model from Recursive, with about 2.5B active parameters out of 40B total, built by Recursive's autoresearch system Eureka Machine for coding agents. It is suited...",
+      "contexto": 262144,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "nvidia/nemotron-3.5-super-vl:free",
+      "nome": "NVIDIA: Nemotron 3.5 Super VL (free)",
+      "descricao": "NVIDIA Nemotron 3.5 Super VL is an open multimodal mixture-of-experts model from NVIDIA, with 12B active parameters out of 120B total. It takes text, images, documents, GUI screenshots, and video...",
+      "contexto": 1000000,
+      "modalidades": [
+        "text",
+        "image",
+        "video"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "nvidia/nemotron-3.5-lightning:free",
+      "nome": "NVIDIA: Nemotron 3.5 Lightning (free)",
+      "descricao": "NVIDIA Nemotron 3.5 Lightning is an open mixture-of-experts model from NVIDIA, with 3B active parameters out of 30B total. It is suited for high-throughput agentic workloads and specialized tasks that...",
+      "contexto": 1000000,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "nvidia/nemotron-3-ultra-550b-a55b:free",
+      "nome": "NVIDIA: Nemotron 3 Ultra (free)",
+      "descricao": "NVIDIA Nemotron 3 Ultra is an open frontier-reasoning and orchestration model from NVIDIA, with 55B active parameters out of 550B total (MoE). Built on a hybrid Transformer-Mamba mixture-of-experts architecture, it...",
+      "contexto": 1000000,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning:free",
+      "nome": "NVIDIA: Nemotron 3 Nano Omni (free)",
+      "descricao": "NVIDIA Nemotron™ 3 Nano Omni is a 30B-A3B open multimodal model designed to function as a perception and context sub-agent in enterprise agent systems. It accepts text, image, video, and...",
+      "contexto": 256000,
+      "modalidades": [
+        "text",
+        "audio",
+        "image",
+        "video"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "openrouter",
+      "id": "openrouter/free",
+      "nome": "Free Models Router",
+      "descricao": "The simplest way to get free inference. openrouter/free is a router that selects free models at random from the models available on OpenRouter. The router smartly filters for models that...",
+      "contexto": 200000,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": true,
+      "preco": {
+        "prompt": "0",
+        "completion": "0"
+      }
+    },
+    {
+      "fonte": "huggingface",
+      "id": "thinkingmachines/Inkling-2-Mini",
+      "nome": "thinkingmachines/Inkling-2-Mini",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 96527,
+      "likes": 5920
+    },
+    {
+      "fonte": "huggingface",
+      "id": "unsloth/Inkling-2-Mini-GGUF",
+      "nome": "unsloth/Inkling-2-Mini-GGUF",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 2445633,
+      "likes": 1317
+    },
+    {
+      "fonte": "huggingface",
+      "id": "AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
+      "nome": "AtomicChat/Inkling-2-Mini-Uncensored-GGUF",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 762491,
+      "likes": 797
+    },
+    {
+      "fonte": "huggingface",
+      "id": "prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
+      "nome": "prism-ml/Ternary-Bonsai-2.5-27B-GGUF",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 59366,
+      "likes": 254
+    },
+    {
+      "fonte": "huggingface",
+      "id": "harness-hub/Qwen3.8-27B-pi-adapted",
+      "nome": "harness-hub/Qwen3.8-27B-pi-adapted",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 3844,
+      "likes": 1087
+    },
+    {
+      "fonte": "huggingface",
+      "id": "tencent/Hy4-flash",
+      "nome": "tencent/Hy4-flash",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 10479,
+      "likes": 689
+    },
+    {
+      "fonte": "huggingface",
+      "id": "Qwen/Qwen3.8-27B",
+      "nome": "Qwen/Qwen3.8-27B",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 6047011,
+      "likes": 21762
+    },
+    {
+      "fonte": "huggingface",
+      "id": "inclusionAI/LingSante-3.1-flash",
+      "nome": "inclusionAI/LingSante-3.1-flash",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 1487,
+      "likes": 172
+    },
+    {
+      "fonte": "huggingface",
+      "id": "nari-labs/Qwen3.8-27B-NariQ-GGUF",
+      "nome": "nari-labs/Qwen3.8-27B-NariQ-GGUF",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 14337,
+      "likes": 133
+    },
+    {
+      "fonte": "huggingface",
+      "id": "RadixArk/DaisyRose-27B",
+      "nome": "RadixArk/DaisyRose-27B",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 3182,
+      "likes": 362
+    },
+    {
+      "fonte": "huggingface",
+      "id": "Aleph-Alpha/Kolibri-1.1",
+      "nome": "Aleph-Alpha/Kolibri-1.1",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 837,
+      "likes": 132
+    },
+    {
+      "fonte": "huggingface",
+      "id": "strata-engine/Inkling-2-Mini-Strata",
+      "nome": "strata-engine/Inkling-2-Mini-Strata",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 2965,
+      "likes": 137
+    },
+    {
+      "fonte": "huggingface",
+      "id": "DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
+      "nome": "DavidAU/Qwen3.8-27B-TURBO-Fable-Cold-Fusion-735-882-Heretic-Uncensored-NEO-CODER-MAX-MTP-GGUF",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 1873950,
+      "likes": 4349
+    },
+    {
+      "fonte": "huggingface",
+      "id": "baidu/ERNIE-5.5-Flash-Preview",
+      "nome": "baidu/ERNIE-5.5-Flash-Preview",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 1193,
+      "likes": 278
+    },
+    {
+      "fonte": "huggingface",
+      "id": "sensenova/SenseNova-Loop-9B",
+      "nome": "sensenova/SenseNova-Loop-9B",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 3268,
+      "likes": 699
+    },
+    {
+      "fonte": "huggingface",
+      "id": "thinkingmachines/TML-d24-varloop-research",
+      "nome": "thinkingmachines/TML-d24-varloop-research",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 3398,
+      "likes": 122
+    },
+    {
+      "fonte": "huggingface",
+      "id": "inclusionAI/LingSante-3.1-air-VL",
+      "nome": "inclusionAI/LingSante-3.1-air-VL",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 4635,
+      "likes": 122
+    },
+    {
+      "fonte": "huggingface",
+      "id": "MemTensor/MemT-1.0-Pro",
+      "nome": "MemTensor/MemT-1.0-Pro",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 806,
+      "likes": 104
+    },
+    {
+      "fonte": "huggingface",
+      "id": "thinkingmachines/Inkling-2-Small",
+      "nome": "thinkingmachines/Inkling-2-Small",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 78274,
+      "likes": 1484
+    },
+    {
+      "fonte": "huggingface",
+      "id": "KRAFTON/Raon-1-mini",
+      "nome": "KRAFTON/Raon-1-mini",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 264,
+      "likes": 84
+    },
+    {
+      "fonte": "huggingface",
+      "id": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+      "nome": "deepseek-ai/DeepSeek-V4.1-Flash-1017",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 550396,
+      "likes": 6675
+    },
+    {
+      "fonte": "huggingface",
+      "id": "huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
+      "nome": "huihui-ai/Huihui-Qwen3.8-27B-abliterated-GGUF",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 4628141,
+      "likes": 2620
+    },
+    {
+      "fonte": "huggingface",
+      "id": "surogate/Surogate3.7-35B-A3B",
+      "nome": "surogate/Surogate3.7-35B-A3B",
+      "descricao": "",
+      "contexto": null,
+      "modalidades": [
+        "text",
+        "image"
+      ],
+      "gratuito": "endpoint publico; uso sujeito ao provedor",
+      "downloads": 530,
+      "likes": 94
+    }
+  ]
+}

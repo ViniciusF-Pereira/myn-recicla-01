@@ -51,6 +51,13 @@ Eventos SSE: `conectado`, `iniciado`, `ciclo_inicio`, `plano`, `branch`, `higien
 ## Visual
 Playground → botão **worker** abre painel com log escuro, cor por tipo de evento, campo de objetivo, INICIAR/PARAR. Cada etapa aparece com timestamp.
 
+## Engenharia contínua (25/11/2026)
+- **Análise** mede quatro frentes: código/arquivos, desempenho no fio, modelos livres e grafo de dependências.
+- **Melhoria** aplica o backlog verificável. Com backlog vazio, espera 2 minutos e pede ao Pollinations (`openai-fast`) uma proposta de patch para código, infra, modelos ou arquitetura.
+- Toda proposta passa por validação de escopo, `node --test`, `node --check` e `git diff --check`. Código fica em `worker/auto`; nunca é mergeado automaticamente.
+- O merge de docs/config exige que **todo o diff `master...worker/auto`** seja docs/config. Uma tarefa de docs não pode arrastar código anterior.
+- Descoberta de modelos: `node scripts/descobrir-modelos.mjs` (Pollinations, OpenRouter, HuggingFace; sem chave e sem Google).
+
 ## Dois workers separados (25/11/2026)
 - **Análise** (`src/worker-analise.mjs`): só observa — varrimento de arquivos, saúde, backlog e achados. Nunca edita nem commita. Endpoints `/api/worker-analise/{status,start,stop,stream}`.
 - **Melhoria** (`src/worker-melhoria.mjs`): aplica tarefa real do backlog, testa, commita e faz merge. Quando o backlog acaba, fica em `aguardando` (vigia) em vez de inventar trabalho. Código permanece em `worker/auto` para revisão; só docs/config têm merge automático. Endpoints `/api/worker-melhoria/{status,start,stop,stream}`.

@@ -5,8 +5,8 @@ import path from 'node:path';
 import { promisify } from 'node:util';
 
 const executar = promisify(execFile);
-const RAIZ = process.cwd();
-export const DIR_ARQUIVOS = path.join(RAIZ, 'dados', 'arquivos');
+const DADOS = process.env.MYN_DADOS || path.join(process.cwd(), 'dados');
+export const DIR_ARQUIVOS = path.join(DADOS, 'arquivos');
 await mkdir(DIR_ARQUIVOS, { recursive: true });
 const TESSERACT = 'C:/Program Files/Tesseract-OCR/tesseract.exe';
 const LIMITE = 12 * 1024 * 1024;

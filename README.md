@@ -16,8 +16,8 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 
 ## O que é
 
-- **167 plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade.
-- **13 rotas Google** mapeadas por um único login (Gemini, Nano Banana, Google Chat, Messages, ImageFX, NotebookLM, Drive, Meet, AI Studio, Veo…).
+- **154 plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade. Google/Gemini foram removidos do catálogo público.
+- **Descoberta de modelos livres** via Pollinations, OpenRouter e HuggingFace (endpoints públicos, sem chave), com filtro de preço e modalidade.
 - **Chat com streaming SSE** (primeiro token em ~15 ms), pesquisa com RAG + catálogo, anexos, tabelas markdown e arquivos.
 - **Mídia free**: imagem (Pollinations → desenho local), voz (edge-tts), vídeo (ffmpeg local).
 - **Myn-01 Auto**: escolhe rotas por capacidade e saúde, roda em paralelo e escolhe a melhor resposta.
@@ -50,8 +50,8 @@ node scripts/gateway-vm.mjs
 - Escreva e aperte **Enter** → streaming token a token.
 - **🔎 pesquisar** ou `/pesquisa pergunta` → cruza RAG + plugins antes de responder.
 - **🖼 imagem / 🔊 áudio / 🎬 vídeo** → clique com texto no campo gera na hora; com campo vazio fica “armado” para o próximo Enter.
-- **🔌 plugins** → painel com os 167 plugins; clique insere `/id ` no campo.
-- **🇬 google** → **CONECTAR TUDO (1 login)**: abre o login uma vez, detecta a conta e mapeia as 13 rotas.
+- **🔌 plugins** → painel com os 154 plugins; clique insere `/id ` no campo.
+- **🧠 modelos** → catálogo descoberto por fontes públicas, sem Google/Gemini.
 - **📜** → gaveta com histórico, cache e tempos.
 - Comandos: `/plan objetivo`, `/loop objetivo`, `/goal objetivo`, `/id mensagem`. Mensageria exige `/id confirmar: texto`.
 
@@ -66,7 +66,7 @@ node scripts/gateway-vm.mjs
 | POST | `/api/plan` · `/api/goal` · `/api/goal/rodar` | planejamento e goal autônomo |
 | GET/DELETE | `/api/goal` | listar/remover goals |
 | POST | `/api/orquestrar` | paralelismo por capacidade (`rapido:true`) |
-| GET | `/api/plugins` · `/api/saude` · `/api/google` | catálogo, saúde, Google |
+| GET | `/api/plugins` · `/api/saude` · `/api/desempenho` · `/api/arquitetura` · `/api/modelos/descobertos` | catálogo, saúde, métricas e modelos |
 | POST | `/api/midia` · `/api/documento` | imagem/voz/vídeo, anexos |
 | GET | `/api/arquivos` · `/api/historico` · `/api/cache` | arquivos, caderno, cache |
 | POST | `/mcp` | MCP JSON-RPC (`initialize`, `tools/list`, `tools/call`) |
@@ -94,7 +94,7 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Direção web-only:** [`docs/PLANEJAMENTO.md`](docs/PLANEJAMENTO.md) — evoluir o Myn para agente open-source tipo OpenCode/Claude Code/Codex usando **somente rotas free de navegador + WebGPU**, sem binário/local PC. Fase 0 item 3 já entregue: `/api/orquestrar?rapido=true` nunca escolhe rotas `*-local`.
 
-**Workers separados:** `docs/WORKER_INFINITO.md`. Análise (`/api/worker-analise/*`) só observa e para quando não há mudança; melhoria (`/api/worker-melhoria/*`) aplica tarefa, roda `node --test`, commita e mergeia **somente docs/config** — código fica em `worker/auto` para revisão. Sem Gemini/Google.
+**Workers separados:** `docs/WORKER_INFINITO.md`. Análise (`/api/worker-analise/*`) mede código, desempenho, modelos e arquitetura. Melhoria (`/api/worker-melhoria/*`) aplica tarefa, roda `node --test` e, com backlog vazio, gera propostas de engenharia via Pollinations. Merge automático só quando **todo o diff da branch** é docs/config; código fica em `worker/auto` para revisão. Sem Gemini/Google.
 
 **Created By (seção 06 da home):** `node scripts/atualizar-perfil.mjs` busica dados públicos do GitHub via `gh api` e grava `site/perfil.json` — foto, bio, números, repos e LinkedIn (achado no campo `blog` do GitHub). Sem segredos.
 
@@ -112,7 +112,7 @@ Ele cria o goal com as 6 fases do planejamento e roda um ciclo imediato. Acompan
 4. Mensageria real só com confirmação explícita.
 5. Nenhuma chave, `.env`, token ou senha no repo.
 
-Limites honestos: o Pollinations tem cota comunitária (fallback local cobre), Gemini/Google exigem um login no perfil do gateway, e recusas de modelo de texto são desviadas para o gerador de imagem.
+Limites honestos: o Pollinations tem cota comunitária; HuggingFace/OpenRouter são descobertos por API pública, mas execução depende do provedor. Mídia ainda pode usar binários locais opcionais (ffmpeg/PIL/edge-tts/Tesseract); o caminho padrão de texto é web/API. Google/Gemini estão desativados.
 ## Provas
 
 Veja `docs/PROVAS.md` para relatório, mapa e bateria de testes.
