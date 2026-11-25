@@ -31,3 +31,5 @@ O achado de caminho em mídia foi um **hardening**, não um exploit confirmado: 
 - Nenhuma revisão humana intermediária.
 - Nenhum envio de código para LLM.
 - Todos os merges foram `--ff-only` e passaram pela allowlist de caminhos.
+- Lock de processo bloqueou o segundo start simultâneo com HTTP `409`.
+- Smoke pós-merge foi validado; um teste em repositório temporário confirmou rollback completo quando o HTTP falha.

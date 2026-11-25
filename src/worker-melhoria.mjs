@@ -90,7 +90,7 @@ export function caminhoPermitido(caminho, permitirCodigo) {
     || /^(Dockerfile|docker-compose\.yml|package\.json)$/.test(caminho);
 }
 
-async function smokePosMerge() {
+export async function smokePosMerge() {
   if (process.env.MYN_SMOKE_HTTP === '0') return { ok: true, ignorado: true };
   const base = process.env.MYN_API_BASE || 'http://127.0.0.1:' + (process.env.PORTA || 5188);
   try {
@@ -102,7 +102,7 @@ async function smokePosMerge() {
   } catch (e) { return { ok: false, erro: String(e.message).slice(0, 180) }; }
 }
 
-async function mesclarBranch(n, permitirCodigo = AUTO_MERGE_CODIGO) {
+export async function mesclarBranch(n, permitirCodigo = AUTO_MERGE_CODIGO) {
   const diff = await git(['diff', '--name-only', 'master...worker/auto']);
   const arquivos = diff.split(/\r?\n/).filter(Boolean);
   if (!arquivos.length) return false;
