@@ -139,3 +139,8 @@ Módulo do Myn Recicla/01.
 Exports: auditarArquitetura
 
 Módulo do Myn Recicla/01.
+## engenheiro.mjs
+
+Exports: gerarProposta, aplicarProposta
+
+Módulo do Myn Recicla/01.
