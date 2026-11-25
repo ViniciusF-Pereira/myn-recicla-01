@@ -7,5 +7,6 @@
   "doc-seguranca",
   "doc-limites",
   "doc-indice",
-  "config-app"
+  "config-app",
+  "script-validar-config"
 ]
