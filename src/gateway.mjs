@@ -4,7 +4,7 @@ import { execFile } from 'node:child_process';
 import { resolve } from 'node:path';
 import { promisify } from 'node:util';
 const executar = promisify(execFile);
-const TESSERACT = process.env.MYNCELLIUM_TESSERACT || 'C:/Program Files/Tesseract-OCR/tesseract.exe';
+const TESSERACT = process.env.MYN_TESSERACT || process.env.MYNCELLIUM_TESSERACT || 'tesseract';
 
 export async function carregarConfigAsync(caminho = resolve('config/rotas.json')) {
   return JSON.parse(await readFile(caminho, 'utf8'));
