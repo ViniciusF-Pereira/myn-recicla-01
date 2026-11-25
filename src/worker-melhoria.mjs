@@ -219,14 +219,7 @@ async function ciclo(n, objetivo) {
   return analise.tarefa ? cicloBacklog(n, analise.tarefa) : cicloAuditoria(n);
 }
 
-export async function iniciar({ objetivo = 'melhorar codigo, infra, modelos e arquitetura', maxCiclos = 1000, intervaloMs = 4000 } = {}) {
-  if (ativo) return { ok: false, erro: 'worker de melhoria ja ativo' };
-  const lock = await adquirirLock('melhoria');
-  if (!lock.ok) return { ok: false, erro: lock.motivo, pid: lock.pid };
-  liberarLock = lock.liberar;
-  ativo = true; abortar = false;
-  estado = { ciclos: 0, ultimo: null, iniciadoEm: new Date().toISOString(), objetivo: String(objetivo).slice(0, 500) };
-  emitir('iniciado', { objetivo: estado.objetivo, autoMergeCodigo: AUTO_MERGE_CODIGO, modo: 'achado-concreto', pid: process.pid });
+async function executarLoop(maxCiclos, intervaloMs) {
   let n = 0, motivo = 'limite', falhou = null, falhas = 0;
   try {
     while (ativo && !abortar && n < maxCiclos) {
@@ -246,5 +239,18 @@ export async function iniciar({ objetivo = 'melhorar codigo, infra, modelos e ar
     await liberarLock?.();
     liberarLock = null;
   }
+}
+
+export async function iniciar({ objetivo = 'melhorar codigo, infra, modelos e arquitetura', maxCiclos = 1000, intervaloMs = 4000 } = {}) {
+  if (ativo) return { ok: false, erro: 'worker de melhoria ja ativo' };
+  ativo = true; abortar = false;
+  const lock = await adquirirLock('melhoria');
+  if (!lock.ok) { ativo = false; return { ok: false, erro: lock.motivo, pid: lock.pid }; }
+  liberarLock = lock.liberar;
+  estado = { ciclos: 0, ultimo: null, iniciadoEm: new Date().toISOString(), objetivo: String(objetivo).slice(0, 500) };
+  emitir('iniciado', { objetivo: estado.objetivo, autoMergeCodigo: AUTO_MERGE_CODIGO, modo: 'achado-concreto', pid: process.pid });
+  void executarLoop(Math.min(1000, Number(maxCiclos) || 1000), Math.max(500, Number(intervaloMs) || 4000))
+    .catch((e) => emitir('engenharia_erro', { erro: String(e.message).slice(0, 240) }));
+  return { ok: true, status: status() };
 }
 export function parar() { if (!ativo) return { ok: false, erro: 'worker de melhoria nao estava ativo' }; abortar = true; emitir('parando', {}); return { ok: true }; }

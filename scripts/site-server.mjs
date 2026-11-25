@@ -135,13 +135,25 @@ const servidor = http.createServer(async (req, res) => {
       try {
         let corpo = ''; for await (const p of req) corpo += p;
         const b = JSON.parse(corpo || '{}');
-        w.iniciar({
+        if (w.status().ativo) {
+          res.writeHead(409, { 'content-type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: false, erro: 'worker ja ativo', status: w.status() }));
+          return;
+        }
+        const opcoes = {
           objetivo: String(b.objetivo || 'melhorar e otimizar o codigo do Myn Recicla').slice(0, 500),
           maxCiclos: Math.min(1000, Number(b.maxCiclos) || 1000),
           intervaloMs: Math.max(500, Number(b.intervaloMs) || 4000),
-        }).catch((e) => console.log('[worker-' + workerRota[1] + ']', e.message));
-        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ ok: true, status: w.status() }));
+        };
+        if (workerRota[1] === 'melhoria') {
+          const resultado = await w.iniciar(opcoes);
+          res.writeHead(resultado.ok ? 200 : 409, { 'content-type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify(resultado));
+        } else {
+          w.iniciar(opcoes).catch((e) => console.log('[worker-' + workerRota[1] + ']', e.message));
+          res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+          res.end(JSON.stringify({ ok: true, status: w.status() }));
+        }
       } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
       return;
     }
