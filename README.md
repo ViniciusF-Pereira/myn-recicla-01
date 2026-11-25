@@ -113,3 +113,6 @@ Ele cria o goal com as 6 fases do planejamento e roda um ciclo imediato. Acompan
 5. Nenhuma chave, `.env`, token ou senha no repo.
 
 Limites honestos: o Pollinations tem cota comunitária (fallback local cobre), Gemini/Google exigem um login no perfil do gateway, e recusas de modelo de texto são desviadas para o gerador de imagem.
+## Provas
+
+Veja `docs/PROVAS.md` para relatório, mapa e bateria de testes.
