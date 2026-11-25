@@ -30,6 +30,12 @@ test('todo modelo mapeado tem plugin real e nenhum é Google', async () => {
   const ids = new Set(plugins.map((p) => p.id));
   assert.ok(mapa.every((r) => ids.has(r.id)), JSON.stringify(mapa.filter((r) => !ids.has(r.id)).map((r) => r.id)));
   assert.ok(mapa.every((r) => !/google|gemini/i.test(r.id + r.nome + r.modelo)));
+  assert.ok(mapa.every((r) => !/-local$/.test(r.id)));
+});
+
+test('orquestrador não escolhe gerador local nem em modo normal', async () => {
+  const rotas = await escolherPara('gere uma imagem de um gato', 10, false);
+  assert.ok(rotas.every((r) => !/-local$/.test(r.id)));
 });
 
 test('se todas as rotas falham, o orquestrador usa fallback determinístico', async () => {

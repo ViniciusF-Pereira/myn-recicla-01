@@ -33,7 +33,7 @@ export async function escolherPara(tarefa, max = 3, rapido = false) {
   const caps = classificarTarefa(tarefa);
   const mapa = (await carregarMapaModelos()).filter((r) => !/google|gemini/i.test(r.id + ' ' + r.nome + ' ' + r.modelo));
   const plugins = JSON.parse(await readFile(path.join(RAIZ, 'config/plugins.json'), 'utf8')).plugins
-    .filter((p) => !/google|gemini/i.test(p.id + ' ' + p.nome));
+    .filter((p) => p.acao !== 'local' && !/google|gemini/i.test(p.id + ' ' + p.nome));
   const idsDisponiveis = new Set(plugins.map((p) => p.id));
   let candidatos = mapa.filter((r) => idsDisponiveis.has(r.id) && r.capacidades.some((c) => caps.includes(c)) && !r.confirmacao);
   if (rapido) {
