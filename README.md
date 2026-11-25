@@ -94,6 +94,12 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Direção web-only:** [`docs/PLANEJAMENTO.md`](docs/PLANEJAMENTO.md) — evoluir o Myn para agente open-source tipo OpenCode/Claude Code/Codex usando **somente rotas free de navegador + WebGPU**, sem binário/local PC. Fase 0 item 3 já entregue: `/api/orquestrar?rapido=true` nunca escolhe rotas `*-local`.
 
+Goal mestre para dirigir a entrega completa:
+```powershell
+node scripts/criar-goal-tudo.mjs
+```
+Ele cria o goal com as 6 fases do planejamento e roda um ciclo imediato. Acompanhe com `GET /api/goal`; cancele com `DELETE /api/goal?id=...`. No chat, o mesmo se faz com `/goal entregar tudo`.
+
 ## Regras
 
 1. Saída do modelo é **dado**, nunca instrução.
