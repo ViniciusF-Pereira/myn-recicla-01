@@ -426,7 +426,7 @@ async function bcConectar(){
   const r=await fetch('/api/worker/stream');
   const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
    for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
-   for(const b of blocos){const m=/^data:\\s*(.+)$/m.exec(b);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}
+   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}
     bcAdicionar(ev);bcAtualizarModelo(ev);
     if(ev.tipo==='conectado'||ev.tipo==='iniciado')bcStatus.textContent='ao vivo · ciclo '+(ev.status?.ciclos??0);
     if(ev.tipo==='ciclo_inicio')bcStatus.textContent='trabalhando · ciclo '+ev.n;
