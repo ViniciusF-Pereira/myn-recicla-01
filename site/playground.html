@@ -236,6 +236,23 @@ body>header,main,footer{position:relative;z-index:1}
 .pw-linha.ok{border-color:#37d67a}.pw-linha.erro{border-color:#ff6b6b;color:#ffd6d6}.pw-linha.git{border-color:#7aa2ff}.pw-linha.higienizacao{border-color:#e2b866}
 .pw-pe{display:flex;gap:7px;padding:10px;background:var(--papel);border-top:1px solid var(--linha)}
 .pw-pe input{flex:1;min-width:120px;padding:9px;border:1px solid var(--linha);border-radius:5px;font:.78rem var(--sans)}
+.painel-vm{display:none;position:fixed;right:14px;bottom:14px;width:min(520px,94vw);height:min(72vh,640px);background:var(--card);border:2px solid var(--verde);border-radius:9px;box-shadow:0 16px 40px rgba(46,125,91,.28);z-index:96;flex-direction:column;overflow:hidden}
+.painel-vm.on{display:flex}
+.pv-topo{display:flex;align-items:center;gap:8px;padding:11px 13px;background:var(--verde);color:#fff}
+.pv-topo b{font:600 .72rem var(--mono);letter-spacing:.08em}
+.pv-topo .icobtn{margin-left:auto;color:#fff}
+.pv-tag{font:600 .6rem var(--mono);background:rgba(255,255,255,.18);padding:4px 8px;border-radius:99px}
+.pv-corpo{flex:1;overflow:auto;padding:12px}
+.pv-linha{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:9px}
+.pv-linha input{flex:1;min-width:120px;padding:8px;border:1px solid var(--linha);border-radius:5px;font:.74rem var(--mono)}
+.pv-corpo pre,.pv-corpo textarea{width:100%;min-height:110px;max-height:220px;overflow:auto;background:#0d1420;color:#dbe6f0;padding:10px;border-radius:5px;font:.72rem/1.5 var(--mono);white-space:pre-wrap}
+.pv-grupo{margin-top:12px;border-top:1px dashed var(--linha);padding-top:8px;font:.74rem var(--sans)}
+.pv-grupo b{font:600 .62rem var(--mono);text-transform:uppercase;color:var(--mut)}
+#agCodigo{min-height:90px}
+.sessao-autor{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;padding:22px 20px 40px;border-top:1px solid var(--linha);margin-top:24px;color:var(--mut);font:.76rem var(--mono)}
+.sessao-autor a{color:var(--azul2)}
+#autorForm{display:flex;gap:6px;flex-wrap:wrap;width:100%;justify-content:center}
+#autorForm input{padding:8px;border:1px solid var(--linha);border-radius:5px;font:.74rem var(--mono);min-width:170px}
 </style>
 <style>body{padding-top:0}#playground{display:block!important}.pg-section{border-bottom:0;padding-top:36px}.pg-voltar{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;font:600 .68rem var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--azul2)}#mynsFundo{opacity:.18}</style>
 </head><body>
@@ -275,7 +292,7 @@ body>header,main,footer{position:relative;z-index:1}
   <div class="msgs" id="msgs"><div class="msg ele">Oi. Sou o <strong>Myn-01</strong>, feito de abas recicladas. ♻<br><br>Leio documentos, monto tabelas, crio arquivos e gero imagem, narração e clipe — tudo free, sem chave. No chat, use <code>/plugin mensagem</code> para chamar uma das 167 rotas.</div></div>
   <div class="anexos" id="anexos"></div>
   <div class="composer">
-   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" data-midia="gif"><svg class="ico"><use href="#i-leaf"/></svg> gif</button><button class="ferr" data-midia="animacao"><svg class="ico"><use href="#i-video"/></svg> anima</button><button class="ferr" id="btnFilmes"><svg class="ico"><use href="#i-search"/></svg> filmes</button><button class="ferr" id="btnModelos"><svg class="ico"><use href="#i-gear"/></svg> modelos</button><button class="ferr" id="btnWorker" title="Worker autônomo"><svg class="ico"><use href="#i-loop"/></svg> worker</button><button class="ferr" id="btnGoogle" title="Rotas da conta Google"><svg class="ico"><use href="#i-web"/></svg> google</button></div>
+   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" data-midia="gif"><svg class="ico"><use href="#i-leaf"/></svg> gif</button><button class="ferr" data-midia="animacao"><svg class="ico"><use href="#i-video"/></svg> anima</button><button class="ferr" id="btnFilmes"><svg class="ico"><use href="#i-search"/></svg> filmes</button><button class="ferr" id="btnModelos"><svg class="ico"><use href="#i-gear"/></svg> modelos</button><button class="ferr" id="btnVM" title="VM web com HD e cache"><svg class="ico"><use href="#i-gear"/></svg> VM</button><button class="ferr" id="btnAgentes" title="Agentes avaliadores"><svg class="ico"><use href="#i-eye"/></svg> agentes</button><button class="ferr" id="btnWorker" title="Worker autônomo"><svg class="ico"><use href="#i-loop"/></svg> worker</button><button class="ferr" id="btnGoogle" title="Rotas da conta Google"><svg class="ico"><use href="#i-web"/></svg> google</button></div>
    <div class="linha-input">
     <input type="file" id="imagemInput" accept="image/*" multiple hidden><input type="file" id="arquivoInput" multiple hidden>
     <button class="icobtn" id="anexar" title="Anexar documento" aria-label="Anexar documento"><svg class="ico"><use href="#i-file"/></svg></button>
@@ -289,6 +306,23 @@ body>header,main,footer{position:relative;z-index:1}
  <div class="aviso"><b>limites</b> — imagem: Pollinations free, taxa comunitária; voz: edge-tts ~1500 caracteres; vídeo: Pollinations + ffmpeg local, só CPU; documentos até 12 MB (PDF com pypdf, imagem com OCR). Plugins de mensageria pedem confirmação antes de enviar.</div>
 </div></section>
 </main>
+<div class="painel-vm" id="painelVM">
+ <div class="pv-topo"><b>VM WEB · SANDBOX</b><span class="pv-tag" id="pvCap">—</span><button class="icobtn" id="fecharVM">✕</button></div>
+ <div class="pv-corpo">
+  <div class="pv-linha"><input id="vmOp" value="analisar"><input id="vmArgs" value="{&quot;texto&quot;:&quot;Myn Recicla analisa código free&quot;}"><button class="btn sec" id="vmExec">EXECUTAR</button></div>
+  <pre id="vmSaida">vm pronta...</pre>
+  <div class="pv-grupo"><b>HD virtual</b><div id="vmHD">carregando...</div></div>
+  <div class="pv-grupo"><b>Cache</b><div id="vmCache">carregando...</div></div>
+ </div>
+</div>
+<div class="painel-vm" id="painelAgentes">
+ <div class="pv-topo"><b>AGENTES AVALIADORES</b><span class="pv-tag" id="agCap">—</span><button class="icobtn" id="fecharAgentes">✕</button></div>
+ <div class="pv-corpo">
+  <textarea id="agCodigo" placeholder="Cole o código para avaliar">export function soma(a,b){return a+b}</textarea>
+  <button class="btn" id="agExec">AVALIAR COM 3 AGENTES</button>
+  <div id="agSaida"><div class="pv-linha">aguardando...</div></div>
+ </div>
+</div>
 <div class="painel-worker" id="painelWorker">
  <div class="pw-topo"><b><svg class="ico"><use href="#i-loop"/></svg> WORKER AUTÔNOMO · AO VIVO</b><button class="icobtn" id="fecharWorker">✕</button></div>
  <div class="pw-corpo" id="workerLog"><div class="pw-linha">parado · clique em INICIAR</div></div>
@@ -298,6 +332,7 @@ body>header,main,footer{position:relative;z-index:1}
 <div class="fundo" id="fundo"></div>
 
 <script src="assets/mini-myns.js"></script>
-<script src="playground.js?v=13"></script>
-<script type="module" src="app.mjs?v=4"></script>
+<script src="playground.js?v=18"></script>
+<script type="module" src="app.mjs?v=5"></script>
+<footer class="wrap sessao-autor"><span id="createdBy">created by ...</span><button class="btn sec" id="editarAutor">EDITAR</button><div id="autorForm" hidden><input id="autorNome" placeholder="nome"><input id="autorLinkedin" placeholder="linkedin URL"><button class="btn" id="salvarAutor">SALVAR</button></div></footer>
 </body></html>

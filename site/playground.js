@@ -317,3 +317,51 @@ $('btnModelos').onclick=async()=>{
   espera.innerHTML='<div class="modelos">'+d.rotas.map(r=>'<div><b>'+esc(r.id)+'</b> · '+esc(r.modelo)+'<br><small>'+esc(r.agente||'')+' · '+esc((r.capacidades||[]).join(', '))+'</small></div>').join('')+'</div>';
  }catch(e){espera.className='msg err';espera.textContent='Erro: '+e.message}
 };
+
+const pv=$('painelVM'), pag=$('painelAgentes');
+$('btnVM').onclick=()=>{pv.classList.toggle('on');if(pv.classList.contains('on'))carregarVM()};
+$('fecharVM').onclick=()=>pv.classList.remove('on');
+$('btnAgentes').onclick=()=>{pag.classList.toggle('on');if(pag.classList.contains('on'))$('agCap').textContent=window.myn?.capacidade?.modo||'—'};
+$('fecharAgentes').onclick=()=>pag.classList.remove('on');
+async function carregarVM(){
+ try{
+  await window.myn.pronto;
+  $('pvCap').textContent=window.myn.capacidade.modo;
+  const hd=await window.myn.vm.padrao.HD();
+  $('vmHD').textContent=hd.length?hd.slice(-5).map(x=>x.nome).join(', '):'vazio — grave algo para começar';
+  const cache=await window.myn.db.listar('cache',5);
+  $('vmCache').textContent=cache.length?cache.map(x=>x.id).join(', '):'vazio';
+ }catch(e){$('vmSaida').textContent='Erro: '+e.message}
+}
+$('vmExec').onclick=async()=>{
+ try{
+  const args=JSON.parse($('vmArgs').value||'{}');
+  const r=await window.myn.vm.padrao.executar($('vmOp').value.trim(),args);
+  $('vmSaida').textContent=JSON.stringify(r,null,2);
+  await window.myn.vm.padrao.gravarCache('vm:'+$('vmOp').value,{r,t:Date.now()});
+  carregarVM();
+ }catch(e){$('vmSaida').textContent='Erro: '+e.message}
+};
+$('agExec').onclick=async()=>{
+ const saida=$('agSaida');saida.innerHTML='<div class="pv-linha">avaliando...</div>';
+ try{
+  const r=await window.myn.agentes.avaliarTodos($('agCodigo').value);
+  saida.innerHTML=r.resultados.map(x=>'<div class="pv-linha"><b>'+esc(x.agente)+'</b> · '+esc(x.foco)+' · '+x.ms+'ms · '+esc(x.via)+'<br>'+esc(x.texto).replace(/\n/g,'<br>')+'</div>').join('');
+ }catch(e){saida.innerHTML='<div class="pv-linha">Erro: '+esc(e.message)+'</div>'}
+};
+async function carregarAutor(){
+ try{
+  const a=await window.myn.sessao.carregar();
+  $('createdBy').innerHTML=window.myn.sessao.markdown(a);
+   if($('autorNome'))$('autorNome').value=a.nome||''; if($('autorLinkedin'))$('autorLinkedin').value=a.linkedin||'';
+  }catch(e){if($('createdBy'))$('createdBy').textContent='created by Vinicius de Freitas · github.com/ViniciusF-Pereira'}
+}
+$('editarAutor')?.addEventListener('click',()=>{const f=$('autorForm');if(f)f.hidden=!f.hidden});
+$('salvarAutor')?.addEventListener('click',async()=>{
+ await window.myn.sessao.salvar({nome:$('autorNome').value.trim(),linkedin:$('autorLinkedin').value.trim()});
+ const f=$('autorForm');if(f)f.hidden=true;carregarAutor();
+});
+async function esperarMyn(){
+ for(let i=0;i<80;i++){if(window.myn?.sessao)return carregarAutor();await new Promise(r=>setTimeout(r,50))}
+}
+esperarMyn();
