@@ -212,6 +212,20 @@ body>header,main,footer{position:relative;z-index:1}
 .plugin-btn code{font:600 .68rem var(--mono);color:var(--azul2);background:var(--azucl);padding:2px 5px;border-radius:3px;white-space:nowrap}
 .plugin-btn small{color:var(--mut);font:.7rem var(--sans);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card.hidden{display:none}
+.msg p{margin:.25em 0}.msg p:first-child{margin-top:0}.msg p:last-child{margin-bottom:0}
+.tabela-wrap{overflow:auto;max-width:100%;margin:8px 0;border:1px solid var(--tinta);border-radius:5px;background:#fff}
+.tabela-wrap table{border-collapse:collapse;width:100%;table-layout:auto;font:.82rem/1.45 var(--sans)}
+.tabela-wrap th,.tabela-wrap td{padding:7px 9px;border:1px solid var(--linha);vertical-align:top;word-break:break-word}
+.tabela-wrap th{white-space:nowrap;background:var(--azul);color:#fff}
+.stream-text{white-space:pre-wrap;overflow-wrap:anywhere;font:.93rem/1.6 var(--serif)}
+.stream-meta{font:.66rem var(--mono);color:var(--mut);margin-bottom:6px;border-bottom:1px dashed var(--linha);padding-bottom:5px}
+.stream-imagens{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
+.stream-imagens figure{margin:0;width:120px}
+.stream-imagens img{width:120px;height:90px;object-fit:cover;border:1px solid var(--linha);border-radius:4px;display:block}
+.stream-imagens figcaption{font:.62rem var(--mono);color:var(--mut);line-height:1.3}
+.chip-img{display:inline-flex;padding:0;border:1px solid var(--linha);border-radius:4px;overflow:hidden;background:#fff}
+.chip-img img{width:54px;height:54px;object-fit:cover;display:block}
+.thumb{width:64px;height:64px;object-fit:cover;border-radius:4px;margin:6px 6px 0 0;display:inline-block;border:1px solid rgba(255,255,255,.5)}
 </style>
 <style>body{padding-top:0}#playground{display:block!important}.pg-section{border-bottom:0;padding-top:36px}.pg-voltar{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;font:600 .68rem var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--azul2)}#mynsFundo{opacity:.18}</style>
 </head><body>
@@ -251,9 +265,9 @@ body>header,main,footer{position:relative;z-index:1}
   <div class="msgs" id="msgs"><div class="msg ele">Oi. Sou o <strong>Myn-01</strong>, feito de abas recicladas. ♻<br><br>Leio documentos, monto tabelas, crio arquivos e gero imagem, narração e clipe — tudo free, sem chave. No chat, use <code>/plugin mensagem</code> para chamar um dos 50+ plugins.</div></div>
   <div class="anexos" id="anexos"></div>
   <div class="composer">
-   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnGoogle" title="Rotas da conta Google"><svg class="ico"><use href="#i-web"/></svg> google</button></div>
+   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" id="btnGoogle" title="Rotas da conta Google"><svg class="ico"><use href="#i-web"/></svg> google</button></div>
    <div class="linha-input">
-    <input type="file" id="arquivoInput" multiple hidden>
+    <input type="file" id="imagemInput" accept="image/*" multiple hidden><input type="file" id="arquivoInput" multiple hidden>
     <button class="icobtn" id="anexar" title="Anexar documento" aria-label="Anexar documento"><svg class="ico"><use href="#i-file"/></svg></button>
     <textarea id="texto" rows="1" placeholder="Escreva... Enter envia, Shift+Enter quebra linha" aria-label="Mensagem"></textarea>
     <button class="btn" id="enviar"><svg class="ico"><use href="#i-arrow"/></svg> ENVIAR</button>
@@ -269,6 +283,6 @@ body>header,main,footer{position:relative;z-index:1}
 <div class="fundo" id="fundo"></div>
 
 <script src="assets/mini-myns.js"></script>
-<script src="playground.js?v=6"></script>
+<script src="playground.js?v=8"></script>
 <script type="module" src="app.mjs?v=4"></script>
 </body></html>

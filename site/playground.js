@@ -34,26 +34,34 @@ $('rota').addEventListener('change',e=>{
 });
 popularRotas();
 const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+function inline(t){
+ const BK=String.fromCharCode(96);
+ let x=esc(t);
+ x=x.replace(new RegExp(BK+"([^"+BK+"]+)"+BK,"g"),"<code>$1</code>");
+ x=x.replace(/\*\*([^*]+)\*\*/g,'<strong>$1</strong>').replace(/(^|[^*])\*([^*]+)\*/g,'$1<em>$2</em>');
+ return x.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]+)/g,(m,texto,url,url2)=>url?'<a href="'+url+'" target="_blank" rel="noopener">'+texto+'</a>':'<a href="'+url2+'" target="_blank" rel="noopener">'+url2+'</a>');
+}
 function md(t){
- let s=esc(t);
- s=s.replace(/```(\w*)\n?([\s\S]*?)```/g,(_,l,c)=>'<pre class="codigo">'+c.trim()+'</pre>');
- s=s.replace(/(^\|.*\|\s*$\n?)+/gm,bloco=>{
-  const linhas=bloco.trim().split(/\r?\n/).filter(x=>x.trim().startsWith('|'));
-  if(linhas.length<2)return bloco;
-  const cel=l=>l.split('|').slice(1,-1).map(x=>x.trim());
-  const cab=cel(linhas[0]);
-  const sec=linhas[1].replace(/[|:\- ]/g,'');
-  const corpo=linhas.slice(sec===''?2:1).filter(r=>r.replace(/[|:\- ]/g,'')!=='').map(cel);
-  return '<div class="tabela-wrap"><table><thead><tr>'+cab.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+corpo.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';
- });
- s=s.replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/(^|[^*])\*([^*]+)\*/g,'$1<em>$2</em>').replace(/_([^_\s][^_]*)_/g,'<em>$1</em>').replace(/`([^`]+)`/g,'<code>$1</code>');
- s=s.replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)|(https?:\/\/[^\s<]+)/g,(m,texto,url,url2)=>url?'<a href="'+url+'" target="_blank" rel="noopener">'+texto+'</a>':'<a href="'+url2+'" target="_blank" rel="noopener">'+url2+'</a>');
- return s.replace(/\n/g,'<br>');
+ const BK=String.fromCharCode(96);
+ const linhas=String(t??'').replace(/\r\n?/g,'\n').split('\n');
+ let html='',i=0;
+ while(i<linhas.length){
+  const l=linhas[i];
+  if(l.trim().slice(0,3)===BK){let code=[];i++;while(i<linhas.length&&linhas[i].trim().slice(0,3)!==BK)code.push(linhas[i++]);i++;html+='<pre class="codigo">'+esc(code.join('\n'))+'</pre>';continue}
+  if(/^\s*\|.*\|\s*$/.test(l)&&/^\s*\|[\s:\-|]+\|\s*$/.test(linhas[i+1]||'')){
+   const cab=l.split('|').slice(1,-1).map(x=>inline(x.trim()));i+=2;const rows=[];
+   while(i<linhas.length&&/^\s*\|.*\|\s*$/.test(linhas[i])){rows.push(linhas[i].split('|').slice(1,-1).map(x=>inline(x.trim())));i++}
+   html+='<div class="tabela-wrap"><table><thead><tr>'+cab.map(c=>'<th>'+c+'</th>').join('')+'</tr></thead><tbody>'+rows.map(r=>'<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>').join('')+'</tbody></table></div>';continue;
+  }
+  if(!l.trim()){html+='<br>';i++;continue}
+  html+='<p>'+inline(l)+'</p>';i++;
+ }
+ return html;
 }
 function add(html,classe){const d=document.createElement('div');d.className='msg '+classe;d.innerHTML=html;$('msgs').appendChild(d);$('msgs').scrollTop=$('msgs').scrollHeight;return d}
 async function post(url,body,ms=300000){const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(ms)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'HTTP '+r.status);return d}
 
-let anexos=[];
+let anexos=[],imagensAnexadas=[];
 $('anexar').onclick=()=>$('arquivoInput').click();
 $('arquivoInput').onchange=async e=>{
  for(const f of e.target.files){
@@ -67,6 +75,18 @@ $('arquivoInput').onchange=async e=>{
  }
  e.target.value='';
 };
+$('imagemInput').onchange=async e=>{
+ for(const f of e.target.files){
+  try{
+   const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(f)});
+   const d=await post('/api/documento',{nome:f.name,base64:b64});
+   imagensAnexadas.push(d);
+   const chip=document.createElement('span');chip.className='chip-img';chip.innerHTML='<img src="'+d.url+'" alt="'+esc(d.nome)+'">';$('anexos').appendChild(chip);
+  }catch(er){add('Falha na imagem '+esc(f.name)+': '+esc(er.message),'err')}
+ }
+ e.target.value='';
+};
+$('btnImagem').onclick=()=>$('imagemInput').click();
 function artifact(d){
  if(d.tipo==='imagem')return '<figure class="arte-chat"><img src="'+d.url+'" alt="imagem gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>';
  if(d.tipo==='audio')return '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>';
@@ -96,17 +116,17 @@ async function enviar(pesquisa=false){
  if(aliasMidia){const tipo=/v/i.test(aliasMidia[1])&&/v/.test(aliasMidia[1])?'video':(/^a/i.test(aliasMidia[1])?'audio':'imagem');add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,aliasMidia[2]);return}
  let mensagem=bruto,modoPesquisa=pesquisa;
  if(/^\/pesquisa\s+/i.test(bruto)){mensagem=bruto.replace(/^\/pesquisa\s+/i,'');modoPesquisa=true}
- add(esc(mensagem)+(modoPesquisa?' <small class="meta-chat">🔎 pesquisa</small>':''),'eu');
+ add(esc(mensagem)+(modoPesquisa?' <small class="meta-chat">🔎 pesquisa</small>':'')+imagensAnexadas.map(x=>'<img class="thumb" src="'+x.url+'" alt="'+esc(x.nome)+'">').join(''),'eu');
  $('texto').value='';
  const enviados=anexos.splice(0);$('anexos').innerHTML='';
  if(enviados.length)mensagem+='\n\nDOCUMENTOS ANEXADOS (dados):\n'+enviados.map(a=>'--- '+a.nome+' ---\n'+String(a.texto||'').slice(0,8000)).join('\n\n');
  ocupado=true;const btn=$('enviar');btn.disabled=true;
  const espera=add('<span class="pensando">pensando<span class="pontos">...</span></span>','ele');
  try{
-  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value);
+  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&anexos='+encodeURIComponent(JSON.stringify(imagensAnexadas));
   const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
   if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
-  const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false,via='';
+  const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false,via='',streamEl=null,metaHtml='';
   for(;;){
    const {done,value}=await leitor.read();if(done)break;
    resto+=dec.decode(value,{stream:true});
@@ -114,29 +134,31 @@ async function enviar(pesquisa=false){
    for(const bloco of blocos){
     const m=/^data:\s*(.+)$/m.exec(bloco);if(!m)continue;
     const ev=JSON.parse(m[1]);
-    if(ev.inicio){
+         if(ev.inicio){
       via=ev.via||ev.rota||'';
       const bits=[];if(ev.rota)bits.push(esc(ev.rota));if(ev.capacidades?.length)bits.push(esc(ev.capacidades.join('/')));if(ev.fontes?.length)bits.push(ev.fontes.length+' fontes');if(ev.ferramentas?.length)bits.push(ev.ferramentas.length+' ferramentas');
-      if(bits.length){espera.innerHTML='<small class="meta-chat">'+bits.join(' · ')+'</small>';espera.className='msg ele'}
+      if(bits.length)metaHtml='<div class="stream-meta">'+bits.join(' · ')+'</div>';
+      if(ev.imagens?.length)metaHtml+='<div class="stream-imagens">'+ev.imagens.map(im=>'<figure><img src="'+im.url+'" alt="'+esc(im.nome||'imagem')+'"><figcaption>'+esc(im.fonte||'')+'</figcaption></figure>').join('')+'</div>';
+      if(metaHtml){espera.innerHTML=metaHtml+'<div class="pensando">pensando<span class="pontos">...</span></div>';espera.className='msg ele'}
       continue;
      }
-    if(ev.erro)throw new Error(ev.erro);
-    if(ev.token){texto+=ev.token;espera.innerHTML=md(texto)+'<span class="cursorzinho">▌</span>';$('msgs').scrollTop=$('msgs').scrollHeight;iniciado=true}
-        if(ev.done){const v=ev.via||via;espera.innerHTML=md(texto||ev.texto||'(vazio)')+(v?'<br><small class="meta-chat">via '+esc(v)+'</small>':'');$('msgs').scrollTop=$('msgs').scrollHeight}
+if(ev.erro)throw new Error(ev.erro);
+    if(ev.token){texto+=ev.token;if(!streamEl){espera.innerHTML=metaHtml+'<div class="stream-text"></div>';streamEl=espera.querySelector('.stream-text')}streamEl.textContent+=ev.token;$('msgs').scrollTop=$('msgs').scrollHeight;iniciado=true}
+        if(ev.done){espera.innerHTML=metaHtml+md(texto||ev.texto||'(vazio)')+(ev.via||via?'<br><small class="meta-chat">via '+esc(ev.via||via)+'</small>':'');$('msgs').scrollTop=$('msgs').scrollHeight}
    }
   }
-  if(!iniciado)espera.innerHTML='(sem resposta)';
+  if(!iniciado)espera.innerHTML=metaHtml+'(sem resposta)';
   if(window.myn&&texto){
    const cmd=window.myn.reparar(texto);
    if(cmd&&!cmd.acao){const rr=await window.myn.tools.executar(cmd);add('<small class="meta-chat">🔧 TOOL '+esc(cmd.tool)+' → '+(rr.ok?'ok':'falha')+' '+esc(rr.nome||rr.erro||'')+'</small>','ele')}
   }
   if(/sorry|afraid|can[’']?t|desculpe|não posso/i.test(texto.trim())){
    if(window.myn?.llm?.disponivel()){
-    espera.innerHTML='<small class="meta-chat">rota recusou · WebGPU no navegador...</small>';
+    espera.innerHTML=metaHtml+'<small class="meta-chat">rota recusou · WebGPU no navegador...</small>';
     try{
      let local='';
-     await window.myn.llm.responder(mensagem,(t)=>{local+=t;espera.innerHTML=md(local)+'<span class="cursorzinho">▌</span>';$('msgs').scrollTop=$('msgs').scrollHeight});
-     espera.innerHTML=md(local)+'<br><small class="meta-chat">via WebGPU · '+esc(window.myn.llm.info.modelo)+'</small>';
+     await window.myn.llm.responder(mensagem,(t)=>{local+=t;espera.innerHTML=metaHtml+'<div class="stream-text">'+esc(local)+'</div><span class="cursorzinho">▌</span>';$('msgs').scrollTop=$('msgs').scrollHeight});
+     espera.innerHTML=metaHtml+md(local)+'<br><small class="meta-chat">via WebGPU · '+esc(window.myn.llm.info.modelo)+'</small>';
     }catch(e){espera.className='msg err';espera.textContent='A rota recusou e o WebGPU não carregou. Troque a rota ou use /pesquisar. ('+String(e.message).slice(0,80)+')'}
    }else{espera.className='msg err';espera.textContent='A rota recusou. Sem WebGPU, troque a rota ou use /pesquisar. Nenhuma imagem foi gerada.'}
   }

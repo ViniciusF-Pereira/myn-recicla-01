@@ -15,6 +15,10 @@ Executado no navegador (`http://127.0.0.1:5188/playground.html`), sem Node no cl
 | Botões mídia/plugins | ✅ imagem, áudio, vídeo geram artifact; painel de plugins lista 167 |
 | Botões da home | ✅ catálogo (26→24), vitrine (6→1 em “voz”), ABRIR PLAYGROUND em nova aba; zero botões mortos |
 | Recusa sem imagem | ✅ WebGPU `Qwen2.5-0.5B` carregado sob demanda; sem desvio para gerador |
+| Markdown/tabela | ✅ parser por blocos renderiza `<table>` corretamente; teste com 3 colunas e 2 linhas |
+| Streaming | ✅ tokens em `.stream-text` estável; layout final troca por Markdown; sem flicker |
+| Imagens na conversa | ✅ botão “imagem+” anexa, faz OCR, mostra thumb e envia contexto |
+| Imagens na pesquisa | ✅ `/pesquisa` gera imagem relevante e mostra miniatura com fonte no painel |
 | Servidor `/web/*` | ✅ módulos ES com MIME `text/javascript` |
 | Playground | ✅ em página própria, chat funcional, botão da home abre nova aba |
 
