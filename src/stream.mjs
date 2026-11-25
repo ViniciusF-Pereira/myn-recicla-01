@@ -43,7 +43,7 @@ export async function* streamResposta(mensagem, prazoMs = 30000, fallbackTexto =
   for (const modelo of MODELOS.slice(0, 3)) {
     let emitiu = false;
     try {
-      const r = await fetch(urlStream(pergunta, modelo), { signal: AbortSignal.timeout(Math.max(0, prazoMs - (Date.now() - inicio))) });
+      const r = await fetch(urlStream(pergunta, modelo), { signal: AbortSignal.timeout(Math.max(1, prazoMs - (Date.now() - inicio))) });
       if (!r.ok || !r.body) throw new Error('stream HTTP ' + r.status);
       const leitor = r.body.getReader();
       const decod = new TextDecoder();
