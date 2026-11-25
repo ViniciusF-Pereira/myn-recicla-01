@@ -9,7 +9,8 @@ import { rodarLoop } from '../src/loop.mjs';
 import { criarFerramentas } from '../src/tools.mjs';
 import { registrar, listar, cacheGet, cacheSet, cacheChaves, limparTipo } from '../src/historico.mjs';
 import { executarAuto } from '../src/auto.mjs';
-import { extrairDocumento, gerarImagem, gerarAudio, gerarVideo, listarArquivos, lerArquivo, tipoMime } from '../src/midia.mjs';
+import { extrairDocumento, gerarImagem, gerarAudio, gerarVideo, gerarGif, gerarAnimacao, listarArquivos, lerArquivo, tipoMime } from '../src/midia.mjs';
+import { buscarFilmes } from '../src/filmes.mjs';
 import { carregarPlugins, listaPublica, executarPlugin, extrairComando } from '../src/plugins.mjs';
 import { respostaRapida, streamResposta } from '../src/stream.mjs';
 import { contextoPara } from '../src/rag.mjs';
@@ -19,6 +20,7 @@ import { orquestrar, classificarTarefa } from '../src/orquestrar-modelos.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
+import { iniciar as iniciarWorker, parar as pararWorker, status as statusWorker, assinar as assinarWorker } from '../src/worker.mjs';
 
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = path.join(raiz, 'site');
@@ -36,6 +38,41 @@ const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; ch
 
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
+  if (url.pathname === '/api/worker/status' && req.method === 'GET') {
+    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify(statusWorker()));
+    return;
+  }
+  if (url.pathname === '/api/worker/start' && req.method === 'POST') {
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const b = JSON.parse(corpo || '{}');
+      iniciarWorker({
+        objetivo: String(b.objetivo || 'melhorar e otimizar o codigo do Myn Recicla').slice(0, 500),
+        maxCiclos: Math.min(1000, Number(b.maxCiclos) || Infinity),
+        intervaloMs: Math.max(500, Number(b.intervaloMs) || 4000),
+        autoMerge: b.autoMerge !== false,
+      }).catch((e) => console.log('[worker] erro', e.message));
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ ok: true, status: statusWorker() }));
+    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+    return;
+  }
+  if (url.pathname === '/api/worker/stop' && req.method === 'POST') {
+    const r = pararWorker();
+    res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+    res.end(JSON.stringify(r));
+    return;
+  }
+  if (url.pathname === '/api/worker/stream' && req.method === 'GET') {
+    res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', 'connection': 'keep-alive', 'x-accel-buffering': 'no' });
+    const escrever = (ev) => res.write('data: ' + JSON.stringify(ev) + '\n\n');
+    escrever({ t: new Date().toISOString(), tipo: 'conectado', status: statusWorker() });
+    const cancelar = assinarWorker(escrever);
+    const ping = setInterval(() => res.write(': ping\n\n'), 15000);
+    req.on('close', () => { clearInterval(ping); cancelar(); });
+    return;
+  }
   if (url.pathname === '/mcp' && req.method === 'POST') {
     try {
       let corpo = ''; for await (const p of req) corpo += p;
@@ -326,10 +363,32 @@ const servidor = http.createServer(async (req, res) => {
       if (tipo === 'imagem') dado = await gerarImagem(prompt);
       else if (tipo === 'audio') dado = await gerarAudio(prompt, voz);
       else if (tipo === 'video') dado = await gerarVideo(prompt, segundos);
+      else if (tipo === 'gif') dado = await gerarGif(prompt, segundos);
+      else if (tipo === 'animacao' || tipo === 'animação') dado = await gerarAnimacao(prompt, segundos);
       else throw new Error('tipo de mídia inválido');
       await registrar('midia', { input: String(prompt).slice(0, 300), output: dado.url, tipo });
       res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
       res.end(JSON.stringify(dado));
+    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+    return;
+  }
+  if (url.pathname === '/api/filmes' && req.method === 'GET') {
+    try {
+      const q = String(url.searchParams.get('q') || '').slice(0, 120);
+      if (!q) throw new Error('q ausente');
+      const itens = await buscarFilmes(q, 5);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ q, itens }));
+    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
+    return;
+  }
+  if (url.pathname === '/api/modelos' && req.method === 'GET') {
+    try {
+      const modelos = JSON.parse(await readFile(path.join(raiz, 'config/modelos.json'), 'utf8'));
+      const grupos = {};
+      for (const r of modelos.rotas || []) (grupos[r.id] = grupos[r.id] || []).push(r);
+      res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ total: (modelos.rotas || []).length, rotas: modelos.rotas || [], grupos }));
     } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
     return;
   }

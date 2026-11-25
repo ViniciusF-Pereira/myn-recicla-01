@@ -226,6 +226,16 @@ body>header,main,footer{position:relative;z-index:1}
 .chip-img{display:inline-flex;padding:0;border:1px solid var(--linha);border-radius:4px;overflow:hidden;background:#fff}
 .chip-img img{width:54px;height:54px;object-fit:cover;display:block}
 .thumb{width:64px;height:64px;object-fit:cover;border-radius:4px;margin:6px 6px 0 0;display:inline-block;border:1px solid rgba(255,255,255,.5)}
+.painel-worker{display:none;position:fixed;right:14px;bottom:14px;width:min(560px,94vw);height:min(70vh,640px);background:var(--card);border:2px solid var(--azul);border-radius:9px;box-shadow:0 16px 40px rgba(13,79,165,.28);z-index:95;flex-direction:column;overflow:hidden}
+.painel-worker.on{display:flex}
+.pw-topo{display:flex;align-items:center;gap:8px;padding:11px 13px;background:var(--azul);color:#fff}
+.pw-topo b{display:flex;align-items:center;gap:8px;font:600 .72rem var(--mono);letter-spacing:.08em}
+.pw-topo .icobtn{margin-left:auto;color:#fff}
+.pw-corpo{flex:1;overflow:auto;padding:10px 12px;background:#0d1420;font:600 .72rem/1.55 var(--mono)}
+.pw-linha{padding:5px 8px;margin:4px 0;border-left:3px solid var(--mostarda);color:#dbe6f0;background:rgba(255,255,255,.04);white-space:pre-wrap;overflow-wrap:anywhere}
+.pw-linha.ok{border-color:#37d67a}.pw-linha.erro{border-color:#ff6b6b;color:#ffd6d6}.pw-linha.git{border-color:#7aa2ff}.pw-linha.higienizacao{border-color:#e2b866}
+.pw-pe{display:flex;gap:7px;padding:10px;background:var(--papel);border-top:1px solid var(--linha)}
+.pw-pe input{flex:1;min-width:120px;padding:9px;border:1px solid var(--linha);border-radius:5px;font:.78rem var(--sans)}
 </style>
 <style>body{padding-top:0}#playground{display:block!important}.pg-section{border-bottom:0;padding-top:36px}.pg-voltar{display:inline-flex;align-items:center;gap:8px;margin-bottom:14px;font:600 .68rem var(--mono);text-transform:uppercase;letter-spacing:.1em;color:var(--azul2)}#mynsFundo{opacity:.18}</style>
 </head><body>
@@ -265,7 +275,7 @@ body>header,main,footer{position:relative;z-index:1}
   <div class="msgs" id="msgs"><div class="msg ele">Oi. Sou o <strong>Myn-01</strong>, feito de abas recicladas. ♻<br><br>Leio documentos, monto tabelas, crio arquivos e gero imagem, narração e clipe — tudo free, sem chave. No chat, use <code>/plugin mensagem</code> para chamar uma das 167 rotas.</div></div>
   <div class="anexos" id="anexos"></div>
   <div class="composer">
-   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" id="btnGoogle" title="Rotas da conta Google"><svg class="ico"><use href="#i-web"/></svg> google</button></div>
+   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" data-midia="gif"><svg class="ico"><use href="#i-leaf"/></svg> gif</button><button class="ferr" data-midia="animacao"><svg class="ico"><use href="#i-video"/></svg> anima</button><button class="ferr" id="btnFilmes"><svg class="ico"><use href="#i-search"/></svg> filmes</button><button class="ferr" id="btnModelos"><svg class="ico"><use href="#i-gear"/></svg> modelos</button><button class="ferr" id="btnWorker" title="Worker autônomo"><svg class="ico"><use href="#i-loop"/></svg> worker</button><button class="ferr" id="btnGoogle" title="Rotas da conta Google"><svg class="ico"><use href="#i-web"/></svg> google</button></div>
    <div class="linha-input">
     <input type="file" id="imagemInput" accept="image/*" multiple hidden><input type="file" id="arquivoInput" multiple hidden>
     <button class="icobtn" id="anexar" title="Anexar documento" aria-label="Anexar documento"><svg class="ico"><use href="#i-file"/></svg></button>
@@ -279,10 +289,15 @@ body>header,main,footer{position:relative;z-index:1}
  <div class="aviso"><b>limites</b> — imagem: Pollinations free, taxa comunitária; voz: edge-tts ~1500 caracteres; vídeo: Pollinations + ffmpeg local, só CPU; documentos até 12 MB (PDF com pypdf, imagem com OCR). Plugins de mensageria pedem confirmação antes de enviar.</div>
 </div></section>
 </main>
+<div class="painel-worker" id="painelWorker">
+ <div class="pw-topo"><b><svg class="ico"><use href="#i-loop"/></svg> WORKER AUTÔNOMO · AO VIVO</b><button class="icobtn" id="fecharWorker">✕</button></div>
+ <div class="pw-corpo" id="workerLog"><div class="pw-linha">parado · clique em INICIAR</div></div>
+ <div class="pw-pe"><input id="workerObj" value="melhorar e otimizar o codigo do Myn Recicla"><button class="btn" id="startWorker">INICIAR</button><button class="btn sec" id="stopWorker">PARAR</button></div>
+</div>
 <div class="gaveta" id="gaveta" aria-hidden="true"><div class="gaveta-topo"><b><svg class="ico"><use href="#i-history"/></svg> Caderno / histórico</b><button class="icobtn" id="fecharHist" aria-label="Fechar">✕</button></div><div class="gaveta-corpo" id="hist"><div class="passo-linha">carregando...</div></div><div class="gaveta-pe"><button class="btn sec" id="recarregarHist">ATUALIZAR</button><button class="btn sec" id="limparHist">LIMPAR</button></div></div>
 <div class="fundo" id="fundo"></div>
 
 <script src="assets/mini-myns.js"></script>
-<script src="playground.js?v=10"></script>
+<script src="playground.js?v=12"></script>
 <script type="module" src="app.mjs?v=4"></script>
 </body></html>

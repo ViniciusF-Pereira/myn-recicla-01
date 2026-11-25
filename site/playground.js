@@ -62,6 +62,15 @@ function add(html,classe){const d=document.createElement('div');d.className='msg
 async function post(url,body,ms=300000){const r=await fetch(url,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify(body),signal:AbortSignal.timeout(ms)});const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error(d.error||'HTTP '+r.status);return d}
 
 let anexos=[],imagensAnexadas=[];
+function extNome(n){return String(n||'').split('.').pop().toLowerCase()}
+function chipHtml(d){
+ const e=extNome(d.nome);
+ if(['png','jpg','jpeg','webp','gif','bmp'].includes(e))return '<span class="chip-preview"><img src="'+d.url+'" alt="'+esc(d.nome)+'"><a href="'+d.url+'" target="_blank">'+esc(d.nome)+'</a></span>';
+ if(['mp3','wav','ogg','m4a'].includes(e))return '<span class="chip-preview"><audio controls src="'+d.url+'"></audio><a href="'+d.url+'" target="_blank">'+esc(d.nome)+'</a></span>';
+ if(['mp4','webm'].includes(e))return '<span class="chip-preview"><video controls src="'+d.url+'"></video><a href="'+d.url+'" target="_blank">'+esc(d.nome)+'</a></span>';
+ if(e==='pdf')return '<span class="chip-preview"><a href="'+d.url+'" target="_blank">📄 '+esc(d.nome)+'</a></span>';
+ return '<span class="anexo">▤ '+esc(d.nome)+(d.texto?' · '+d.texto.length+' chars':'')+' <a href="'+d.url+'" target="_blank">abrir</a></span>';
+}
 $('anexar').onclick=()=>$('arquivoInput').click();
 $('arquivoInput').onchange=async e=>{
  for(const f of e.target.files){
@@ -69,7 +78,7 @@ $('arquivoInput').onchange=async e=>{
    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(f)});
    const d=await post('/api/documento',{nome:f.name,base64:b64});
    anexos.push(d);
-   const chip=document.createElement('span');chip.className='anexo';chip.textContent='▤ '+d.nome+(d.texto?' · '+d.texto.length+' chars':'');$('anexos').appendChild(chip);
+   const chip=document.createElement('span');chip.innerHTML=chipHtml(d);$('anexos').appendChild(chip);
    if(d.aviso)add('Aviso sobre <b>'+esc(d.nome)+'</b>: '+esc(d.aviso),'ele');
   }catch(er){add('Falha ao anexar '+esc(f.name)+': '+esc(er.message),'err')}
  }
@@ -81,14 +90,14 @@ $('imagemInput').onchange=async e=>{
    const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(f)});
    const d=await post('/api/documento',{nome:f.name,base64:b64});
    imagensAnexadas.push(d);
-   const chip=document.createElement('span');chip.className='chip-img';chip.innerHTML='<img src="'+d.url+'" alt="'+esc(d.nome)+'">';$('anexos').appendChild(chip);
+   const chip=document.createElement('span');chip.innerHTML=chipHtml(d);$('anexos').appendChild(chip);
   }catch(er){add('Falha na imagem '+esc(f.name)+': '+esc(er.message),'err')}
  }
  e.target.value='';
 };
 $('btnImagem').onclick=()=>$('imagemInput').click();
 function artifact(d){
- if(d.tipo==='imagem')return '<figure class="arte-chat"><img src="'+d.url+'" alt="imagem gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>';
+ if(d.tipo==='imagem'||d.tipo==='gif')return '<figure class="arte-chat"><img src="'+d.url+'" alt="mídia gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>';
  if(d.tipo==='audio')return '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>';
  if(d.tipo==='video')return '<div class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+'</figcaption></div>';
  return '<a href="'+d.url+'" target="_blank">'+esc(d.nome)+'</a>';
@@ -260,3 +269,51 @@ $('btnGoogle').onclick=()=>{painelG.classList.toggle('on');if(painelG.classList.
 $('fecharGoogle').onclick=()=>painelG.classList.remove('on');
 document.addEventListener('click',e=>{if(painelG.classList.contains('on')&&!painelG.contains(e.target)&&e.target!==$('btnGoogle')&&!$('btnGoogle').contains(e.target))painelG.classList.remove('on')});
 
+
+const painelWorker=$('painelWorker'), logWorker=$('workerLog');
+function linhaWorker(ev){
+ const d=document.createElement('div');
+ d.className='pw-linha'+(/erro|falha|revertido/.test(ev.tipo)?' erro':/git|commit|merge|branch/.test(ev.tipo)?' git':/higienizacao/.test(ev.tipo)?' higienizacao':/ok|testes/.test(ev.tipo)?' ok':'');
+ let texto=ev.tipo;
+ if(ev.objetivo)texto+=' · '+ev.objetivo;
+ if(ev.passos)texto+=' · '+ev.passos.join(', ');
+ if(ev.removidos)texto+=' · removidos: '+(ev.removidos.join(', ')||'nenhum');
+ if(ev.arquivo)texto+=' · '+ev.arquivo;
+ if(ev.checagens)texto+=' · '+ev.checagens.map(c=>c.arquivo+':'+(c.ok?'ok':'FALHA')).join(' ');
+ if(ev.merge!==undefined)texto+=' · merge='+ev.merge;
+ if(ev.motivo)texto+=' · '+ev.motivo;
+ if(ev.erro)texto+=' · '+ev.erro;
+ d.textContent=ev.t+' · '+texto;
+ logWorker.appendChild(d);logWorker.scrollTop=logWorker.scrollHeight;
+}
+let workerStream=null;
+function conectarWorker(){
+ if(workerStream)workerStream.cancel().catch(()=>{});
+ workerStream=new AbortController();
+ fetch('/api/worker/stream',{signal:workerStream.signal}).then(async r=>{
+  const rd=r.body.getReader(),dec=new TextDecoder();let resto='';
+  for(;;){const {done,value}=await rd.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
+   for(const b of blocos){const m=/^data:\s*(.+)$/m.exec(b);if(!m)continue;try{linhaWorker(JSON.parse(m[1]))}catch{}}}
+ }).catch(()=>{});
+}
+$('btnWorker').onclick=()=>{painelWorker.classList.toggle('on');if(painelWorker.classList.contains('on')&&!workerStream)conectarWorker()};
+$('fecharWorker').onclick=()=>painelWorker.classList.remove('on');
+$('startWorker').onclick=async()=>{logWorker.innerHTML='';conectarWorker();try{await post('/api/worker/start',{objetivo:$('workerObj').value.trim(),maxCiclos:1000,intervaloMs:4000,autoMerge:true});linhaWorker({t:new Date().toISOString(),tipo:'iniciado'})}catch(e){linhaWorker({t:new Date().toISOString(),tipo:'erro',erro:e.message})}};
+$('stopWorker').onclick=async()=>{try{const r=await post('/api/worker/stop',{});linhaWorker({t:new Date().toISOString(),tipo:'parando',ok:r.ok})}catch(e){linhaWorker({t:new Date().toISOString(),tipo:'erro',erro:e.message})}};
+
+$('btnFilmes').onclick=async()=>{
+ const q=$('texto').value.trim();if(!q){add('Escreva o título do filme e clique em filmes.','err');$('texto').focus();return}
+ const espera=add('buscando filme: '+esc(q),'ele');
+ try{
+  const d=await (await fetch('/api/filmes?q='+encodeURIComponent(q))).json();
+  espera.innerHTML=d.itens?.length ? d.itens.map(f=>'<div class="filme"><b>'+esc(f.titulo)+'</b>'+(f.imagem?' <img src="'+f.imagem+'" alt="">':'')+'<p>'+esc(f.resumo)+'</p><a href="'+f.url+'" target="_blank">'+esc(f.fonte)+' →</a></div>').join('') : 'Nenhum filme encontrado.';
+  $('texto').value='';
+ }catch(e){espera.className='msg err';espera.textContent='Erro: '+e.message}
+};
+$('btnModelos').onclick=async()=>{
+ const espera=add('mapeando modelos por provider...','ele');
+ try{
+  const d=await (await fetch('/api/modelos')).json();
+  espera.innerHTML='<div class="modelos">'+d.rotas.map(r=>'<div><b>'+esc(r.id)+'</b> · '+esc(r.modelo)+'<br><small>'+esc(r.agente||'')+' · '+esc((r.capacidades||[]).join(', '))+'</small></div>').join('')+'</div>';
+ }catch(e){espera.className='msg err';espera.textContent='Erro: '+e.message}
+};

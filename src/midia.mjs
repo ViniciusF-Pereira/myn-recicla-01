@@ -177,7 +177,31 @@ export async function gerarVideo(prompt, segundos = 6) {
   return { nome, tipo: 'video', url: '/api/arquivos/' + encodeURIComponent(nome), imagem: img.url, prompt: String(prompt).slice(0, 600), duracao: dur, fonte: img.fonte + ' + ffmpeg local · limite = CPU' };
 }
 
+/** GIF animado a partir de uma imagem gerada (zoom + paleta otimizada). */
+export async function gerarGif(prompt, segundos = 3) {
+  const dur = Math.min(8, Math.max(2, Number(segundos) || 3));
+  const vid = await gerarVideo(prompt, dur);
+  const nome = 'gif-' + Date.now() + '.gif';
+  const destino = path.join(DIR_ARQUIVOS, nome);
+  const origem = path.join(DIR_ARQUIVOS, vid.nome);
+  const grafico = `[0:v]fps=12,scale=480:360:flags=lanczos,split[a][b];[a]palettegen[p];[b][p]paletteuse=dither=bayer`;
+  await executar('ffmpeg', ['-y', '-i', origem, '-filter_complex', grafico, '-t', String(dur), '-loop', '0', destino], { timeout: 120000 });
+  return { nome, tipo: 'gif', url: '/api/arquivos/' + encodeURIComponent(nome), imagem: vid.imagem, video: vid.url, prompt: String(prompt).slice(0, 600), duracao: dur, fonte: vid.fonte + ' · GIF animado' };
+}
+
+/** Animação curta em WebM com efeito de pulse/rotação. */
+export async function gerarAnimacao(prompt, segundos = 4) {
+  const img = await gerarImagem(prompt, 960, 540);
+  const nome = 'animacao-' + Date.now() + '.webm';
+  const destino = path.join(DIR_ARQUIVOS, nome);
+  const origem = path.join(DIR_ARQUIVOS, img.nome);
+  const dur = Math.min(12, Math.max(2, Number(segundos) || 4));
+  const filtro = `scale=960:540:force_original_aspect_ratio=increase,crop=960:540,zoompan=z='1+0.12*sin(on/12)':x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':d=${dur * 24}:s=960x540:fps=24,format=yuv420p`;
+  await executar('ffmpeg', ['-y', '-loop', '1', '-i', origem, '-vf', filtro, '-t', String(dur), '-c:v', 'libvpx-vp9', '-b:v', '1M', '-an', destino], { timeout: 180000 });
+  return { nome, tipo: 'video', url: '/api/arquivos/' + encodeURIComponent(nome), imagem: img.url, prompt: String(prompt).slice(0, 600), duracao: dur, fonte: img.fonte + ' + ffmpeg local · animação WebM' };
+}
+
 export function tipoMime(nome) {
   const ext = path.extname(nome).toLowerCase();
-  return ({ '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.png':'image/png', '.mp3':'audio/mpeg', '.wav':'audio/wav', '.mp4':'video/mp4', '.pdf':'application/pdf', '.csv':'text/csv', '.json':'application/json', '.txt':'text/plain', '.md':'text/markdown' })[ext] || 'application/octet-stream';
+  return ({ '.jpg':'image/jpeg', '.jpeg':'image/jpeg', '.png':'image/png', '.gif':'image/gif', '.webp':'image/webp', '.mp3':'audio/mpeg', '.wav':'audio/wav', '.ogg':'audio/ogg', '.m4a':'audio/mp4', '.mp4':'video/mp4', '.webm':'video/webm', '.pdf':'application/pdf', '.csv':'text/csv', '.json':'application/json', '.txt':'text/plain', '.md':'text/markdown' })[ext] || 'application/octet-stream';
 }
