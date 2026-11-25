@@ -20,5 +20,6 @@
   "readme-provas",
   "export-filme",
   "export-stream",
-  "export-auto"
+  "export-auto",
+  "export-worker"
 ]

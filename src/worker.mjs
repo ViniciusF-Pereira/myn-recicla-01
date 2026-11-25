@@ -183,3 +183,4 @@ export async function iniciar({ objetivo = 'melhorar o projeto Myn Recicla', max
   return { ok: true, ciclos: n };
 }
 export function parar() { if (!ativo) return { ok: false, erro: 'worker não estava ativo' }; abortar = true; emitir('parando', {}); return { ok: true }; }
+export function ajudaWorker(){return "POST /api/worker/start | /api/worker/stop | GET /api/worker/stream"}
