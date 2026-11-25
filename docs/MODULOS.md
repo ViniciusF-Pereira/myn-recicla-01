@@ -144,3 +144,8 @@ Módulo do Myn Recicla/01.
 Exports: gerarProposta, aplicarProposta
 
 Módulo do Myn Recicla/01.
+## modelos-pollinations.mjs
+
+Exports: MODELOS_POLLINATIONS
+
+Módulo do Myn Recicla/01.
