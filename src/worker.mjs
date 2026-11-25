@@ -88,11 +88,11 @@ async function checar(arquivos) {
   catch (e) { saidas.push({ arquivo: 'git diff --check', ok: false, erro: String(e.stderr || e.message).slice(0, 300) }); }
   return saidas;
 }
-async function commitEmerge(mensagem) {
+async function commitEmerge(mensagem, arquivo) {
   const sujo = await statusSujo();
   if (!sujo) return { commit: false, merge: false, motivo: 'sem alterações' };
-  await git(['add', '-A']);
-  await git(['commit', '-m', mensagem]);
+  await git(['add', '--', arquivo]);
+  await git(['commit', '-m', mensagem, '--', arquivo]);
   const atual = await branchAtual();
   if (atual !== BRANCH) return { commit: true, merge: false, motivo: 'fora da branch worker' };
   await git(['checkout', ALVO]);
@@ -154,7 +154,7 @@ async function ciclo(n, objetivo, { autoMerge, intervaloMs, sinal }) {
       emitir('revertido', { n, arquivo });
       return { n, ok: false, motivo: 'testes falharam', ms: Date.now() - inicio };
     }
-    const merge = autoMerge ? await commitEmerge('worker: ' + t.titulo + ' (ciclo ' + n + ')') : { commit: false, merge: false, motivo: 'autoMerge desligado' };
+    const merge = autoMerge ? await commitEmerge('worker: ' + t.titulo + ' (ciclo ' + n + ')', t.alvo) : { commit: false, merge: false, motivo: 'autoMerge desligado' };
     if (merge.commit) await marcarMelhoria(t.id);
     emitir('git', { n, ...merge, tarefa: t.id });
     return { n, ok: true, merge: merge.merge === true, ms: Date.now() - inicio, arquivo };
