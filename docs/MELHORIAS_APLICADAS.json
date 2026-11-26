@@ -32,5 +32,6 @@
   "modulo-eventlog",
   "modulo-lock",
   "modulo-conhecimento-local",
-  "modulo-token-local"
+  "modulo-token-local",
+  "modulo-api-antropic"
 ]

@@ -174,3 +174,8 @@ Módulo do Myn Recicla/01.
 Exports: emitirToken, validarToken, bearer, ehLoopback
 
 Módulo do Myn Recicla/01.
+## api-antropic.mjs
+
+Exports: handleAnthropic
+
+Módulo do Myn Recicla/01.
