@@ -1,32 +1,37 @@
 # Endpoints
 
-Extraído de `scripts/site-server.mjs`: 27 caminhos.
+Extraído de `scripts/site-server.mjs`: 33 caminhos.
 
+- `/api/arquitetura`
 - `/api/arquivos`
 - `/api/arquivos/`
 - `/api/auto`
 - `/api/cache`
 - `/api/chat`
 - `/api/chat/stream`
+- `/api/desempenho`
 - `/api/documento`
 - `/api/filmes`
 - `/api/goal`
 - `/api/goal/rodar`
-- `/api/google`
-- `/api/google/login`
 - `/api/historico`
 - `/api/historico/limpar`
 - `/api/loop`
 - `/api/midia`
 - `/api/modelos`
+- `/api/modelos/descobertos`
 - `/api/orquestrar`
 - `/api/plan`
 - `/api/plugins`
 - `/api/rag`
 - `/api/saude`
+- `/api/token`
+- `/api/token/renovar`
 - `/api/worker/start`
 - `/api/worker/status`
 - `/api/worker/stop`
 - `/api/worker/stream`
+- `/api/workers/stream`
+- `/docs/`
 - `/mcp`
-
+- `/v1/messages`
