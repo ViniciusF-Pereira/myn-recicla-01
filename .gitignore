@@ -1,9 +1,10 @@
 node_modules/
 dados/
 outputs/
-.playground-workspace/
 outputs-*.json
+*.log
 *.tmp
 .env
 .env.*
-.DS_Store
+token-local.json
+worker-*-eventos.jsonl

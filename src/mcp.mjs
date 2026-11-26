@@ -54,7 +54,9 @@ async function executar(nome, a, base) {
     }
     case 'myn_rotas': {
       const [p, s] = await Promise.all([get(base, '/api/plugins'), get(base, '/api/saude')]);
-      return JSON.stringify({ plugins: p.total, google: 0, saude: s.rotas.slice(0, 20) }, null, 2);
+      const ids = new Set(p.plugins.map((x) => x.id));
+      const saude = s.rotas.filter((r) => ids.has(r.id)).slice(0, 20);
+      return JSON.stringify({ plugins: p.total, google: 0, saude }, null, 2);
     }
     case 'myn_plugin': {
       const d = await post(base, '/api/chat', { message: '/' + a.id + ' ' + a.entrada, rota: 'auto' });

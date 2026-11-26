@@ -30,7 +30,7 @@ export async function adquirirLock(nome, { staleMs = 5 * 60_000 } = {}) {
       try {
         const dados = JSON.parse(await readFile(arquivo, 'utf8'));
         if (vivo(dados.pid)) return { ok: false, motivo: 'worker já ativo', pid: dados.pid, host: dados.host };
-        if (Date.now() - Date.parse(dados.startedAt) < staleMs) return { ok: false, motivo: 'lock recente', pid: dados.pid };
+        // PID morto: lock órfão, pode ser removido imediatamente.
       } catch { /* lock inválido */ }
       await unlink(arquivo).catch(() => {});
     }

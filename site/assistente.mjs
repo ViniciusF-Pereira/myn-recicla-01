@@ -36,7 +36,7 @@ let ferramentas = [];
 let apresentado = sessionStorage.getItem('work-apresentado') === '1';
 let somAtivo = localStorage.getItem('work-som') !== '0';
 let vozAtiva = localStorage.getItem('work-voz') !== '0';
-let audioCtx = null, reconhecimento = null, ocupado = false, controleAtual = null;
+let audioCtx = null, reconhecimento = null, ocupado = false, controleAtual = null, tokenMcp = null;
 const HISTORICO = 'work-chat-v1';
 
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
@@ -79,7 +79,17 @@ function apresentar(forcar = false) {
 }
 
 async function rpc(metodo, params = {}, signal) {
-  const r = await fetch('/mcp', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: metodo, params }), signal: signal || AbortSignal.timeout(180000) });
+  const chamar = () => fetch('/mcp', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(tokenMcp ? { authorization: 'Bearer ' + tokenMcp } : {}) },
+    body: JSON.stringify({ jsonrpc: '2.0', id: Date.now(), method: metodo, params }),
+    signal: signal || AbortSignal.timeout(180000),
+  });
+  let r = await chamar();
+  if (r.status === 401 && !tokenMcp) {
+    tokenMcp = await fetch('/api/token').then((x) => x.json()).then((d) => d.token);
+    r = await chamar();
+  }
   const d = await r.json();
   if (d.error) throw new Error(d.error.message || 'erro MCP');
   return d.result;

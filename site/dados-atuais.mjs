@@ -34,7 +34,8 @@ export async function carregarDados() {
   dados.totalKb = dados.desempenho?.totalKb ?? null;
   dados.piorMs = dados.desempenho?.medidas?.length ? Math.max(...dados.desempenho.medidas.map((m) => m.p50Ms || 0)) : null;
   dados.arquiteturaResumo = dados.arquitetura?.resumo || null;
-  const saude = dados.saude?.rotas || [];
+  const idsPlugins = new Set(plugins.map((p) => p.id));
+  const saude = (dados.saude?.rotas || []).filter((r) => idsPlugins.has(r.id));
   dados.saudeMedia = saude.length ? saude.reduce((n, r) => n + (r.score || 0), 0) / saude.length : null;
   dados.workers = { analise: dados.analise || null, melhoria: dados.melhoria || null };
   return dados;

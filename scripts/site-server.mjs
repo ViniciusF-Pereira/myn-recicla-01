@@ -22,6 +22,9 @@ import { medirDesempenho } from '../src/desempenho.mjs';
 import { obterModelos } from '../src/modelos-livres.mjs';
 import { auditarArquitetura } from '../src/arquitetura.mjs';
 import { lerEventos } from '../src/eventlog.mjs';
+import { respostaLocal } from '../src/conhecimento-local.mjs';
+import { emitirToken, validarToken, bearer, ehLoopback } from '../src/token-local.mjs';
+import { handleAnthropic } from '../src/api-antropic.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
@@ -40,6 +43,8 @@ const plugins = (await carregarPlugins()).filter((p) => !/google|gemini/i.test([
 const PORTA = Number(process.env.PORT || 5188);
 const HOST = process.env.MYN_HOST || '127.0.0.1';
 const IDENTIDADE = 'Você é o Myn Recicla/01, um produto open-source de engenharia de software browser-only que transforma abas de chat gratuitas em rotas de agente. Tem Playground, workers de análise/melhoria, MCP, RAG local e descoberta de modelos livres. NÃO é um assistente de viagem, itinerário, trânsito ou transporte. Responda em português, seja útil e honesto, e nunca invente essa função de rotas de deslocamento. Não diga que é ChatGPT, Claude ou outro produto.';
+let tokenLocal = await emitirToken();
+const EXIGIR_TOKEN_AGENTE = process.env.MYN_EXIGIR_TOKEN_AGENTE === '1';
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' };
 
@@ -114,6 +119,22 @@ const servidor = http.createServer(async (req, res) => {
   res.setHeader('x-frame-options', 'DENY');
   res.setHeader('referrer-policy', 'no-referrer');
   res.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+  if (url.pathname === '/api/token' && req.method === 'GET') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    enviarJson(req, res, {
+      token: tokenLocal.token, expiresAt: new Date(tokenLocal.expiresAt).toISOString(), scope: tokenLocal.scope,
+      mcpUrl: 'http://127.0.0.1:' + PORTA + '/mcp', messagesUrl: 'http://127.0.0.1:' + PORTA + '/v1/messages',
+      auth: 'Authorization: Bearer ' + tokenLocal.token,
+    });
+    return;
+  }
+  if (url.pathname === '/api/token/renovar' && req.method === 'POST') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    const novo = await emitirToken({ renovar: true });
+    tokenLocal = novo;
+    enviarJson(req, res, { token: novo.token, expiresAt: new Date(novo.expiresAt).toISOString(), mcpUrl: 'http://127.0.0.1:' + PORTA + '/mcp', messagesUrl: 'http://127.0.0.1:' + PORTA + '/v1/messages' });
+    return;
+  }
   const workerRotas = {
     analise: { iniciar: iniciarAnalise, parar: pararAnalise, status: statusAnalise, assinar: assinarAnalise },
     melhoria: { iniciar: iniciarMelhoria, parar: pararMelhoria, status: statusMelhoria, assinar: assinarMelhoria },
@@ -216,7 +237,27 @@ const servidor = http.createServer(async (req, res) => {
     req.on('close', () => { clearInterval(ping); cancelar(); });
     return;
   }
+  if (url.pathname === '/v1/messages' && req.method === 'POST') {
+    if (EXIGIR_TOKEN_AGENTE && !(await validarToken(bearer(req)))) {
+      res.writeHead(401, { 'content-type': 'application/json; charset=utf-8', 'www-authenticate': 'Bearer' });
+      res.end(JSON.stringify({ type: 'error', error: { type: 'authentication_error', message: 'token ausente ou inválido' } }));
+      return;
+    }
+    try {
+      let corpo = ''; for await (const p of req) { corpo += p; if (corpo.length > 1_000_000) throw new Error('payload acima de 1 MB'); }
+      await handleAnthropic({ body: JSON.parse(corpo || '{}'), req, res, base: 'http://127.0.0.1:' + PORTA });
+    } catch (erro) {
+      if (!res.headersSent) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ type: 'error', error: { type: 'invalid_request_error', message: String(erro.message).slice(0, 240) } })); }
+      else res.end();
+    }
+    return;
+  }
   if (url.pathname === '/mcp' && req.method === 'POST') {
+    if (EXIGIR_TOKEN_AGENTE && !(await validarToken(bearer(req)))) {
+      res.writeHead(401, { 'content-type': 'application/json; charset=utf-8', 'www-authenticate': 'Bearer' });
+      res.end(JSON.stringify({ error: 'token_ausente_ou_invalido' }));
+      return;
+    }
     try {
       let corpo = ''; for await (const p of req) corpo += p;
       const requisicao = JSON.parse(corpo || '{}');
@@ -356,11 +397,11 @@ const servidor = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ reply: respostaPlugin, rota: plugin.id, plugin: d, cache: false }));
         return;
       }
-      if (/quem (é|e) (você|voce|o myn)|sobre o myn|o que (é|e) o myn|resumo.{0,30}myn|myn recicla/i.test(String(message))) {
-        const respostaLocal = 'Sou o **Myn Recicla/01**, um produto open-source browser-only que transforma abas de chat gratuitas em rotas de agente. Tenho Playground, workers de análise e melhoria, MCP, descoberta de modelos livres, RAG local e funcionamento sem chaves de API.';
-        await registrar('chat', { input: String(message).slice(0, 300), output: respostaLocal.slice(0, 600), via: 'conhecimento-local' });
+      const respostaProduto = await respostaLocal(String(message));
+      if (respostaProduto) {
+        await registrar('chat', { input: String(message).slice(0, 300), output: respostaProduto.slice(0, 600), via: 'conhecimento-local' });
         res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ reply: respostaLocal, rota: 'local', via: 'conhecimento-local', cache: false }));
+        res.end(JSON.stringify({ reply: respostaProduto, rota: 'local', via: 'conhecimento-local', cache: false }));
         return;
       }
       // Documentos anexados viram contexto em DADOS, nunca instruções.
