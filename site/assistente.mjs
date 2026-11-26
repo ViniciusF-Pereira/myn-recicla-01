@@ -33,9 +33,14 @@ const CSS = `
 
 const INTRO = 'Oi, eu sou WORK, o assistente virtual do Myn Recicla/01. Posso conversar, pesquisar, consultar rotas, gerar mídia, usar ferramentas MCP e navegar pela página. Clique na bolha para falar comigo.';
 let ferramentas = [];
-let apresentado = sessionStorage.getItem('work-apresentado') === '1';
-let somAtivo = localStorage.getItem('work-som') !== '0';
-let vozAtiva = localStorage.getItem('work-voz') !== '0';
+function lerLocal(k,d=''){try{return localStorage.getItem(k)??d}catch{return d}}
+function salvarLocal(k,v){try{localStorage.setItem(k,v)}catch{}}
+function removerLocal(k){try{localStorage.removeItem(k)}catch{}}
+function lerSessao(k){try{return sessionStorage.getItem(k)}catch{return null}}
+function salvarSessao(k,v){try{sessionStorage.setItem(k,v)}catch{}}
+let apresentado = lerSessao('work-apresentado') === '1';
+let somAtivo = lerLocal('work-som') !== '0';
+let vozAtiva = lerLocal('work-voz') !== '0';
 let audioCtx = null, reconhecimento = null, ocupado = false, controleAtual = null, tokenMcp = null;
 const HISTORICO = 'work-chat-v1';
 
@@ -72,7 +77,7 @@ function falar(texto) {
 function apresentar(forcar = false) {
   if (apresentado && !forcar) return;
   apresentado = true;
-  sessionStorage.setItem('work-apresentado', '1');
+  salvarSessao('work-apresentado', '1');
   const bolha = document.getElementById('waBolha');
   if (bolha) bolha.querySelector('span').textContent = 'Oi, eu sou WORK. Clique para conversar.';
   if (!document.querySelector('#waMsgs .wa-msg.bot')) msg(INTRO, 'bot');
@@ -114,9 +119,9 @@ function msg(texto, tipo = 'bot', persistir = true) {
   if (videoUrl && /^https?:\/\//.test(videoUrl)) { const v = document.createElement('video'); v.controls = true; v.src = videoUrl; v.style.cssText = 'width:100%;border-radius:8px;margin-top:7px'; el.appendChild(v); }
   area?.appendChild(el); area?.scrollTo({ top: area.scrollHeight, behavior: 'smooth' });
   if (persistir) try {
-    const h = JSON.parse(localStorage.getItem(HISTORICO) || '[]');
+    const h = JSON.parse(lerLocal(HISTORICO, '[]'));
     h.push({ tipo, texto: limpo });
-    localStorage.setItem(HISTORICO, JSON.stringify(h.slice(-40)));
+    salvarLocal(HISTORICO, JSON.stringify(h.slice(-40)));
   } catch { /* armazenamento indisponível */ }
 }
 
@@ -253,7 +258,7 @@ export function iniciarAssistente() {
    </section>`;
   document.body.appendChild(root);
   try {
-    const historico = JSON.parse(localStorage.getItem(HISTORICO) || '[]');
+    const historico = JSON.parse(lerLocal(HISTORICO, '[]'));
     for (const m of historico.slice(-40)) msg(m.texto, m.tipo === 'user' ? 'user' : 'bot', false);
   } catch { /* sem histórico */ }
   document.getElementById('waOlho').onclick = abrir; document.getElementById('waBolha').onclick = abrir; document.getElementById('waFechar').onclick = fechar;
@@ -263,13 +268,13 @@ export function iniciarAssistente() {
   document.getElementById('waArquivo').onchange = (e) => processarAnexo(e.target.files?.[0]);
   document.getElementById('waCancelar').onclick = () => controleAtual?.abort();
   document.getElementById('waLimpar').onclick = () => {
-    localStorage.removeItem(HISTORICO);
+    removerLocal(HISTORICO);
     const area = document.getElementById('waMsgs'); area.innerHTML = '';
     msg(INTRO, 'bot');
     estado('online · conversa limpa');
   };
-  document.getElementById('waSom').onclick = (e) => { somAtivo = !somAtivo; localStorage.setItem('work-som', somAtivo ? '1' : '0'); e.currentTarget.textContent = somAtivo ? '🔔' : '🔕'; if (somAtivo) tocarSom(); };
-  document.getElementById('waVoz').onclick = (e) => { vozAtiva = !vozAtiva; localStorage.setItem('work-voz', vozAtiva ? '1' : '0'); e.currentTarget.textContent = vozAtiva ? '🗣' : '🤐'; if (vozAtiva) falar(INTRO); else speechSynthesis?.cancel(); };
+  document.getElementById('waSom').onclick = (e) => { somAtivo = !somAtivo; salvarLocal('work-som', somAtivo ? '1' : '0'); e.currentTarget.textContent = somAtivo ? '🔔' : '🔕'; if (somAtivo) tocarSom(); };
+  document.getElementById('waVoz').onclick = (e) => { vozAtiva = !vozAtiva; salvarLocal('work-voz', vozAtiva ? '1' : '0'); e.currentTarget.textContent = vozAtiva ? '🗣' : '🤐'; if (vozAtiva) falar(INTRO); else window.speechSynthesis?.cancel(); };
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape') fechar(); });
   iniciarVoz();
   setInterval(() => { if (ocupado) return; const x = Math.round((Math.random() - .5) * 7), y = Math.round((Math.random() - .5) * 5); document.querySelectorAll('.wa-pupila i').forEach((i) => { i.style.transform = `translate(${x}px,${y}px)`; }); }, 2600);
