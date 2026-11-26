@@ -10,7 +10,7 @@ function vivo(pid) {
   try { process.kill(pid, 0); return true; } catch { return false; }
 }
 
-export async function adquirirLock(nome, { staleMs = 5 * 60_000 } = {}) {
+export async function adquirirLock(nome) {
   await mkdir(DADOS, { recursive: true });
   const arquivo = path.join(DADOS, 'worker-' + nome + '.lock');
   for (let tentativa = 0; tentativa < 2; tentativa++) {
