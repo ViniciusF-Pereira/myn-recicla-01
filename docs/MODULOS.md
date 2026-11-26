@@ -189,3 +189,8 @@ Módulo do Myn Recicla/01.
 Exports: criarPedido, listarPendentes, concluirPedido
 
 Módulo do Myn Recicla/01.
+## supervisor.mjs
+
+Exports: criticar, iniciarSupervisor, statusSupervisor, pararSupervisor
+
+Módulo do Myn Recicla/01.
