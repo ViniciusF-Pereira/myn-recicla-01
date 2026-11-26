@@ -67,10 +67,10 @@ function validar(proposta, arquivo) {
   return proposta;
 }
 
-export async function gerarProposta() {
+export async function gerarProposta({ arquivo: arquivoForcado, objetivo, categoria: categoriaForcada } = {}) {
   const categorias = Object.keys(ALVOS);
-  const categoria = categorias[giro++ % categorias.length];
-  const lista = ALVOS[categoria];
+  const categoria = categoriaForcada || (arquivoForcado ? 'codigo' : categorias[giro++ % categorias.length]);
+  const lista = arquivoForcado ? [arquivoForcado] : ALVOS[categoria];
   let arquivo = lista[0], codigo = '';
   for (const candidato of lista) {
     try { codigo = await readFile(path.join(RAIZ, candidato), 'utf8'); arquivo = candidato; break; } catch { /* próximo */ }
@@ -81,8 +81,9 @@ export async function gerarProposta() {
   const prompt = `Você é engenheiro do projeto Myn Recicla/01 (Node ESM, browser-only, sem chaves, sem Google/Gemini).
 Categoria desta rodada: ${categoria}.
 Arquivo: ${arquivo}.
+Objetivo específico do usuário: ${String(objetivo || 'melhorar este arquivo preservando comportamento').slice(0, 1200)}.
 
-Proponha UMA melhoria real e específica. Pode corrigir bug, reduzir trabalho repetido, melhorar robustez, infra ou arquitetura.
+Proponha UMA melhoria real e específica que atenda ao objetivo. Pode corrigir bug, reduzir trabalho repetido, melhorar robustez, infra ou arquitetura.
 É PROIBIDO: mudança só de estilo, comentário, documentação, renomear, helper sem uso, microajuste numérico sem bug demonstrável, ou remover comportamento público.
 Preserve exports e comportamento observável. Não invente APIs. Use os testes relacionados como referência de comportamento.
 

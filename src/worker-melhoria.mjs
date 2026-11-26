@@ -5,6 +5,8 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { analisarMelhorias, marcar } from './analise.mjs';
 import { auditarCodigo, reproduzirAchado } from './auditoria-codigo.mjs';
+import { gerarProposta, aplicarProposta } from './engenheiro.mjs';
+import { listarPendentes, concluirPedido } from './pedidos.mjs';
 import { registrarEvento } from './eventlog.mjs';
 import { adquirirLock } from './lock.mjs';
 
@@ -185,6 +187,42 @@ async function cicloAuditoria(n) {
   }
 }
 
+async function cicloPedido(n, pedido) {
+  await garantirBranch();
+  emitir('pedido_recebido', { n, id: pedido.id, arquivo: pedido.arquivo, objetivo: pedido.objetivo, origem: pedido.origem });
+  let arquivoAplicado = '';
+  try {
+    const proposta = await gerarProposta({ arquivo: pedido.arquivo, objetivo: pedido.objetivo });
+    emitir('proposta', { n, pedido: pedido.id, categoria: proposta.categoria, modelo: proposta.modelo, titulo: proposta.titulo, motivo: proposta.motivo, arquivo: proposta.arquivo, substituicoes: proposta.substituicoes.length, envio: proposta.envio });
+    const aplicacao = await aplicarProposta(proposta);
+    arquivoAplicado = aplicacao.arquivo;
+    const checagens = await verificar(aplicacao.arquivo);
+    const ok = checagens.every((c) => c.ok);
+    emitir('testes', { n, ok, checagens, pedido: pedido.id });
+    if (!ok) {
+      await git(['checkout', '--', aplicacao.arquivo]).catch(() => undefined);
+      await concluirPedido(pedido.id, 'bloqueado', 'testes falharam');
+      emitir('pedido_bloqueado', { n, id: pedido.id, arquivo: aplicacao.arquivo });
+      return { n, ok: false, tarefa: pedido.id };
+    }
+    await git(['add', '--', aplicacao.arquivo]);
+    const pendente = await git(['status', '--porcelain', '--', aplicacao.arquivo]);
+    let merge = false;
+    if (pendente) {
+      await git(['commit', '-m', 'pedido: ' + proposta.titulo + ' (' + pedido.id + ')', '--', aplicacao.arquivo]);
+      merge = await mesclarBranch(n, AUTO_MERGE_CODIGO);
+    }
+    await concluirPedido(pedido.id, merge ? 'aplicado' : 'revisao', merge ? 'merge automático' : 'commit em worker/auto');
+    emitir('pedido_concluido', { n, id: pedido.id, arquivo: aplicacao.arquivo, merge });
+    return { n, ok: true, merge, tarefa: pedido.id };
+  } catch (e) {
+    if (arquivoAplicado) await git(['checkout', '--', arquivoAplicado]).catch(() => undefined);
+    await concluirPedido(pedido.id, 'bloqueado', String(e.message).slice(0, 240));
+    emitir('engenharia_erro', { n, id: pedido.id, erro: String(e.message).slice(0, 240) });
+    return { n, ok: false, tarefa: pedido.id };
+  }
+}
+
 async function cicloBacklog(n, t) {
   await garantirBranch();
   emitir('branch', { n, branch: await git(['rev-parse', '--abbrev-ref', 'HEAD']) });
@@ -214,6 +252,8 @@ async function cicloBacklog(n, t) {
 
 async function ciclo(n, objetivo) {
   emitir('ciclo_inicio', { n, objetivo: objetivo.slice(0, 200) });
+  const pedidos = await listarPendentes();
+  if (pedidos.length) return cicloPedido(n, pedidos[0]);
   const analise = await analisarMelhorias();
   emitir('analise', { n, ...analise.analise });
   return analise.tarefa ? cicloBacklog(n, analise.tarefa) : cicloAuditoria(n);

@@ -26,6 +26,8 @@ import { respostaLocal } from '../src/conhecimento-local.mjs';
 import { emitirToken, validarToken, bearer, ehLoopback } from '../src/token-local.mjs';
 import { handleAnthropic } from '../src/api-antropic.mjs';
 import { iniciarPonteTelegram, enviarTelegram, statusPonte } from '../src/telegram-ponte.mjs';
+import { criarPedido, listarPendentes } from '../src/pedidos.mjs';
+import { iniciarSupervisor, statusSupervisor, pararSupervisor } from '../src/supervisor.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
@@ -120,6 +122,21 @@ const servidor = http.createServer(async (req, res) => {
   res.setHeader('x-frame-options', 'DENY');
   res.setHeader('referrer-policy', 'no-referrer');
   res.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+  if (url.pathname === '/api/melhoria/pedido' && req.method === 'POST') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const { objetivo, arquivo } = JSON.parse(corpo || '{}');
+      const pedido = await criarPedido({ objetivo, arquivo, origem: 'http-local' });
+      enviarJson(req, res, { ok: true, pedido });
+    } catch (e) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(e.message).slice(0, 240) })); }
+    return;
+  }
+  if (url.pathname === '/api/melhoria/pedidos' && req.method === 'GET') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    enviarJson(req, res, { pendentes: await listarPendentes() });
+    return;
+  }
   if (url.pathname === '/api/telegram/status' && req.method === 'GET') {
     if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
     enviarJson(req, res, statusPonte());
@@ -151,6 +168,19 @@ const servidor = http.createServer(async (req, res) => {
     tokenLocal = novo;
     enviarJson(req, res, { token: novo.token, expiresAt: new Date(novo.expiresAt).toISOString(), mcpUrl: 'http://127.0.0.1:' + PORTA + '/mcp', messagesUrl: 'http://127.0.0.1:' + PORTA + '/v1/messages' });
     return;
+  }
+  if (url.pathname === '/api/supervisor/status' && req.method === 'GET') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    enviarJson(req, res, statusSupervisor()); return;
+  }
+  if (url.pathname === '/api/supervisor/start' && req.method === 'POST') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    const r = await iniciarSupervisor({ duracaoMs: 6 * 60 * 60 * 1000 });
+    enviarJson(req, res, r); return;
+  }
+  if (url.pathname === '/api/supervisor/stop' && req.method === 'POST') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    enviarJson(req, res, pararSupervisor()); return;
   }
   const workerRotas = {
     analise: { iniciar: iniciarAnalise, parar: pararAnalise, status: statusAnalise, assinar: assinarAnalise },
@@ -768,4 +798,5 @@ process.once('SIGTERM', () => desligar('SIGTERM'));
 servidor.listen(PORTA, HOST, () => {
   console.log('Myn - Recicla/01 em http://' + HOST + ':' + PORTA);
   iniciarPonteTelegram().then((r) => console.log('[telegram] ' + (r.ok ? 'ponte ativa' : 'ponte offline: ' + r.erro))).catch((e) => console.log('[telegram] ' + e.message));
+  if (process.env.MYN_SUPERVISOR_ATIVO !== '0') iniciarSupervisor({ duracaoMs: 6 * 60 * 60 * 1000 }).then((r) => console.log('[supervisor] ' + (r.ok ? 'ativo por 6h' : r.erro)));
 });

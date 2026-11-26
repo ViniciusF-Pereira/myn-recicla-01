@@ -13,7 +13,7 @@ export async function carregarDados() {
   const urls = {
     plugins: '/api/plugins', modelos: '/api/modelos', descobertos: '/api/modelos/descobertos',
     desempenho: '/api/desempenho', arquitetura: '/api/arquitetura', saude: '/api/saude',
-    analise: '/api/worker-analise/status', melhoria: '/api/worker-melhoria/status',
+    analise: '/api/worker-analise/status', melhoria: '/api/worker-melhoria/status', supervisor: '/api/supervisor/status',
   };
   const chaves = Object.keys(urls);
   const resultados = await Promise.allSettled(chaves.map((k) => json(urls[k])));
@@ -37,7 +37,7 @@ export async function carregarDados() {
   const idsPlugins = new Set(plugins.map((p) => p.id));
   const saude = (dados.saude?.rotas || []).filter((r) => idsPlugins.has(r.id));
   dados.saudeMedia = saude.length ? saude.reduce((n, r) => n + (r.score || 0), 0) / saude.length : null;
-  dados.workers = { analise: dados.analise || null, melhoria: dados.melhoria || null };
+  dados.workers = { analise: dados.analise || null, melhoria: dados.melhoria || null, supervisor: dados.supervisor || null };
   return dados;
 }
 

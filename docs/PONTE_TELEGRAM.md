@@ -20,7 +20,13 @@ O arquivo fica fora do Git. Nunca coloque o token em `config/`, `site/`, docs ou
 - `/start` ou `/ajuda` — apresentação e comandos.
 - `/status` — workers e arquitetura.
 - `/worker` — estado do worker de melhoria.
+- `/melhorar src/arquivo.mjs | descreva a correção` — pedido de código que o worker testa antes de aplicar.
+- Fotos e documentos — são baixados, enviados ao `/api/documento` e respondidos com OCR/arquivo.
 - Qualquer texto — conversa com o Myn/Work.
+
+## Supervisor de 6h
+
+O supervisor acompanha novas mensagens do Telegram e do chat, critica riscos e mantém o worker de melhoria ativo. Ele avisa quando uma ideia é vaga, destrutiva, sem confirmação ou sem critério de teste.
 
 A ponte também envia notificações de:
 
