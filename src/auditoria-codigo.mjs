@@ -56,6 +56,34 @@ export async function auditarCodigo() {
       ]));
   }
 
+  const assistente = await texto('site/assistente.mjs');
+  if (assistente.includes("sessionStorage.getItem('work-apresentado')")) {
+    const eol = assistente.includes('\r\n') ? '\r\n' : '\n';
+    const helpers = [
+      "function lerLocal(k,d=''){try{return localStorage.getItem(k)??d}catch{return d}}",
+      'function salvarLocal(k,v){try{localStorage.setItem(k,v)}catch{}}',
+      'function removerLocal(k){try{localStorage.removeItem(k)}catch{}}',
+      'function lerSessao(k){try{return sessionStorage.getItem(k)}catch{return null}}',
+      'function salvarSessao(k,v){try{sessionStorage.setItem(k,v)}catch{}}',
+    ].join(eol);
+    findings.push(achado('work-armazenamento-seguro', 'site/assistente.mjs',
+      'acesso direto a storage pode lançar quando o navegador bloqueia localStorage/sessionStorage.',
+      async () => (await texto('site/assistente.mjs')).includes("sessionStorage.getItem('work-apresentado')"),
+      [
+        { antigo: "let apresentado = sessionStorage.getItem('work-apresentado') === '1';", novo: helpers + eol + "let apresentado = lerSessao('work-apresentado') === '1';" },
+        { antigo: "let somAtivo = localStorage.getItem('work-som') !== '0';", novo: "let somAtivo = lerLocal('work-som') !== '0';" },
+        { antigo: "let vozAtiva = localStorage.getItem('work-voz') !== '0';", novo: "let vozAtiva = lerLocal('work-voz') !== '0';" },
+        { antigo: "sessionStorage.setItem('work-apresentado', '1');", novo: "salvarSessao('work-apresentado', '1');" },
+        { antigo: "JSON.parse(localStorage.getItem(HISTORICO) || '[]')", novo: "JSON.parse(lerLocal(HISTORICO, '[]'))" },
+        { antigo: "JSON.parse(localStorage.getItem(HISTORICO) || '[]')", novo: "JSON.parse(lerLocal(HISTORICO, '[]'))" },
+        { antigo: "localStorage.setItem(HISTORICO, JSON.stringify(h.slice(-40)));", novo: "salvarLocal(HISTORICO, JSON.stringify(h.slice(-40)));" },
+        { antigo: "localStorage.removeItem(HISTORICO);", novo: "removerLocal(HISTORICO);" },
+        { antigo: "localStorage.setItem('work-som', somAtivo ? '1' : '0');", novo: "salvarLocal('work-som', somAtivo ? '1' : '0');" },
+        { antigo: "localStorage.setItem('work-voz', vozAtiva ? '1' : '0');", novo: "salvarLocal('work-voz', vozAtiva ? '1' : '0');" },
+        { antigo: "speechSynthesis?.cancel();", novo: "window.speechSynthesis?.cancel();" },
+      ]));
+  }
+
   for (const arquivo of ['src/stream.mjs', 'src/rapido.mjs']) {
     const codigo = await texto(arquivo);
     if (/gemini|google/i.test(codigo)) findings.push(achado('sem-google-' + arquivo, arquivo,

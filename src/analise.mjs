@@ -1,6 +1,7 @@
 /** Analisador de melhorias reais: lê o projeto, encontra lacunas e gera tarefas verificáveis. */
 import { readFile, readdir } from 'node:fs/promises';
 import path from 'node:path';
+import { createHash } from 'node:crypto';
 
 const RAIZ = process.cwd();
 const FEITAS = 'docs/MELHORIAS_APLICADAS.json';
@@ -103,13 +104,18 @@ async function candidatosDeReferencia(feitas) {
         conteudo: '# Rotas e plugins\n\nGerado de `config/plugins.json`: ' + lista.length + ' rotas.\n\n| id | nome | categoria | login | chave |\n|---|---|---|---|---|\n' + linhas.join('\n') + '\n' });
     }
   }
-  if (!feitas.has('docs-endpoints') && !(await existe('docs/ENDPOINTS.md'))) {
+  {
     const fonte = await texto('scripts/site-server.mjs');
     const achados = new Set();
-    for (const m of fonte.matchAll(/(['"])(\/(?:api|mcp)[^'"]*)\1/g)) achados.add(m[2]);
+    for (const m of fonte.matchAll(/(['"])(\/(?:api|mcp|v1|docs)[^'"]*)\1/g)) {
+      if (!/^\/api\/google(?:\/|$)/.test(m[2])) achados.add(m[2]);
+    }
     if (achados.size) {
-      out.push({ id: 'docs-endpoints', alvo: 'docs/ENDPOINTS.md', modo: 'criar', titulo: 'inventário de endpoints',
-        conteudo: '# Endpoints\n\nExtraído de `scripts/site-server.mjs`: ' + achados.size + ' caminhos.\n\n' + [...achados].sort().map((e) => '- `' + e + '`').join('\n') + '\n' });
+      const conteudo = '# Endpoints\n\nExtraído de `scripts/site-server.mjs`: ' + achados.size + ' caminhos.\n\n' + [...achados].sort().map((e) => '- `' + e + '`').join('\n') + '\n';
+      const atual = (await texto('docs/ENDPOINTS.md')).replace(/\r\n/g, '\n');
+      const hash = createHash('sha256').update(conteudo).digest('hex').slice(0, 10);
+      const id = 'docs-endpoints-' + hash;
+      if (atual !== conteudo && !feitas.has(id)) out.push({ id, alvo: 'docs/ENDPOINTS.md', modo: 'criar', titulo: 'atualiza inventário de endpoints', conteudo });
     }
   }
   // Testes só entram na fila quando os exports que eles exercitam já existem.
