@@ -117,7 +117,9 @@ export async function iniciarPonteTelegram({ base = 'http://127.0.0.1:' + (proce
     const cancelar = assinarEventos();
     const parar = () => { ativo = false; clearTimeout(timer); cancelar(); liberarLock?.(); liberarLock = null; };
     timer = setTimeout(() => poll(base), 100);
-    await enviarTelegram(`Ponte WORK ↔ Telegram ativa.\nBot: @${botUsername}\nEnvie uma mensagem para conversar. /status mostra os workers.`);
+    try {
+      await enviarTelegram(`Ponte WORK ↔ Telegram ativa.\nBot: @${botUsername}\nEnvie uma mensagem para conversar. /status mostra os workers.`);
+    } catch (e) { ultimoErro = 'aguardando Start do usuário: ' + String(e.message).slice(0, 160); }
     await registrar({ direcao: 'sistema', evento: 'iniciada', botUsername });
     return { ok: true, status: statusPonte(), parar };
   } catch (e) {
