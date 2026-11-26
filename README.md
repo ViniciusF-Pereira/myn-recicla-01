@@ -97,7 +97,7 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Workers separados:** `docs/WORKER_INFINITO.md`. Análise (`/api/worker-analise/*`) mede código, desempenho, modelos e arquitetura. Melhoria (`/api/worker-melhoria/*`) aplica achados reproduzíveis, roda `node --test`, usa lock de processo, smoke pós-merge e rollback. Merge automático por allowlist, sem revisão humana; desligue com `MYN_AUTO_MERGE_CODIGO=0`. O fluxo padrão não envia código para LLM. Sem Gemini/Google.
 
-**Rota local de agente:** `node scripts/emitir-token.mjs` emite um token local para usar o Myn por MCP ou por uma rota estilo Anthropic Messages (`/v1/messages`), com streaming, tools e resumo de raciocínio. Veja `docs/ROTA_AGENTE_LOCAL.md`.
+**Rota local de agente:** `npm run token` ou o botão **agente local** no Playground emite/copia/renova o token para usar o Myn por MCP ou por uma rota estilo Anthropic Messages (`/v1/messages`), com streaming, tools e resumo de raciocínio. Veja `docs/ROTA_AGENTE_LOCAL.md`.
 
 **WORK — assistente virtual:** presente em todas as telas, com mascote animado, apresentação narrada, som, mini-chat, voz, microfone, anexos, players de áudio/vídeo, ações rápidas, histórico persistente, cancelamento e ferramentas MCP visíveis em uso. Veja `docs/ASSISTENTE_WORK.md`.
 

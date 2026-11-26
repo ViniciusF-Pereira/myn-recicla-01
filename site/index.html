@@ -432,7 +432,7 @@ async function atualizarDados(){
   for(const [cat,lista] of Object.entries(d.categorias||{})){
    const alvo=$('cat-'+cat+'-desc'); if(alvo)alvo.textContent=lista.length+' rotas · '+(lista.slice(0,5).map(p=>p.nome).join(', ')||'nenhuma');
   }
-  ITENS=(d.pluginsLista||[]).map(p=>({n:p.nome,u:p.url,l:'multi',t:p.capacidades||[],lim:p.limite||'—',login:!!p.login,acao:p.acao||'navegador'}));
+  ITENS=(d.pluginsLista||[]).map(p=>{const u=String(p.url||'');return {n:p.nome,u:/^(https?:|brave:)/i.test(u)?u:'#',l:'multi',t:p.capacidades||[],lim:p.limite||'—',login:!!p.login,acao:p.acao||'navegador'}});
   pintar('todos');
  }catch(e){$('catalogoCount').textContent='dados indisponíveis: '+e.message}
 }

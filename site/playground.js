@@ -351,3 +351,20 @@ async function atualizarDadosPlayground(){
 }
 atualizarDadosPlayground();
 setInterval(atualizarDadosPlayground,30000);
+
+const painelAgenteLocal=$('painelAgenteLocal');
+async function carregarAgenteLocal(){
+ try{
+  const d=await (await fetch('/api/token')).json();
+  $('alToken').value=d.token;$('alMcp').value=d.mcpUrl;$('alMessages').value=d.messagesUrl;
+  $('alStatus').textContent='expira '+new Date(d.expiresAt).toLocaleDateString('pt-BR');
+  $('alConfig').textContent=JSON.stringify({mcpServers:{'myn-recicla':{url:d.mcpUrl,headers:{Authorization:'Bearer '+d.token}}}},null,2);
+ }catch(e){$('alStatus').textContent='erro: '+e.message}
+}
+async function copiarCampo(id){const v=$(id).value;try{await navigator.clipboard.writeText(v);$('alStatus').textContent='copiado'}catch{$('alStatus').textContent='copie manualmente'}}
+$('btnAgenteLocal').onclick=()=>{painelAgenteLocal.classList.toggle('on');if(painelAgenteLocal.classList.contains('on'))carregarAgenteLocal()};
+$('fecharAgenteLocal').onclick=()=>painelAgenteLocal.classList.remove('on');
+$('copiarToken').onclick=()=>copiarCampo('alToken');
+$('copiarMcp').onclick=()=>copiarCampo('alMcp');
+$('copiarMessages').onclick=()=>copiarCampo('alMessages');
+$('renovarToken').onclick=async()=>{try{await post('/api/token/renovar',{});await carregarAgenteLocal();$('alStatus').textContent='token renovado'}catch(e){$('alStatus').textContent='erro: '+e.message}};

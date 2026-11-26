@@ -251,7 +251,7 @@ carregarDados().then(d=>{
  const set=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v};
  set('dataRelatorio',new Date(d.atualizadoEm).toLocaleString('pt-BR'));
  set('relRotas',d.totalPlugins); set('relModelos',d.totalDescobertos);
- set('relPayload',d.totalKb+' KB · pior '+d.piorMs+'ms');
+ set('relPayload',d.totalKb==null?'—':d.totalKb+' KB · pior '+d.piorMs+'ms');
  set('relArquitetura',d.arquiteturaResumo?d.arquiteturaResumo.modulos+' · '+d.arquiteturaResumo.dependencias:'—');
  set('relSaude',d.saudeMedia==null?'—':d.saudeMedia.toFixed(2));
  set('relWorkers',resumoWorkers(d));

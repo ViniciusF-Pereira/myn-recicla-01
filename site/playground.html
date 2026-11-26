@@ -289,7 +289,7 @@ body>header,main,footer{position:relative;z-index:1}
   <div class="msgs" id="msgs"><div class="msg ele">Oi. Sou o <strong>Myn-01</strong>, feito de abas recicladas. ♻<br><br>Leio documentos, monto tabelas, crio arquivos e gero imagem, narração e clipe — tudo free, sem chave. No chat, use <code>/plugin mensagem</code> para chamar uma das <span id="msgRotas">carregando...</span> rotas.</div></div>
   <div class="anexos" id="anexos"></div>
   <div class="composer">
-   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" data-midia="gif"><svg class="ico"><use href="#i-leaf"/></svg> gif</button><button class="ferr" data-midia="animacao"><svg class="ico"><use href="#i-video"/></svg> anima</button><button class="ferr" id="btnFilmes"><svg class="ico"><use href="#i-search"/></svg> filmes</button><button class="ferr" id="btnModelos"><svg class="ico"><use href="#i-gear"/></svg> modelos</button><button class="ferr" id="btnVM" title="VM web com HD e cache"><svg class="ico"><use href="#i-gear"/></svg> VM</button><button class="ferr" id="btnAgentes" title="Agentes avaliadores"><svg class="ico"><use href="#i-eye"/></svg> agentes</button><button class="ferr" id="btnWorker" title="Worker autônomo"><svg class="ico"><use href="#i-loop"/></svg> worker</button></div>
+   <div class="ferramentas"><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" data-midia="gif"><svg class="ico"><use href="#i-leaf"/></svg> gif</button><button class="ferr" data-midia="animacao"><svg class="ico"><use href="#i-video"/></svg> anima</button><button class="ferr" id="btnFilmes"><svg class="ico"><use href="#i-search"/></svg> filmes</button><button class="ferr" id="btnModelos"><svg class="ico"><use href="#i-gear"/></svg> modelos</button><button class="ferr" id="btnVM" title="VM web com HD e cache"><svg class="ico"><use href="#i-gear"/></svg> VM</button><button class="ferr" id="btnAgentes" title="Agentes avaliadores"><svg class="ico"><use href="#i-eye"/></svg> agentes</button><button class="ferr" id="btnWorker" title="Worker autônomo"><svg class="ico"><use href="#i-loop"/></svg> worker</button><button class="ferr" id="btnAgenteLocal" title="Token e rota local de agente"><svg class="ico"><use href="#i-api"/></svg> agente local</button></div>
    <div class="linha-input">
     <input type="file" id="imagemInput" accept="image/*" multiple hidden><input type="file" id="arquivoInput" multiple hidden>
     <button class="icobtn" id="anexar" title="Anexar documento" aria-label="Anexar documento"><svg class="ico"><use href="#i-file"/></svg></button>
@@ -319,6 +319,17 @@ body>header,main,footer{position:relative;z-index:1}
   <div id="agSaida"><div class="pv-linha">aguardando...</div></div>
  </div>
 </div>
+<div class="painel-vm" id="painelAgenteLocal">
+ <div class="pv-topo"><b>ROTA LOCAL DE AGENTE</b><span class="pv-tag" id="alStatus">—</span><button class="icobtn" id="fecharAgenteLocal">✕</button></div>
+ <div class="pv-corpo">
+  <div class="pv-linha"><input id="alToken" readonly placeholder="token local"><button class="btn sec" id="copiarToken">COPIAR</button></div>
+  <div class="pv-linha"><input id="alMcp" readonly><button class="btn sec" id="copiarMcp">COPIAR</button></div>
+  <div class="pv-linha"><input id="alMessages" readonly><button class="btn sec" id="copiarMessages">COPIAR</button></div>
+  <pre id="alConfig">carregando configuração...</pre>
+  <button class="btn" id="renovarToken">RENOVAR TOKEN</button>
+  <a href="/docs/ROTA_AGENTE_LOCAL.md" target="_blank" rel="noopener">documentação da rota →</a>
+ </div>
+</div>
 <div class="painel-worker" id="painelWorker">
  <div class="pw-topo"><b><svg class="ico"><use href="#i-loop"/></svg> WORKER AUTÔNOMO · AO VIVO</b><span id="pwResumo" style="margin-left:auto;font:600 .62rem var(--mono)">carregando...</span><button class="icobtn" id="fecharWorker">✕</button></div>
  <div class="pw-corpo" id="workerLog"><div class="pw-linha">parado · clique em INICIAR</div></div>
@@ -328,7 +339,7 @@ body>header,main,footer{position:relative;z-index:1}
 <div class="fundo" id="fundo"></div>
 
 <script src="assets/mini-myns.js"></script>
-<script type="module" src="playground.js?v=28"></script>
+<script type="module" src="playground.js?v=29"></script>
 <script type="module" src="app.mjs?v=5"></script>
 
 </body></html>

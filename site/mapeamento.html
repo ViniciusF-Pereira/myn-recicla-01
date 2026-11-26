@@ -35,7 +35,7 @@ import './assistente.mjs';
 const esc = s => String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 carregarDados().then(d=>{
   document.getElementById('resumoAtual').innerHTML='<div class="linha"><b>Dados atuais</b><span class="badge ok">'+new Date(d.atualizadoEm).toLocaleString('pt-BR')+'</span></div>'+
-   '<div class="meta">'+d.totalPlugins+' rotas · '+d.totalDescobertos+' modelos livres · '+d.totalKb+' KB · '+resumoWorkers(d)+'</div>';
+   '<div class="meta">'+d.totalPlugins+' rotas · '+d.totalDescobertos+' modelos livres · '+(d.totalKb==null?'—':d.totalKb+' KB')+' · '+resumoWorkers(d)+'</div>';
  }).catch(e=>{document.getElementById('resumoAtual').textContent='Erro nos dados atuais: '+e.message});
  fetch('mapeamento.json').then(r=>r.json()).then(d=>{
  document.getElementById('info').textContent=`Mapeado em ${d.em} · gateway ${d.gateway} · sonda: "${d.probe}" · ${d.resultados.length} provedores`;
