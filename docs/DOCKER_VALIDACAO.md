@@ -21,6 +21,8 @@ Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`).
 - Processo executado como usuário `myn` (UID 10001), não root.
 - Healthcheck respondeu `200` em `/api/saude`.
 - Assets do WORK e painel atual presentes: `site/assistente.mjs`, `site/dados-atuais.mjs` e `docs/RELATORIO_UNICO.html`.
+- Token local no container: sem `Authorization` → 401; com token válido → 200.
+- `.dockerignore` reduziu o contexto de dezenas de MB para cerca de 1,3 MB, excluindo `dados/`, logs e outputs.
 
 ## Infra
 
