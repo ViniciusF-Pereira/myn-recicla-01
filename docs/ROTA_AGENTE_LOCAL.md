@@ -48,7 +48,7 @@ Exemplo de configuração genérica:
 }
 ```
 
-Ferramentas disponíveis: chat, pesquisa, rotas, plugin, imagem, áudio, vídeo, documento, histórico e mensagem.
+Ferramentas disponíveis: chat, pesquisa, rotas, planejamento, loop agêntico, arquitetura, desempenho, modelos, plugin, imagem, áudio, vídeo, documento, histórico e mensagem.
 
 ## 3. Rota estilo Anthropic Messages
 

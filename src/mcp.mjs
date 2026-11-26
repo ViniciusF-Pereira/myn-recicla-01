@@ -1,5 +1,10 @@
 /** Myn MCP: expõe rotas, plugins, RAG e mídia como ferramentas. JSON-RPC sobre HTTP local. */
 import { registrar } from './historico.mjs';
+import { planejar } from './planejador.mjs';
+import { executarCiclo } from './agendador.mjs';
+import { auditarArquitetura } from './arquitetura.mjs';
+import { medirDesempenho } from './desempenho.mjs';
+import { obterModelos } from './modelos-livres.mjs';
 
 const T = (name, description, properties = [], required = [], extra = {}) => ({
   name, description,
@@ -14,6 +19,11 @@ export const FERRAMENTAS = [
   T('myn_chat', 'Conversa com o Myn-01. Rotas free, sem chave. Use rota="auto" para escolher a melhor.', [['message', S('Mensagem do usuário')], ['rota', S('auto, brave-leo, zai, openrouter, chatgpt, claude')]], ['message']),
   T('myn_pesquisar', 'Pesquisa local: RAG nos docs + catálogo atual de plugins.', [['query', S('Pergunta ou termo')]], ['query']),
   T('myn_rotas', 'Lista rotas, saúde (score/circuito) e plugins disponíveis.', [], []),
+  T('myn_planejar', 'Planeja passos executáveis para um objetivo usando o planejador do Myn.', [['objetivo', S('Objetivo')], ['maxPassos', N('Máximo de passos, até 6')]], ['objetivo']),
+  T('myn_loop', 'Executa um ciclo agêntico planejado. Pode gerar mídia, docs e chamadas de rota.', [['objetivo', S('Objetivo do ciclo')], ['maxPassos', N('Máximo de passos, até 6')]], ['objetivo'], { annotations: { readOnlyHint: false } }),
+  T('myn_arquitetura', 'Audita módulos, dependências, ciclos e violações de camada.', [], []),
+  T('myn_desempenho', 'Mede latência p50, bytes no fio, gzip e 304 das páginas/APIs.', [], []),
+  T('myn_modelos', 'Lista modelos livres descobertos por Pollinations, OpenRouter e HuggingFace.', [], []),
   T('myn_plugin', 'Executa qualquer plugin por id (/id no chat).', [['id', S('id do plugin')], ['entrada', S('texto de entrada')]], ['id', 'entrada']),
   T('myn_imagem', 'Gera imagem. Pollinations primeiro; se a cota acabar, desenha o sujeito por palavra-chave localmente.', [['prompt', S('O que gerar')]], ['prompt']),
   T('myn_audio', 'Narra texto em pt-BR com edge-tts (free, sem chave).', [['prompt', S('Texto para narrar')], ['voz', S('Voz edge-tts')]], ['prompt']),
@@ -57,6 +67,26 @@ async function executar(nome, a, base) {
       const ids = new Set(p.plugins.map((x) => x.id));
       const saude = s.rotas.filter((r) => ids.has(r.id)).slice(0, 20);
       return JSON.stringify({ plugins: p.total, google: 0, saude }, null, 2);
+    }
+    case 'myn_planejar': {
+      const d = await planejar(a.objetivo, { maxPassos: Math.max(1, Math.min(6, Number(a.maxPassos) || 4)) });
+      return JSON.stringify(d, null, 2);
+    }
+    case 'myn_loop': {
+      const d = await executarCiclo({ objetivo: a.objetivo, maxPassos: Math.max(1, Math.min(6, Number(a.maxPassos) || 4)), execucoes: [] });
+      return JSON.stringify(d, null, 2).slice(0, 14000);
+    }
+    case 'myn_arquitetura': {
+      const d = await auditarArquitetura();
+      return JSON.stringify({ resumo: d.resumo, violacoes: d.violacoes }, null, 2);
+    }
+    case 'myn_desempenho': {
+      const d = await medirDesempenho(base, 2);
+      return JSON.stringify(d, null, 2);
+    }
+    case 'myn_modelos': {
+      const d = await obterModelos();
+      return JSON.stringify({ total: d.total, porFonte: d.porFonte, erros: d.erros, modelos: d.modelos.slice(0, 30) }, null, 2);
     }
     case 'myn_plugin': {
       const d = await post(base, '/api/chat', { message: '/' + a.id + ' ' + a.entrada, rota: 'auto' });

@@ -8,6 +8,11 @@ test('MCP lista ferramentas atuais sem Google', async () => {
   assert.ok(nomes.includes('myn_chat'));
   assert.ok(nomes.includes('myn_pesquisar'));
   assert.ok(nomes.includes('myn_mensagem'));
+  assert.ok(nomes.includes('myn_planejar'));
+  assert.ok(nomes.includes('myn_loop'));
+  assert.ok(nomes.includes('myn_arquitetura'));
+  assert.ok(nomes.includes('myn_desempenho'));
+  assert.ok(nomes.includes('myn_modelos'));
   assert.ok(!nomes.includes('myn_google'));
 });
 

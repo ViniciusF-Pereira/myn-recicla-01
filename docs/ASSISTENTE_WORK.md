@@ -23,6 +23,11 @@ O WORK aparece flutuante na home, no Playground, no mapa de evidências e no pai
 - `myn_chat`
 - `myn_pesquisar`
 - `myn_rotas`
+- `myn_planejar`
+- `myn_loop`
+- `myn_arquitetura`
+- `myn_desempenho`
+- `myn_modelos`
 - `myn_plugin`
 - `myn_imagem`
 - `myn_audio`
@@ -43,6 +48,10 @@ Google/Gemini não fazem parte do catálogo.
 ## Validação executada
 
 - `myn_rotas`: 154 plugins, saúde retornada.
+- `myn_planejar`: plano gerado via Pollinations.
+- `myn_arquitetura`: 64 módulos, 92 dependências, 0 violações.
+- `myn_desempenho`: medição p50/bytes retornada.
+- `myn_modelos`: 34 modelos descobertos.
 - `myn_pesquisar`: documento `docs/WORKER_INFINITO.md`.
 - `myn_chat`: identidade e resumo local.
 - `myn_imagem`: JPEG gerado.

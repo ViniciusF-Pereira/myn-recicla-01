@@ -36,7 +36,7 @@ export async function respostaLocal(pergunta) {
     return 'Os workers funcionam em duas frentes: **análise** mede código, desempenho, modelos e arquitetura; **melhoria** aplica achados concretos, roda testes, faz smoke e merge automático guardado. Quando não existe achado real, a melhoria fica vigiando em vez de inventar commits.';
   }
   if (/mcp|ferramenta|tool/i.test(p)) {
-    return 'O MCP expõe 10 ferramentas: chat, pesquisa, rotas, plugin, imagem, áudio, vídeo, documento, histórico e mensagem. O WORK mostra a ferramenta em uso e permite cancelar a chamada.';
+    return 'O MCP expõe 15 ferramentas: chat, pesquisa, rotas, planejamento, loop agêntico, arquitetura, desempenho, modelos, plugin, imagem, áudio, vídeo, documento, histórico e mensagem. O WORK mostra a ferramenta em uso e permite cancelar a chamada.';
   }
   if (/modelo|modelos|ollama|webgpu/i.test(p)) {
     return `O catálogo possui **${n.modelos} modelos descobertos** por fontes públicas: Pollinations, OpenRouter e HuggingFace. A execução depende da rota escolhida e pode ter cota comunitária; Google/Gemini não são usados.`;

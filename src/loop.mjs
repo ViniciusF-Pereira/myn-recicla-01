@@ -1,10 +1,11 @@
 /** Agente em loop: planeja → age → observa → repete, com RAG e checkpoint. */
-import { writeFile } from 'node:fs/promises';
+import { writeFile, mkdir } from 'node:fs/promises';
 import path from 'node:path';
 import { repararComando } from './reparo.mjs';
 import { contextoPara } from './rag.mjs';
 
-export async function rodarLoop({ objetivo, gateway, rota, ferramentas, arquivos = ['resultado'], maxPassos = 6, checkpointDir = 'D:/0 - Projetos/outputs', sinal, log = () => {} }) {
+export async function rodarLoop({ objetivo, gateway, rota, ferramentas, arquivos = ['resultado'], maxPassos = 6, checkpointDir = path.join(process.env.MYN_DADOS || path.join(process.cwd(), 'dados'), 'checkpoints'), sinal, log = () => {} }) {
+  await mkdir(checkpointDir, { recursive: true });
   const historico = [];
   const permitidas = ferramentas.nomes;
   const ctx = await contextoPara(objetivo);

@@ -162,8 +162,13 @@ function decidir(texto) {
   if (/gerar|criar|fazer/.test(t) && /vídeo|video|clipe|anima/.test(t)) return { nome: 'myn_video', args: { prompt: texto, segundos: 6 } };
   if (/fale|narre|narrar|áudio|audio|voz/.test(t)) return { nome: 'myn_audio', args: { prompt: texto.replace(/^(fale|narre|narrar)\s*/i, '') } };
   if (/histórico|historico|caderno/.test(t)) return { nome: 'myn_historico', args: { limite: 8 } };
+  if (/planej|planeje|plano/.test(t)) return { nome: 'myn_planejar', args: { objetivo: texto, maxPassos: 4 } };
+  if (/loop agêntico|loop agentico|executar ciclo|rodar loop/.test(t)) return { nome: 'myn_loop', args: { objetivo: texto, maxPassos: 4 } };
+  if (/arquitetura|dependências|dependencias|ciclos/.test(t)) return { nome: 'myn_arquitetura', args: {} };
+  if (/desempenho|desempenho|latência|latencia|payload|gzip/.test(t)) return { nome: 'myn_desempenho', args: {} };
+  if (/modelos|models|webgpu/.test(t)) return { nome: 'myn_modelos', args: {} };
   if (/pesquis|fontes|fonte|documenta/.test(t)) return { nome: 'myn_pesquisar', args: { query: texto.replace(/^(pesquise|pesquisa|busque|buscar)\s*/i, '') } };
-  if (/rotas|plugins|saúde|saude|modelos/.test(t)) return { nome: 'myn_rotas', args: {} };
+  if (/rotas|plugins|saúde|saude/.test(t)) return { nome: 'myn_rotas', args: {} };
   return { nome: 'myn_chat', args: { message: texto, rota: 'auto' } };
 }
 
@@ -242,7 +247,7 @@ export function iniciarAssistente() {
    <section class="wa-painel" id="waPainel" aria-label="Mini chat do WORK">
     <div class="wa-topo"><b>WORK /01</b><small id="waTools">conectando MCP...</small><button id="waSom" title="Ativar/desativar som">${somAtivo ? '🔔' : '🔕'}</button><button id="waVoz" title="Ativar/desativar voz">${vozAtiva ? '🗣' : '🤐'}</button><button id="waLimpar" title="Limpar conversa">🧹</button><button id="waFechar" aria-label="Fechar">✕</button></div>
     <div class="wa-status"><span class="wa-led"></span><span id="waStatus">online</span></div>
-    <div class="wa-acoes"><button data-acao="quais são as rotas?">ver rotas</button><button data-acao="pesquise worker">pesquisar</button><button data-acao="ir para catálogo">ir ao catálogo</button><button data-acao="explique o que é o Myn">sobre o Myn</button></div>
+    <div class="wa-acoes"><button data-acao="quais são as rotas?">ver rotas</button><button data-acao="pesquise worker">pesquisar</button><button data-acao="ir para catálogo">ir ao catálogo</button><button data-acao="explique o que é o Myn">sobre o Myn</button><button data-acao="mostre a arquitetura">arquitetura</button></div>
     <div class="wa-msgs" id="waMsgs"><div class="wa-msg bot">Oi, eu sou o WORK. Posso conversar, pesquisar, consultar rotas, gerar mídia e navegar pela página. As ferramentas MCP aparecem aqui enquanto eu uso.</div></div>
     <form class="wa-form" id="waForm"><input type="file" id="waArquivo" hidden accept=".txt,.md,.csv,.json,.html,.pdf,.png,.jpg,.jpeg,.webp"><input id="waInput" autocomplete="off" placeholder="Escreva ou use o microfone..."><button type="button" class="sec" id="waAnexar" title="Anexar documento ou imagem">📎</button><button type="button" class="sec" id="waMic" title="Falar">🎙</button><button type="button" class="cancel" id="waCancelar" title="Cancelar chamada" disabled>■</button><button id="waSend" type="submit">ENVIAR</button></form>
    </section>`;
