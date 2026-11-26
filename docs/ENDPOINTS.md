@@ -1,6 +1,6 @@
 # Endpoints
 
-Extraído de `scripts/site-server.mjs`: 37 caminhos.
+Extraído de `scripts/site-server.mjs`: 40 caminhos.
 
 - `/api/arquitetura`
 - `/api/arquivos`
@@ -27,6 +27,9 @@ Extraído de `scripts/site-server.mjs`: 37 caminhos.
 - `/api/plugins`
 - `/api/rag`
 - `/api/saude`
+- `/api/supervisor/start`
+- `/api/supervisor/status`
+- `/api/supervisor/stop`
 - `/api/telegram/enviar`
 - `/api/telegram/status`
 - `/api/token`
