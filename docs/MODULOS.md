@@ -184,3 +184,8 @@ Módulo do Myn Recicla/01.
 Exports: enviarTelegram, statusPonte, iniciarPonteTelegram
 
 Módulo do Myn Recicla/01.
+## pedidos.mjs
+
+Exports: criarPedido, listarPendentes, concluirPedido
+
+Módulo do Myn Recicla/01.
