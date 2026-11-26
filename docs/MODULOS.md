@@ -179,3 +179,8 @@ Módulo do Myn Recicla/01.
 Exports: handleAnthropic
 
 Módulo do Myn Recicla/01.
+## telegram-ponte.mjs
+
+Exports: enviarTelegram, statusPonte, iniciarPonteTelegram
+
+Módulo do Myn Recicla/01.
