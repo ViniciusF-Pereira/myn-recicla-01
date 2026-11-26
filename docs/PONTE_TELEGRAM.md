@@ -22,6 +22,7 @@ O arquivo fica fora do Git. Nunca coloque o token em `config/`, `site/`, docs ou
 - `/worker` — estado do worker de melhoria.
 - `/melhorar src/arquivo.mjs | descreva a correção` — pedido de código que o worker testa antes de aplicar.
 - Fotos e documentos — são baixados, enviados ao `/api/documento` e respondidos com OCR/arquivo.
+- Imagens geradas pelo Myn são enviadas como `sendPhoto`, não como markdown.
 - Qualquer texto — conversa com o Myn/Work.
 
 ## Supervisor de 6h
