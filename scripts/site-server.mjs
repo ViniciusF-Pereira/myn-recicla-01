@@ -25,6 +25,7 @@ import { lerEventos } from '../src/eventlog.mjs';
 import { respostaLocal } from '../src/conhecimento-local.mjs';
 import { emitirToken, validarToken, bearer, ehLoopback } from '../src/token-local.mjs';
 import { handleAnthropic } from '../src/api-antropic.mjs';
+import { iniciarPonteTelegram, enviarTelegram, statusPonte } from '../src/telegram-ponte.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
@@ -119,6 +120,22 @@ const servidor = http.createServer(async (req, res) => {
   res.setHeader('x-frame-options', 'DENY');
   res.setHeader('referrer-policy', 'no-referrer');
   res.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
+  if (url.pathname === '/api/telegram/status' && req.method === 'GET') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    enviarJson(req, res, statusPonte());
+    return;
+  }
+  if (url.pathname === '/api/telegram/enviar' && req.method === 'POST') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const { texto } = JSON.parse(corpo || '{}');
+      if (!texto || String(texto).length > 12000) throw new Error('texto inválido');
+      await enviarTelegram(String(texto));
+      enviarJson(req, res, { ok: true, status: statusPonte() });
+    } catch (e) { res.writeHead(502, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(e.message).slice(0, 240) })); }
+    return;
+  }
   if (url.pathname === '/api/token' && req.method === 'GET') {
     if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
     enviarJson(req, res, {
@@ -748,4 +765,7 @@ function desligar(sinal) {
 process.once('SIGINT', () => desligar('SIGINT'));
 process.once('SIGTERM', () => desligar('SIGTERM'));
 
-servidor.listen(PORTA, HOST, () => console.log('Myn - Recicla/01 em http://' + HOST + ':' + PORTA));
+servidor.listen(PORTA, HOST, () => {
+  console.log('Myn - Recicla/01 em http://' + HOST + ':' + PORTA);
+  iniciarPonteTelegram().then((r) => console.log('[telegram] ' + (r.ok ? 'ponte ativa' : 'ponte offline: ' + r.erro))).catch((e) => console.log('[telegram] ' + e.message));
+});
