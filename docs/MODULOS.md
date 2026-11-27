@@ -199,3 +199,8 @@ Módulo do Myn Recicla/01.
 Exports: enviarParaSessao, aguardarResposta, conversarNoOpenCode
 
 Módulo do Myn Recicla/01.
+## memoria.mjs
+
+Exports: registrarMemoria, contextoMemoria, buscarMemoria, salvarPreferencia, preferencias, resumirSessao
+
+Módulo do Myn Recicla/01.
