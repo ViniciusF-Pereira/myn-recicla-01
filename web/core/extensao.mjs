@@ -25,14 +25,28 @@ if (podeUsarWindow()) {
   });
 }
 
-function enviar(tipo, dados = {}, timeoutMs = 1000) {
+function enviar(tipo, dados = {}, timeoutMs = 1000, signal) {
   if (!podeUsarWindow()) return Promise.reject(new Error('ponte disponível apenas no navegador'));
+  if (signal?.aborted) return Promise.reject(new Error('operação cancelada'));
   return new Promise((resolve, reject) => {
     const id = 'myn-' + Date.now().toString(36) + '-' + (++seq).toString(36);
-    const timer = setTimeout(() => { pendentes.delete(id); reject(new Error('extensão não detectada')); }, timeoutMs);
-    pendentes.set(id, { resolve, reject, timer });
+    let concluida = false;
+    const limpar = () => { clearTimeout(timer); pendentes.delete(id); signal?.removeEventListener('abort', abort); };
+    const abort = () => {
+      if (concluida) return;
+      concluida = true; limpar();
+      window.postMessage({ canal: CANAL, id: 'cancelar-' + id, tipo: 'cancelar_operacao', operacaoId: id }, location.origin);
+      reject(new Error('operação cancelada'));
+    };
+    const timer = setTimeout(() => { if (concluida) return; concluida = true; limpar(); reject(new Error('extensão não detectada')); }, timeoutMs);
+    pendentes.set(id, {
+      timer,
+      resolve: (valor) => { if (concluida) return; concluida = true; limpar(); resolve(valor); },
+      reject: (erro) => { if (concluida) return; concluida = true; limpar(); reject(erro); },
+    });
+    signal?.addEventListener('abort', abort, { once: true });
     depura.push({ etapa: 'enviada', id, tipo, pendentes: [...pendentes.keys()] });
-    window.postMessage({ canal: CANAL, id, tipo, ...dados }, location.origin);
+    window.postMessage({ canal: CANAL, id, tipo, ...dados, operacaoId: id }, location.origin);
   });
 }
 
@@ -57,6 +71,6 @@ export function listarRotas() { return enviar('listar_rotas', {}, 3000); }
 export function diagnosticarRota(rotaId, timeoutMs = 35000) { return enviar('diagnosticar_rota', { rotaId }, timeoutMs); }
 export function executarRota(rotaId, texto, timeoutMs = 100000) { return enviar('executar_rota', { rotaId, texto }, timeoutMs); }
 export function capturarManual(rotaId, timeoutMs = 35000) { return enviar('capturar_manual', { rotaId }, timeoutMs); }
-export function descobrirRota(url, timeoutMs = 45000) { return enviar('descobrir_rota', { url }, timeoutMs); }
-export function descobrirAbaAtual(timeoutMs = 45000) { return enviar('descobrir_aba_atual', {}, timeoutMs); }
-export function ativarDescoberta(id, seletores = {}, timeoutMs = 10000) { return enviar('ativar_descoberta', { descobertaId: id, seletores }, timeoutMs); }
+export function descobrirRota(url, timeoutMs = 45000, signal) { return enviar('descobrir_rota', { url }, timeoutMs, signal); }
+export function descobrirAbaAtual(timeoutMs = 45000, signal) { return enviar('descobrir_aba_atual', {}, timeoutMs, signal); }
+export function ativarDescoberta(id, seletores = {}, timeoutMs = 10000, signal) { return enviar('ativar_descoberta', { descobertaId: id, seletores }, timeoutMs, signal); }

@@ -27,7 +27,7 @@ export function normalizarRota(valor) {
 export function selecionarRotas({ rota = 'auto', preferida = '', extensaoDisponivel = false, effort = 'medium', saude = {}, catalogoExtensao = [] } = {}) {
   const nivel = normalizarEffort(effort);
   const explicita = normalizarRota(rota);
-  const descobertas = catalogoExtensao.filter((r) => r?.descoberta && r?.id).map((r) => r.id);
+  const descobertas = [...new Set(catalogoExtensao.filter((r) => r?.descoberta && r?.id).map((r) => r.id))];
   const validas = new Set([...ROTAS_VALIDAS, ...descobertas]);
   if (explicita !== 'auto') return validas.has(explicita) && (!descobertas.includes(explicita) || extensaoDisponivel) ? [explicita] : [];
   const candidatas = [];
@@ -210,7 +210,7 @@ export async function* conversar({ texto, sessao = 'local', projeto = '', escopo
 
 export async function extensaoDisponivel() { return extensao.disponivel(); }
 export async function abrirVMExtensao() { return extensao.abrirVM(); }
-export async function descobrirRotaExtensao(url) { return extensao.descobrirRota(url); }
-export async function descobrirAbaAtualExtensao() { return extensao.descobrirAbaAtual(); }
-export async function ativarDescobertaExtensao(id, seletores = {}) { return extensao.ativarDescoberta(id, seletores); }
+export async function descobrirRotaExtensao(url, signal) { return extensao.descobrirRota(url, 45000, signal); }
+export async function descobrirAbaAtualExtensao(signal) { return extensao.descobrirAbaAtual(45000, signal); }
+export async function ativarDescobertaExtensao(id, seletores = {}, signal) { return extensao.ativarDescoberta(id, seletores, 10000, signal); }
 export { ESFORCOS, memoria, rag };

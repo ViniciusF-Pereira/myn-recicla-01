@@ -6,17 +6,17 @@
   "session_id": "ses_dfb7e44bbffepzBlwFy3j0hcSl",
   "status": "completed",
   "started_at": "2026-11-27T19:19:28Z",
-  "finished_at": "2026-11-27T21:02:26Z",
-  "letter_sha256": "95ed55480d1a7001a0e0427fbde26654f8acc912c5086fe03607c10396159187",
+  "finished_at": "2026-11-27T21:27:04Z",
+  "letter_sha256": "064325f0e8d3cc5eb67c9cd8545dec7f3a0109e02b1bc317bb12ec3e29939492",
   "receipts": [
     {
       "path": "receipts/validacao-local.md",
-      "sha256": "090638e420f5fee8aacfb20c6ea67e991d1b15af69709d1457380f45b21b67ea"
+      "sha256": "3c701e0f1b778f69c0c8ce2ed226aafdb041bdfbb87d845fe83942a614cec74e"
     }
   ],
   "events": [
     {
-      "id": "sha256:090638e420f5fee8aacfb20c6ea67e991d1b15af69709d1457380f45b21b67ea",
+      "id": "sha256:3c701e0f1b778f69c0c8ce2ed226aafdb041bdfbb87d845fe83942a614cec74e",
       "route": "local:node-test+edge-acceptance",
       "status": "passed",
       "receipt": "receipts/validacao-local.md"

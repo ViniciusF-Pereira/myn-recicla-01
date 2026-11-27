@@ -156,20 +156,20 @@ function formatarDescoberta(r) {
   ].join('\n');
 }
 
-async function ferramentaLocal(nome, args = {}) {
+async function ferramentaLocal(nome, args = {}, signal) {
   if (nome === 'chats_catalogo') {
     return CATALOGO_CHATS.map((c) => '- ' + c.nome + ' · ' + c.categoria + ' · ' + c.verificacao + ' · ' + c.url).join('\n') + '\n\nPeça “mapear Perplexity”, por exemplo. A autorização é individual.';
   }
   if (nome === 'extensao_descobrir') {
     if (!window.myn?.cliente?.descobrirRota) throw new Error('extensão não conectada; abra o painel lateral');
-    const r = await window.myn.cliente.descobrirRota(args.url);
+    const r = await window.myn.cliente.descobrirRota(args.url, signal);
     if (r?.ok === false) throw new Error(r.erro || 'não foi possível mapear');
     ultimaDescoberta = r;
     return formatarDescoberta(r);
   }
   if (nome === 'extensao_descobrir_aba_atual') {
     if (!window.myn?.cliente?.descobrirAbaAtual) throw new Error('extensão não conectada; abra o painel lateral');
-    const r = await window.myn.cliente.descobrirAbaAtual();
+    const r = await window.myn.cliente.descobrirAbaAtual(signal);
     if (r?.ok === false) throw new Error(r.erro || 'não foi possível mapear');
     ultimaDescoberta = r;
     return formatarDescoberta(r);
@@ -177,7 +177,7 @@ async function ferramentaLocal(nome, args = {}) {
   if (nome === 'extensao_ativar') {
     if (!ultimaDescoberta?.id) throw new Error('nenhuma descoberta recente; primeiro peça para mapear um chat');
     if (!window.myn?.cliente?.ativarDescoberta) throw new Error('extensão não conectada; abra o painel lateral');
-    const r = await window.myn.cliente.ativarDescoberta(ultimaDescoberta.id);
+    const r = await window.myn.cliente.ativarDescoberta(ultimaDescoberta.id, {}, signal);
     if (r?.ok === false) throw new Error(r.erro || 'não foi possível ativar');
     return 'Adaptador ativado: ' + r.adaptador.nome + ' (' + r.adaptador.id + '). Nenhuma mensagem foi enviada.';
   }
@@ -189,7 +189,7 @@ async function ferramenta(nome, args = {}) {
   const chip = document.createElement('div'); chip.className = 'wa-tool'; chip.textContent = '🔧 ' + nome;
   document.getElementById('waMsgs')?.appendChild(chip);
   try {
-    const local = await ferramentaLocal(nome, args);
+    const local = await ferramentaLocal(nome, args, controleAtual?.signal);
     if (local !== null) return local;
     const result = await rpc('tools/call', { name: nome, arguments: args }, controleAtual?.signal);
     const texto = result?.content?.map((c) => c.text || '').join('\n') || 'Concluído.';

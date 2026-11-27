@@ -6,14 +6,14 @@ Data: 2026-11-27 (UTC).
 
 - Projeto: `Myn-Recicla-01`.
 - Tarefa: catálogo de chats, descoberta de adaptadores por DOM, painel lateral e comandos locais do WORK.
-- Chamadas MSP/LLM externas: nenhuma.
+- Chamadas MSP: nenhuma. Houve revisão por subagente local, sem provedor externo adicional.
 - Segredos, tokens, cookies e conteúdo de conversas: não incluídos.
 
 ## Comandos e resultados
 
 - `node scripts/empacotar-extensao.mjs`: ZIP gerado.
 - `node --test`: 74 testes, 74 aprovados, 0 falhas.
-- `node scripts/testar-extensao.mjs`: Microsoft Edge 158.0.4370.45, extensão 1.2.0 habilitada, 13/13 aceites.
+- `node scripts/testar-extensao.mjs`: Microsoft Edge 158.0.4370.45, extensão 1.2.0 habilitada, 16/16 aceites.
 - Mapeamento local: confiança 0,87; seletores `#mensagem`, `#enviar` e `#resposta`.
 - Adaptador descoberto: ativado e executado com resposta `OK local: teste descoberto`.
 - WORK: comando `liste os chats` retornou catálogo contendo Perplexity e Qwen.
@@ -23,9 +23,9 @@ Data: 2026-11-27 (UTC).
 ## Artefatos
 
 - ZIP: `site/extensao/myn-recicla-extensao.zip`
-- SHA256: `ba9e3d97e6821529c3af8db57cfa204cdebff2ab43e7fcdf43729238a0dab66d`
+- SHA256: `6b181edae8c6b6ad515a34c80a463f826cb59752a04267889b9ab2d95d721170`
 - Relatório: `outputs/extensao-teste.json`
-- SHA256: `4780577c883e166e68abe9dee55eaaa0a23a5dd1158e1c560ad2bf7bc2a385fc`
+- SHA256: `bdcfc8070405e8b56f099c51d1e15baddbe7011a4ce88c9d16f1ad57aba4afaa`
 
 ## Limites
 

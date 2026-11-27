@@ -175,7 +175,10 @@ try {
   await cp.foto(path.join(prints, 'extensao-painel.png'), 440, 920);
   relatorio.prints.push('docs/prints/extensao-painel.png');
   await cp.foto(path.join(prints, 'extensao-descoberta.png'), 440, 1100);
-  relatorio.prints.push('docs/prints/extensao-descoberta.png'); cp.fechar();
+  relatorio.prints.push('docs/prints/extensao-descoberta.png');
+  await cp.avaliar(`chrome.storage.local.set({'myn-adaptadores-descobertos-v1':[{id:'descoberto-externo-teste',nome:'Externo temporário',url:'https://exemplo.com/',origem:'https://exemplo.com',versao:1,campos:['textarea'],envio:['button'],respostas:['pre'],descoberta:true,acesso:'activeTab'}]});location.reload()`);
+  relatorio.extensao.acessoTemporario = await esperar(() => cp.avaliar(`(()=>{const r=[...document.querySelectorAll('#rotas .rota')].find(x=>x.querySelector('b')?.textContent==='Externo temporário');if(!r)return false;const b=r.querySelector('button');return b.textContent==='activeTab'&&b.disabled})()`), 30000);
+  cp.fechar();
 } catch (e) {
   try {
     if (ce) {
@@ -204,7 +207,10 @@ const aceites = [
   relatorio.cliente.adaptadorLocal?.ok === true,
   relatorio.cliente.rotaDescoberta?.ok === true,
   relatorio.cliente.workCatalogo === true,
+  relatorio.extensao.ativacaoDireta?.ok === true,
   relatorio.extensao.painel?.descoberta === true,
+  relatorio.extensao.acessoTemporario === true,
+  relatorio.extensao.painelPing?.rotas?.length === new Set(relatorio.extensao.painelPing?.rotas || []).size,
 ];
 relatorio.aceites = { total: aceites.length, aprovados: aceites.filter(Boolean).length };
 await mkdir(path.join(RAIZ, 'outputs'), { recursive: true });

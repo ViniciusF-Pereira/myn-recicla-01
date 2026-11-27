@@ -8,6 +8,22 @@ const CHAVE_SAUDE = 'myn-saude-rotas-v1';
 const CHAVE_DESCOBERTAS = 'myn-descobertas-v1';
 const CHAVE_ADAPTADORES = 'myn-adaptadores-descobertos-v1';
 let saudeCache = {};
+let filaMutation = Promise.resolve();
+const canceladas = new Set();
+function serializar(fn) {
+  const resultado = filaMutation.then(fn, fn);
+  filaMutation = resultado.catch(() => {});
+  return resultado;
+}
+function verificarCancelamento(operacaoId) {
+  if (operacaoId && canceladas.has(operacaoId)) throw erroRota('operacao_cancelada', 'operação cancelada', null, 'cancelar');
+}
+function cancelarOperacao(operacaoId) {
+  if (!operacaoId) return { ok: true };
+  canceladas.add(operacaoId);
+  setTimeout(() => canceladas.delete(operacaoId), 120000);
+  return { ok: true };
+}
 
 chrome.runtime.onInstalled.addListener(async () => {
   await chrome.sidePanel.setPanelBehavior({ openPanelOnActionClick: true }).catch(() => {});
@@ -48,22 +64,28 @@ async function injetar(tabId, func, args = []) {
   const resultados = await chrome.scripting.executeScript({ target: { tabId }, func, args });
   return resultados?.[0]?.result ?? null;
 }
-function diagnosticarLayout({ campos, respostas, login }) {
+function diagnosticarLayout({ campos, respostas, login, unico = false }) {
   const visivel = (el) => Boolean(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
   const encontrar = (seletores) => {
     for (const seletor of seletores || []) {
-      try { const el = document.querySelector(seletor); if (visivel(el)) return el; } catch { /* seletor inválido */ }
+      try {
+        const els = [...document.querySelectorAll(seletor)].filter(visivel);
+        if (els.length && (!unico || els.length === 1)) return els[0];
+      } catch { /* seletor inválido */ }
     }
     return null;
   };
   const campo = encontrar(campos), resposta = encontrar(respostas), loginEl = encontrar(login);
   return { composer: Boolean(campo), resposta: Boolean(resposta), login: Boolean(loginEl), url: location.href, titulo: document.title };
 }
-function prepararEnvio({ campos, texto }) {
+function prepararEnvio({ campos, texto, unico = false }) {
   const visivel = (el) => Boolean(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
   const encontrar = (seletores) => {
     for (const seletor of seletores || []) {
-      try { const el = document.querySelector(seletor); if (visivel(el)) return el; } catch { /* seletor inválido */ }
+      try {
+        const els = [...document.querySelectorAll(seletor)].filter(visivel);
+        if (els.length && (!unico || els.length === 1)) return els[0];
+      } catch { /* seletor inválido */ }
     }
     return null;
   };
@@ -81,26 +103,67 @@ function prepararEnvio({ campos, texto }) {
   campo.dispatchEvent(new Event('change', { bubbles: true }));
   return { ok: true };
 }
-function acionarEnvio({ envio }) {
+function acionarEnvio({ envio, descoberta = false, campos = [] }) {
   const visivel = (el) => Boolean(el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length));
-  for (const seletor of envio || []) {
-    try { const botao = document.querySelector(seletor); if (visivel(botao) && !botao.disabled) { botao.click(); return { ok: true }; } } catch { /* continua */ }
+  let campo = descoberta ? null : document.activeElement;
+  if (descoberta) {
+    for (const seletor of campos) {
+      try { const els = [...document.querySelectorAll(seletor)].filter(visivel); if (els.length === 1) { campo = els[0]; break; } } catch { /* continua */ }
+    }
+    if (!campo) return { ok: false, erro: 'composer configurado não encontrado ou não é único' };
   }
-  const campo = document.activeElement;
-  if (campo) {
+  for (const seletor of envio || []) {
+    try {
+      const els = [...document.querySelectorAll(seletor)].filter(visivel);
+      if (els.length !== 1) continue;
+      const botao = els[0];
+      if (botao.disabled) continue;
+      if (descoberta) {
+        const alvo = ((botao.innerText || '') + ' ' + (botao.getAttribute('aria-label') || '') + ' ' + (botao.getAttribute('title') || '') + ' ' + (botao.getAttribute('data-testid') || '')).toLowerCase();
+        const destrutivo = /delete|remove|destroy|excluir|apagar|limpar|clear|cancel|close|fechar|voltar|back|next|anterior/.test(alvo);
+        const semantico = /send|reply|respond|ask|enviar|responder|perguntar/.test(alvo);
+        if (destrutivo || !semantico || botao.type === 'reset') continue;
+        const a = campo?.getBoundingClientRect(), b = botao.getBoundingClientRect();
+        const perto = Boolean(a && b && Math.hypot(a.left - b.left, a.top - b.top) < 500);
+        const mesmoForm = Boolean(campo?.form && botao.form === campo.form);
+        if (!semantico || (!perto && !mesmoForm)) continue;
+      }
+      botao.click(); return { ok: true };
+    } catch { /* continua */ }
+  }
+  if (!descoberta && campo) {
     campo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
     campo.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', bubbles: true }));
     return { ok: true };
   }
-  return { ok: false, erro: 'não foi possível enviar' };
+  return { ok: false, erro: descoberta ? 'nenhum botão de envio único, semântico e próximo do composer' : 'não foi possível enviar' };
 }
-function lerResposta({ respostas }) {
+function lerResposta({ respostas, descoberta = false }) {
   const textos = [];
+  let totalNos = 0;
+  const usuario = '[data-message-author-role="user"], [data-role="user" i], [class~="user"], [class*="user-message" i], [class*="human" i]';
+  const assistente = '[data-message-author-role="assistant"], [data-testid="assistant-message"], .font-claude-response, [data-role="assistant" i], [class~="assistant"], [class*="assistant-message" i], [class*="answer" i]';
+  const semantico = (n) => /assistant|response|answer|resposta|prose|markdown|output|result/i.test(String(n.id || '') + ' ' + String(n.className || '') + ' ' + (n.getAttribute('role') || '') + ' ' + (n.getAttribute('data-testid') || ''));
   for (const seletor of respostas || []) {
-    try { for (const n of document.querySelectorAll(seletor)) { const t = n.innerText || n.textContent || ''; if (t.trim()) textos.push(t.trim()); } } catch { /* continua */ }
+    try {
+      for (const n of document.querySelectorAll(seletor)) {
+        if (n.matches(usuario) || n.closest(usuario)) continue;
+        let nos;
+        if (descoberta) {
+          const assistentes = n.matches(assistente) ? [n] : [...n.querySelectorAll(assistente)];
+          if (assistentes.length) nos = assistentes;
+          else if (semantico(n) && !n.querySelector(usuario)) nos = [n];
+          else continue;
+        } else nos = [n];
+        for (const no of nos) {
+          const t = no.innerText || no.textContent || '';
+          if (t.trim()) { textos.push(t.trim()); totalNos++; }
+        }
+      }
+    } catch { /* continua */ }
   }
   const unicos = [...new Set(textos)];
-  return { textos: unicos.slice(-4), ultimo: unicos.at(-1) || '', total: unicos.length };
+  return { textos: unicos.slice(-4), ultimo: unicos.at(-1) || '', total: unicos.length, totalNos };
 }
 async function abrirAba(rota) {
   const abas = await chrome.tabs.query({ url: rota.origem + '/*' });
@@ -116,19 +179,29 @@ async function adaptadoresDescobertos() {
   return (await chrome.storage.local.get(CHAVE_ADAPTADORES))[CHAVE_ADAPTADORES] || [];
 }
 async function obterRota(id) {
-  return rotaPorId(id) || (await adaptadoresDescobertos()).find((r) => r.id === id) || null;
+  return (await adaptadoresDescobertos()).find((r) => r.id === id) || rotaPorId(id) || null;
 }
 async function listarRotas() {
   const saude = await carregarSaude();
-  const rotas = [...ROTAS, ...await adaptadoresDescobertos()];
-  return rotas.filter((r) => !r.oculta).map((r) => ({ ...r, saude: pontuar(r.id, saude[r.id]) }));
+  const descobertos = await adaptadoresDescobertos();
+  const porId = new Map(descobertos.map((r) => [r.id, r]));
+  const rotas = ROTAS.map((r) => {
+    const descoberta = porId.get(r.id);
+    return descoberta ? { ...descoberta, oculta: r.oculta } : r;
+  });
+  for (const rota of descobertos) if (!ROTAS.some((r) => r.id === rota.id)) rotas.push(rota);
+  return rotas.filter((r) => !r.oculta).map((r) => {
+    const saida = { ...r, saude: pontuar(r.id, saude[r.id]) };
+    if (saida.acesso === 'activeTab') delete saida.url;
+    return saida;
+  });
 }
 async function diagnosticar(rotaId) {
   const rota = await obterRota(rotaId);
   if (!rota) throw erroRota('rota_inexistente', 'rota não suportada pela extensão', null, 'validar');
   await exigirAcessoInicial(rota);
   const aba = await abrirAba(rota);
-  const layout = await injetar(aba.id, diagnosticarLayout, [{ campos: rota.campos, respostas: rota.respostas, login: rota.login }]);
+  const layout = await injetar(aba.id, diagnosticarLayout, [{ campos: rota.campos, respostas: rota.respostas, login: rota.login, unico: Boolean(rota.descoberta) }]);
   const saude = await carregarSaude();
   return { ok: true, rota: rota.id, versaoAdaptador: rota.versao, layout, saude: pontuar(rota.id, saude[rota.id]), modoManual: !layout?.composer };
 }
@@ -138,21 +211,21 @@ async function executarRota({ rotaId, texto }) {
   try {
     await exigirAcessoInicial(rota);
     const aba = await abrirAba(rota);
-    const layout = await injetar(aba.id, diagnosticarLayout, [{ campos: rota.campos, respostas: rota.respostas, login: rota.login }]);
+    const layout = await injetar(aba.id, diagnosticarLayout, [{ campos: rota.campos, respostas: rota.respostas, login: rota.login, unico: Boolean(rota.descoberta) }]);
     if (!layout?.composer) throw erroRota(layout?.login ? 'login_necessario' : 'layout_incompativel', layout?.login ? 'a rota exige login' : 'composer não encontrado; use o modo manual', rota, 'layout');
-    const antes = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas }]);
-    const preparado = await injetar(aba.id, prepararEnvio, [{ campos: rota.campos, texto: String(texto).slice(0, 6000) }]);
+    const antes = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas, descoberta: Boolean(rota.descoberta) }]);
+    const preparado = await injetar(aba.id, prepararEnvio, [{ campos: rota.campos, texto: String(texto).slice(0, 6000), unico: Boolean(rota.descoberta) }]);
     if (!preparado?.ok) throw erroRota('composer_indisponivel', preparado?.erro || 'composer indisponível', rota, 'preparar');
     await new Promise((r) => setTimeout(r, 300));
-    const envio = await injetar(aba.id, acionarEnvio, [{ envio: rota.envio }]);
+    const envio = await injetar(aba.id, acionarEnvio, [{ envio: rota.envio, campos: rota.campos, descoberta: Boolean(rota.descoberta) }]);
     if (!envio?.ok) throw erroRota('envio_falhou', envio?.erro || 'envio não confirmado', rota, 'enviar');
     const fim = Date.now() + 90000;
     let ultimo = '', estavel = 0;
     while (Date.now() < fim) {
       await new Promise((r) => setTimeout(r, 1500));
-      const atual = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas }]);
+      const atual = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas, descoberta: Boolean(rota.descoberta) }]);
       const novidades = (atual?.textos || []).filter((t) => !(antes?.textos || []).includes(t));
-      const candidato = novidades.at(-1) || (atual?.total > (antes?.total || 0) ? atual.ultimo : '');
+      const candidato = novidades.at(-1) || (atual?.totalNos > (antes?.totalNos || 0) ? atual.ultimo : '');
       if (!candidato) continue;
       if (candidato === ultimo) estavel++; else { ultimo = candidato; estavel = 0; }
       if (estavel >= 2 && candidato.length > 2) {
@@ -171,19 +244,29 @@ async function capturarManual({ rotaId }) {
   if (!rota) throw erroRota('rota_inexistente', 'rota não suportada pela extensão', null, 'validar');
   await exigirAcessoInicial(rota);
   const aba = await abrirAba(rota);
-  const r = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas }]);
+  const r = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas, descoberta: Boolean(rota.descoberta) }]);
   if (!r?.ultimo) throw erroRota('resposta_vazia', 'nenhuma resposta encontrada; envie manualmente na aba', rota, 'capturar');
   await registrarSaude(rota, true, 0);
   return { ok: true, texto: r.ultimo, via: 'extensao-manual:' + rota.id, versaoAdaptador: rota.versao };
 }
-async function salvarDescoberta(relatorio) {
+async function salvarDescoberta(relatorio, operacaoId) {
   if (!relatorio) throw erroRota('mapeamento_falhou', 'não foi possível ler o DOM da página', null, 'mapear');
-  const item = { ...relatorio, id: 'desc_' + Date.now().toString(36), t: Date.now() };
-  const atuais = (await chrome.storage.local.get(CHAVE_DESCOBERTAS))[CHAVE_DESCOBERTAS] || [];
-  await chrome.storage.local.set({ [CHAVE_DESCOBERTAS]: [...atuais, item].slice(-30) });
-  return item;
+  return serializar(async () => {
+    verificarCancelamento(operacaoId);
+    const conhecida = [...ROTAS, ...CATALOGO_CHATS].find((r) => r.origem === relatorio.origem);
+    const sanitizada = new URL(relatorio.url); sanitizada.search = ''; sanitizada.hash = '';
+    const urlOperacional = conhecida?.url || sanitizada.href;
+    const url = conhecida?.url || sanitizada.origin + '/';
+    const titulo = conhecida?.nome || sanitizada.hostname;
+    const item = { ...relatorio, url, titulo, urlOperacional, id: 'desc_' + crypto.randomUUID(), t: Date.now() };
+    const atuais = (await chrome.storage.local.get(CHAVE_DESCOBERTAS))[CHAVE_DESCOBERTAS] || [];
+    await chrome.storage.local.set({ [CHAVE_DESCOBERTAS]: [...atuais, item].slice(-30) });
+    const publico = { ...item }; delete publico.urlOperacional;
+    return publico;
+  });
 }
-async function descobrirRota(url) {
+async function descobrirRota(url, operacaoId) {
+  verificarCancelamento(operacaoId);
   let destino;
   try { destino = new URL(url); } catch { throw erroRota('url_invalida', 'URL inválida', null, 'validar'); }
   if (!/^https?:$/.test(destino.protocol) || destino.username || destino.password || destino.href.length > 2048) throw erroRota('url_invalida', 'use uma URL http/https curta e sem credenciais', null, 'validar');
@@ -192,27 +275,45 @@ async function descobrirRota(url) {
   if (!(await origemPermitida(destino.origin))) throw erroRota('permissao_necessaria', 'permissão necessária para ' + destino.origin + '; autorize no painel da extensão', conhecida, 'permissao');
   const aba = await abrirAba({ url: destino.href, origem: destino.origin });
   await new Promise((r) => setTimeout(r, 800));
-  return salvarDescoberta(await injetar(aba.id, mapearPagina));
+  verificarCancelamento(operacaoId);
+  return salvarDescoberta(await injetar(aba.id, mapearPagina), operacaoId);
 }
-async function descobrirAbaAtual() {
+async function descobrirAbaAtual(operacaoId) {
+  verificarCancelamento(operacaoId);
   const [aba] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!aba?.id || !/^https?:$/.test(aba.url || '')) throw erroRota('aba_invalida', 'abra uma página http/https e clique no ícone da extensão antes de rastrear', null, 'validar');
   await new Promise((r) => setTimeout(r, 500));
+  verificarCancelamento(operacaoId);
   let relatorio;
   try { relatorio = await injetar(aba.id, mapearPagina); }
   catch { throw erroRota('permissao_temporaria', 'o navegador não liberou esta aba; clique no ícone da extensão com a aba ativa e tente novamente', null, 'permissao'); }
-  return salvarDescoberta(relatorio);
+  return salvarDescoberta(relatorio, operacaoId);
 }
-async function ativarDescoberta(id, seletores = {}) {
-  const atuais = (await chrome.storage.local.get(CHAVE_DESCOBERTAS))[CHAVE_DESCOBERTAS] || [];
-  const relatorio = atuais.find((r) => r.id === id);
-  if (!relatorio) throw erroRota('descoberta_inexistente', 'descoberta não encontrada', null, 'validar');
-  let adaptador;
-  try { adaptador = criarAdaptador(relatorio, '', seletores); }
-  catch (erro) { throw erroRota('descoberta_invalida', erro.message, null, 'validar'); }
-  const rotas = await adaptadoresDescobertos();
-  await chrome.storage.local.set({ [CHAVE_ADAPTADORES]: [...rotas.filter((r) => r.id !== adaptador.id), adaptador] });
-  return { ok: true, adaptador };
+async function ativarDescoberta(id, seletores = {}, operacaoId) {
+  return serializar(async () => {
+    verificarCancelamento(operacaoId);
+    const atuais = (await chrome.storage.local.get(CHAVE_DESCOBERTAS))[CHAVE_DESCOBERTAS] || [];
+    const relatorio = atuais.find((r) => r.id === id);
+    if (!relatorio) throw erroRota('descoberta_inexistente', 'descoberta não encontrada', null, 'validar');
+    let adaptador;
+    try { adaptador = criarAdaptador(relatorio, '', seletores); }
+    catch (erro) { throw erroRota('descoberta_invalida', erro.message, null, 'validar'); }
+    const nativa = ROTAS.find((r) => r.origem === adaptador.origem);
+    if (nativa) adaptador.id = nativa.id;
+    adaptador.acesso = [...ROTAS, ...CATALOGO_CHATS].some((r) => r.origem === adaptador.origem) ? 'opcional' : 'activeTab';
+    const rotas = await adaptadoresDescobertos();
+    const anterior = rotas.find((r) => r.origem === adaptador.origem) || nativa;
+    const assinatura = (r) => JSON.stringify([r.url, r.campos, r.envio, r.respostas]);
+    const saude = await carregarSaude();
+    const mudouSaude = Boolean(anterior && assinatura(anterior) !== assinatura(adaptador));
+    if (mudouSaude) delete saude[adaptador.id];
+    verificarCancelamento(operacaoId);
+    if (mudouSaude) saudeCache = saude;
+    const payload = { [CHAVE_ADAPTADORES]: [...rotas.filter((r) => r.origem !== adaptador.origem), adaptador] };
+    if (mudouSaude) payload[CHAVE_SAUDE] = saude;
+    await chrome.storage.local.set(payload);
+    return { ok: true, adaptador };
+  });
 }
 async function abrirVM(tabId) {
   if (!tabId) throw new Error('abra o Myn em uma aba antes de abrir a VM');
@@ -228,9 +329,10 @@ chrome.runtime.onMessage.addListener((mensagem, remetente, responder) => {
     if (mensagem.tipo === 'diagnosticar_rota') return diagnosticar(mensagem.rotaId);
     if (mensagem.tipo === 'executar_rota') return executarRota(mensagem);
     if (mensagem.tipo === 'capturar_manual') return capturarManual(mensagem);
-    if (mensagem.tipo === 'descobrir_rota') return descobrirRota(mensagem.url);
-    if (mensagem.tipo === 'descobrir_aba_atual') return descobrirAbaAtual();
-    if (mensagem.tipo === 'ativar_descoberta') return ativarDescoberta(mensagem.descobertaId, mensagem.seletores);
+    if (mensagem.tipo === 'cancelar_operacao') return cancelarOperacao(mensagem.operacaoId);
+    if (mensagem.tipo === 'descobrir_rota') return descobrirRota(mensagem.url, mensagem.operacaoId);
+    if (mensagem.tipo === 'descobrir_aba_atual') return descobrirAbaAtual(mensagem.operacaoId);
+    if (mensagem.tipo === 'ativar_descoberta') return ativarDescoberta(mensagem.descobertaId, mensagem.seletores, mensagem.operacaoId);
     throw new Error('operação desconhecida');
   })().then(responder).catch((erro) => responder({ ok: false, erro: String(erro.message).slice(0, 300), codigo: erro.codigo || 'erro_extensao', etapa: erro.etapa || 'desconhecida', rota: erro.rota, versaoAdaptador: erro.versaoAdaptador, modoManual: ['layout_incompativel', 'login_necessario'].includes(erro.codigo) }));
   return true;

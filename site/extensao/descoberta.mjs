@@ -69,22 +69,29 @@ export function mapearPagina() {
   let composerEl = null;
   try { if (compositores.length) composerEl = document.querySelector(compositores[0].seletor); } catch { /* candidato inválido não derruba o mapa */ }
   const envios = todos.filter((el) => el.matches('button, input[type="submit"], [role="button"]')).map((el) => {
-    const alvo = (texto(el) + ' ' + atributo(el, 'aria-label') + ' ' + atributo(el, 'title')).toLowerCase();
+    const alvo = (texto(el) + ' ' + atributo(el, 'aria-label') + ' ' + atributo(el, 'title') + ' ' + atributo(el, 'data-testid')).toLowerCase();
     let pontos = el.tagName === 'BUTTON' ? .4 : .35;
-    if (palavras(alvo, /send|submit|reply|respond|ask|enviar|responder|perguntar|arrow|➤|→/)) pontos += .32;
+    if (palavras(alvo, /send|reply|respond|ask|enviar|responder|perguntar/)) pontos += .32;
+    if (palavras(alvo, /delete|remove|destroy|excluir|apagar|limpar|clear|cancel|close|fechar|voltar|back|next|anterior/)) pontos -= .5;
     if (mesmoForm(el, composerEl)) pontos += .16;
     else if (distancia(el, composerEl) < 320) pontos += .12;
     if (!el.disabled) pontos += .08;
     return { seletor: seletorUnico(el), pontos: Math.min(.99, pontos), evidencia: { tag: el.tagName.toLowerCase(), id: el.id, texto: texto(el).slice(0, 100), ariaLabel: atributo(el, 'aria-label') } };
   }).sort((a, b) => b.pontos - a.pontos).slice(0, 5);
 
+  const seletorUsuario = '[data-message-author-role="user"], [data-role="user" i], [class~="user"], [class*="user-message" i], [class*="human" i]';
+  const seletorAssistente = '[data-message-author-role="assistant"], [data-testid="assistant-message"], .font-claude-response, [data-role="assistant" i], [class~="assistant"], [class*="assistant-message" i], [class*="answer" i]';
   const respostas = todos.filter((el) => {
     if (el.matches('html, body, main, script, style, noscript, svg, canvas, nav, footer, header, button, input, textarea, select')) return false;
     if (el.closest('nav, footer, header, button, input, textarea, select')) return false;
+    if (el.matches(seletorUsuario) || el.closest(seletorUsuario) || el.querySelector(seletorUsuario)) return false;
+    if (el.querySelectorAll(seletorAssistente).length > 1) return false;
+    if (composerEl && el.contains(composerEl)) return false;
     const alvo = (el.id + ' ' + el.className + ' ' + atributo(el, 'role') + ' ' + atributo(el, 'data-testid') + ' ' + atributo(el, 'data-message-author-role')).toLowerCase();
     const t = texto(el);
-    const semantico = palavras(alvo, /message|response|answer|assistant|chat|prose|markdown|resposta|mensagem/);
-    return (t.length >= 20 && t.length <= 20000) || semantico;
+    const semantico = palavras(alvo, /response|answer|assistant|prose|markdown|resposta|output|result/);
+    if (!semantico || t.length > 20000) return false;
+    return true;
   }).map((el) => {
     const alvo = (el.id + ' ' + el.className + ' ' + atributo(el, 'role') + ' ' + atributo(el, 'data-testid') + ' ' + atributo(el, 'data-message-author-role')).toLowerCase();
     const t = texto(el);
@@ -94,6 +101,7 @@ export function mapearPagina() {
     if (el.querySelectorAll('p, pre, li').length) pontos += .1;
     if (t.length >= 40) pontos += .08;
     if (el.children.length > 12 && t.length > 5000) pontos -= .2;
+    if (el.querySelectorAll('[data-message-author-role="assistant"], [data-testid="assistant-message"], .prose').length > 1) pontos -= .3;
     return { seletor: seletorUnico(el), pontos: Math.max(.05, Math.min(.99, pontos)), evidencia: { tag: el.tagName.toLowerCase(), id: el.id, classes: classesUteis(el) } };
   }).sort((a, b) => b.pontos - a.pontos).slice(0, 5);
 
@@ -124,23 +132,30 @@ export function criarAdaptador(relatorio, nome = '', escolhas = {}) {
   const s = relatorio?.sugestao;
   if (!s?.compositor || !s?.envio || !s?.resposta) throw new Error('a descoberta não encontrou composer, envio e resposta');
   if (relatorio.bloqueio) throw new Error('página bloqueada por ' + relatorio.bloqueio + '; nenhum adaptador foi ativado');
-  if (!Number.isFinite(s.confianca) || s.confianca < .55) throw new Error('confiança insuficiente (' + Math.round(s.confianca * 100) + '%); revise os candidatos antes de ativar');
   const escolher = (lista, valor, padrao) => {
-    if (!valor) return padrao;
-    if (!lista?.some((c) => c.seletor === valor)) throw new Error('seletor escolhido não pertence aos candidatos desta descoberta');
-    return valor;
+    const alvo = valor || padrao;
+    const candidato = lista?.find((c) => c.seletor === alvo);
+    if (!candidato) throw new Error('seletor escolhido não pertence aos candidatos desta descoberta');
+    return candidato;
   };
+  const compositor = escolher(relatorio.candidatos?.compositores, escolhas.compositor, s.compositor);
+  const envio = escolher(relatorio.candidatos?.envios, escolhas.envio, s.envio);
+  const resposta = escolher(relatorio.candidatos?.respostas, escolhas.resposta, s.resposta);
+  const confianca = Math.round((compositor.pontos * .4 + envio.pontos * .3 + resposta.pontos * .3) * 100) / 100;
+  if (!Number.isFinite(confianca) || confianca < .55) throw new Error('confiança insuficiente (' + Math.round(confianca * 100) + '%); revise os candidatos antes de ativar');
+  const urlOperacional = relatorio.urlOperacional || relatorio.url;
+  const assinatura = [relatorio.origem, urlOperacional, compositor.seletor, envio.seletor, resposta.seletor].join('|');
   return {
-    id: 'descoberto-' + hashOrigem(relatorio.origem),
+    id: 'descoberto-' + hashOrigem(assinatura),
     nome: nome || relatorio.titulo || relatorio.origem,
-    url: relatorio.url,
+    url: urlOperacional,
     origem: relatorio.origem,
     versao: 1,
-    campos: [escolher(relatorio.candidatos?.compositores, escolhas.compositor, s.compositor)],
-    envio: [escolher(relatorio.candidatos?.envios, escolhas.envio, s.envio)],
-    respostas: [escolher(relatorio.candidatos?.respostas, escolhas.resposta, s.resposta)],
+    campos: [compositor.seletor],
+    envio: [envio.seletor],
+    respostas: [resposta.seletor],
     login: [],
     descoberta: true,
-    confianca: s.confianca,
+    confianca,
   };
 }

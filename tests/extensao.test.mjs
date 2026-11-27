@@ -41,6 +41,7 @@ test('ponte da extensão valida origem e máscara de canais', async () => {
   assert.match(fundo, /SITE_PERMITIDO/);
   assert.match(fundo, /permissão necessária/);
   assert.match(fundo, /descobrir_aba_atual/);
+  assert.match(fundo, /cancelar_operacao/);
   assert.match(fundo, /CATALOGO_CHATS/);
   const rotas = await readFile('site/extensao/rotas.js', 'utf8');
   assert.match(rotas, /myn-teste-local/);

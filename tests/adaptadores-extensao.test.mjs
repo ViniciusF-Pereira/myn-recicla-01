@@ -61,16 +61,16 @@ test('descoberta exige confiança, respeita bloqueio e valida seletores escolhid
     titulo: 'Chat de teste', origem: 'https://exemplo.com', url: 'https://exemplo.com/', bloqueio: '',
     sugestao: { compositor: '#entrada', envio: '#enviar', resposta: '#resposta', confianca: .91 },
     candidatos: {
-      compositores: [{ seletor: '#entrada' }, { seletor: 'textarea' }],
-      envios: [{ seletor: '#enviar' }],
-      respostas: [{ seletor: '#resposta' }],
+      compositores: [{ seletor: '#entrada', pontos: .95 }, { seletor: 'textarea', pontos: .8 }, { seletor: 'input', pontos: .05 }],
+      envios: [{ seletor: '#enviar', pontos: .92 }],
+      respostas: [{ seletor: '#resposta', pontos: .72 }],
     },
   };
   const adaptador = criarAdaptador(relatorio, '', { compositor: 'textarea' });
   assert.equal(adaptador.campos[0], 'textarea');
   assert.equal(adaptador.descoberta, true);
   assert.throws(() => criarAdaptador({ ...relatorio, bloqueio: 'captcha' }), /bloqueada/);
-  assert.throws(() => criarAdaptador({ ...relatorio, sugestao: { ...relatorio.sugestao, confianca: .2 } }), /confiança insuficiente/);
+  assert.throws(() => criarAdaptador(relatorio, '', { compositor: 'input' }), /confiança insuficiente/);
   assert.throws(() => criarAdaptador(relatorio, '', { resposta: '#fora' }), /não pertence/);
 });
 

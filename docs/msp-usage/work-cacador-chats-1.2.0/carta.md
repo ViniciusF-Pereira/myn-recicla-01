@@ -10,7 +10,7 @@ O operador pediu que o WORK rastreasse páginas de chat, encontrasse novas forma
 - O manifest não contém `<all_urls>`; usa origens opcionais e `activeTab`.
 - O mapeamento não envia mensagens e a ativação apenas persiste um adaptador.
 - A suíte Node passou 74/74.
-- O aceite em Edge isolado passou 13/13, incluindo descoberta, ativação e execução da rota criada.
+- O aceite em Edge isolado passou 16/16, incluindo descoberta, ativação, execução da rota criada, deduplicação e sinalização de acesso temporário.
 - O relatório final não registrou erros de manifesto ou runtime da extensão.
 - Não houve chamada MSP/LLM externa nesta tarefa.
 
@@ -38,7 +38,7 @@ O operador pediu que o WORK rastreasse páginas de chat, encontrasse novas forma
 
 ## Crítica construtiva
 
-A primeira implementação expôs dois defeitos reais: o ID da descoberta sobrescrevia o ID do envelope da ponte, e o comando `liste os chats` não correspondia ao regex. Ambos foram corrigidos e cobertos pelo aceite. Próximas melhorias: correlacionar erros por ID de ponta a ponta, testar `activeTab` com origem arbitrária e oferecer revalidação periódica do catálogo.
+A primeira implementação expôs dois defeitos reais: o ID da descoberta sobrescrevia o ID do envelope da ponte, e o comando `liste os chats` não correspondia ao regex. A revisão independente também identificou riscos de seletor ambíguo, resposta agregada, confiança recalculada incorretamente, concorrência e permissão temporária mal sinalizada. Todos foram corrigidos: seletores são revalidados no clique, respostas usam nós assistentes, a confiança usa os candidatos escolhidos, gravações são serializadas e `activeTab` aparece como temporário. Próximas melhorias: testar `activeTab` com origem arbitrária real e oferecer revalidação periódica do catálogo.
 
 ## Crítica destrutiva
 
@@ -55,7 +55,7 @@ A premissa “basta abrir um navegador para contornar” deve ser rejeitada. Nav
 ## Aceites
 
 - `node --test`: 74/74.
-- Edge isolado: 13/13.
+- Edge isolado: 16/16.
 - Descoberta local: 87% de confiança.
 - Rota descoberta executada: `OK local: teste descoberto`.
 - WORK listou o catálogo.

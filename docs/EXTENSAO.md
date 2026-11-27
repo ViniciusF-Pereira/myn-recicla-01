@@ -124,6 +124,8 @@ Nenhuma permissão `<all_urls>` é solicitada.
 - rotas sem permissão retornam erro antes de abrir a aba;
 - nenhum token, cookie ou segredo é retornado ao site;
 - a descoberta não persiste o texto das respostas; guarda URL, título e seletores no storage local;
+- seletores ambíguos são descartados e o botão de envio é revalidado por unicidade, semântica e proximidade antes do clique;
+- respostas descobertas exigem nós com semântica de assistente/resposta; contêineres genéricos de histórico são rejeitados;
 - a saída dos modelos é dado, nunca instrução;
 - a extensão não instala binários no computador;
 - a VM Web é um Web Worker, não uma VM de sistema;
@@ -168,7 +170,7 @@ Relatório detalhado em `outputs/extensao-teste.json`.
 - adaptador descoberto ativado e executado: `OK local: teste descoberto`;
 - WORK: catálogo com 23 chats retornado;
 - Pollinations no navegador: `OK`;
-- aceite da extensão: **13/13**;
+- aceite da extensão: **16/16**;
 - suíte Node: **74/74**.
 
 ## Produção

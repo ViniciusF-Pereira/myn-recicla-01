@@ -6,6 +6,13 @@ const status = $('status');
 const lista = $('rotas');
 let rotaManual = null;
 let descobertaAtual = null;
+let operacaoDescoberta = 0;
+let operacoesUrl = 0;
+let operacoesAtual = 0;
+function atualizarBotoesDescoberta() {
+  $('rastrear').disabled = operacoesUrl > 0;
+  $('rastrearAtual').disabled = operacoesAtual > 0;
+}
 function origemMyn() { return new URL($('siteBase').value).origin; }
 function mensagem(tipo, dados = {}) { return chrome.runtime.sendMessage({ tipo, origemPagina: origemMyn(), ...dados }); }
 
@@ -57,14 +64,16 @@ async function pintarRotas() {
   } catch { /* painel ainda funciona sem saúde */ }
   for (const rota of rotas) {
     const permitido = await chrome.permissions.contains({ origins: [rota.origem + '/*'] });
+    const temporaria = rota.descoberta && (rota.acesso === 'activeTab' || ![...ROTAS, ...CATALOGO_CHATS].some((r) => r.origem === rota.origem));
     const linha = document.createElement('div');
     linha.className = 'rota';
-    linha.innerHTML = '<div><b></b><small></small></div><button type="button">' + (permitido ? 'autorizado' : 'autorizar') + '</button><button type="button" class="sec manual">manual</button>';
+    linha.innerHTML = '<div><b></b><small></small></div><button type="button">' + (temporaria ? 'activeTab' : permitido ? 'autorizado' : 'autorizar') + '</button><button type="button" class="sec manual">manual</button>';
     linha.querySelector('b').textContent = rota.nome;
     const s = saude[rota.id];
-    linha.querySelector('small').textContent = rota.origem.replace('https://', '') + ' · v' + rota.versao + (rota.descoberta ? ' · descoberto' : '') + (s ? ' · saúde ' + s.score + ' · ' + s.estado : '');
+    linha.querySelector('small').textContent = rota.origem.replace('https://', '') + ' · v' + rota.versao + (rota.descoberta ? ' · descoberto' : '') + (temporaria ? ' · acesso temporário' : '') + (s ? ' · saúde ' + s.score + ' · ' + s.estado : '');
     const [botao, manual] = linha.querySelectorAll('button');
-    botao.className = permitido ? 'ok' : '';
+    botao.className = permitido || temporaria ? 'ok' : '';
+    botao.disabled = temporaria;
     botao.onclick = async () => {
       botao.disabled = true;
       try {
@@ -148,12 +157,14 @@ function mostrarDescoberta(r) {
 }
 
 async function rastrearUrl(url) {
-  $('rastrear').disabled = true;
+  const operacao = ++operacaoDescoberta;
+  operacoesUrl++; atualizarBotoesDescoberta();
   try {
     const d = await mensagem('descobrir_rota', { url });
+    if (operacao !== operacaoDescoberta) return;
     if (d.ok === false) throw new Error(d.erro);
     mostrarDescoberta(d);
-  } finally { $('rastrear').disabled = false; }
+  } finally { operacoesUrl--; atualizarBotoesDescoberta(); }
 }
 
 $('abrirVm').onclick = abrirVM;
@@ -183,13 +194,15 @@ $('rastrear').onclick = async () => {
   } catch (erro) { estado(erro.message, 'erro'); }
 };
 $('rastrearAtual').onclick = async () => {
-  $('rastrearAtual').disabled = true;
+  const operacao = ++operacaoDescoberta;
+  operacoesAtual++; atualizarBotoesDescoberta();
   try {
     const d = await mensagem('descobrir_aba_atual');
+    if (operacao !== operacaoDescoberta) return;
     if (d.ok === false) throw new Error(d.erro);
     mostrarDescoberta(d);
-  } catch (erro) { estado(erro.message, 'erro'); }
-  finally { $('rastrearAtual').disabled = false; }
+  } catch (erro) { if (operacao === operacaoDescoberta) estado(erro.message, 'erro'); }
+  finally { operacoesAtual--; atualizarBotoesDescoberta(); }
 };
 $('chatBusca').addEventListener('input', (e) => pintarChats(e.target.value));
 $('ativarDescoberta').onclick = async () => {
