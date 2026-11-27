@@ -120,6 +120,19 @@ O teste automatizado abre um Chromium isolado, instala a extensão descompactada
 
 Relatório detalhado em `outputs/extensao-teste.json`.
 
+## Resultado executado
+
+- Chromium: Microsoft Edge `158.0.4370.45`;
+- extensão: `ENABLED`, sem erros de manifesto ou runtime;
+- ponte site ↔ extensão: `true`;
+- painel lateral aberto: `true`;
+- VM Web pronta: `true`;
+- rota sem permissão: bloqueada corretamente;
+- rota local automatizada: `OK local: teste de automação`;
+- Pollinations no navegador: `OK`;
+- suíte Node: **59/59**;
+- Docker: **59/59**, imagem `b7f2f20c8829`.
+
 ## Produção
 
 O site precisa ser servido por HTTPS. A rota:
