@@ -1,6 +1,8 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { ROTAS, VERSAO_ADAPTADORES } from '../site/extensao/rotas.js';
+import { CATALOGO_CHATS } from '../site/extensao/catalogo-chats.js';
+import { criarAdaptador } from '../site/extensao/descoberta.mjs';
 import { registrarResultado, pontuar, ordenar } from '../site/extensao/saude.mjs';
 import { selecionarRotas } from '../web/core/rotas-cliente.mjs';
 
@@ -39,4 +41,44 @@ test('seleção de rotas usa saúde e evita circuito aberto', () => {
   assert.ok(!rotas.includes('chatgpt-web'));
   const ordenadas = ordenar(ROTAS.filter((r) => !r.oculta), { 'claude-web': { sucessos: 10, falhas: 0, ultimaLatenciaMs: 1000 } });
   assert.equal(ordenadas[0].id, 'claude-web');
+});
+
+test('catálogo de chats é amplo, único e mantém proibição Google/Gemini', () => {
+  const ids = new Set(CATALOGO_CHATS.map((c) => c.id));
+  assert.ok(ids.size >= 20);
+  assert.equal(ids.size, CATALOGO_CHATS.length);
+  for (const chat of CATALOGO_CHATS) {
+    assert.match(chat.url, /^https:\/\//);
+    assert.equal(new URL(chat.url).origin, chat.origem);
+    assert.ok(!/google|gemini/i.test(chat.id + chat.nome + chat.url));
+  }
+  assert.ok(CATALOGO_CHATS.some((c) => c.id === 'perplexity-web'));
+  assert.ok(CATALOGO_CHATS.some((c) => c.id === 'qwen-web'));
+});
+
+test('descoberta exige confiança, respeita bloqueio e valida seletores escolhidos', () => {
+  const relatorio = {
+    titulo: 'Chat de teste', origem: 'https://exemplo.com', url: 'https://exemplo.com/', bloqueio: '',
+    sugestao: { compositor: '#entrada', envio: '#enviar', resposta: '#resposta', confianca: .91 },
+    candidatos: {
+      compositores: [{ seletor: '#entrada' }, { seletor: 'textarea' }],
+      envios: [{ seletor: '#enviar' }],
+      respostas: [{ seletor: '#resposta' }],
+    },
+  };
+  const adaptador = criarAdaptador(relatorio, '', { compositor: 'textarea' });
+  assert.equal(adaptador.campos[0], 'textarea');
+  assert.equal(adaptador.descoberta, true);
+  assert.throws(() => criarAdaptador({ ...relatorio, bloqueio: 'captcha' }), /bloqueada/);
+  assert.throws(() => criarAdaptador({ ...relatorio, sugestao: { ...relatorio.sugestao, confianca: .2 } }), /confiança insuficiente/);
+  assert.throws(() => criarAdaptador(relatorio, '', { resposta: '#fora' }), /não pertence/);
+});
+
+test('rotas descobertas podem ser explícitas e entrar no fallback automático', () => {
+  const catalogoExtensao = [{ id: 'descoberto-teste', descoberta: true }];
+  assert.deepEqual(selecionarRotas({ rota: 'descoberto-teste', extensaoDisponivel: true, catalogoExtensao }), ['descoberto-teste']);
+  assert.deepEqual(selecionarRotas({ rota: 'descoberto-teste', extensaoDisponivel: false, catalogoExtensao }), []);
+  const rotas = selecionarRotas({ effort: 'medium', extensaoDisponivel: true, catalogoExtensao, saude: { 'descoberto-teste': { estado: 'closed', score: 1 } } });
+  assert.equal(rotas[0], 'pollinations-text-api');
+  assert.ok(rotas.includes('descoberto-teste'));
 });

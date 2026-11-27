@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Myn Recicla/01 — VM Web",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Abre a VM Web do Myn e conecta rotas de abas gratuitas ao seu navegador, com permissão por site.",
-  "permissions": ["storage", "tabs", "scripting", "sidePanel"],
+  "permissions": ["storage", "tabs", "scripting", "sidePanel", "activeTab"],
   "host_permissions": [
     "https://mynrecicla.com/*",
     "http://127.0.0.1:5188/*"
@@ -13,7 +13,25 @@
     "https://claude.ai/*",
     "https://huggingface.co/*",
     "https://openrouter.ai/*",
-    "https://chat.z.ai/*"
+    "https://chat.z.ai/*",
+    "https://www.perplexity.ai/*",
+    "https://copilot.com/*",
+    "https://chat.mistral.ai/*",
+    "https://grok.com/*",
+    "https://chat.deepseek.com/*",
+    "https://chat.qwen.ai/*",
+    "https://www.meta.ai/*",
+    "https://pi.ai/*",
+    "https://poe.com/*",
+    "https://you.com/*",
+    "https://duck.ai/*",
+    "https://www.blackbox.ai/*",
+    "https://www.t3.chat/*",
+    "https://search.brave.com/*",
+    "https://www.ecosia.org/*",
+    "https://www.phind.com/*",
+    "https://writesonic.com/*",
+    "https://hix.ai/*"
   ],
   "background": {
     "service_worker": "background.js",

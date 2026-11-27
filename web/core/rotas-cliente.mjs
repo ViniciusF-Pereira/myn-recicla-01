@@ -24,21 +24,23 @@ export function normalizarRota(valor) {
   return ALIASES[r] || r;
 }
 
-export function selecionarRotas({ rota = 'auto', preferida = '', extensaoDisponivel = false, effort = 'medium', saude = {} } = {}) {
+export function selecionarRotas({ rota = 'auto', preferida = '', extensaoDisponivel = false, effort = 'medium', saude = {}, catalogoExtensao = [] } = {}) {
   const nivel = normalizarEffort(effort);
   const explicita = normalizarRota(rota);
-  if (explicita !== 'auto') return ROTAS_VALIDAS.has(explicita) ? [explicita] : [];
+  const descobertas = catalogoExtensao.filter((r) => r?.descoberta && r?.id).map((r) => r.id);
+  const validas = new Set([...ROTAS_VALIDAS, ...descobertas]);
+  if (explicita !== 'auto') return validas.has(explicita) && (!descobertas.includes(explicita) || extensaoDisponivel) ? [explicita] : [];
   const candidatas = [];
   const adicionar = (id) => {
     const normalizada = normalizarRota(id);
-    if (!ROTAS_VALIDAS.has(normalizada) || candidatas.includes(normalizada)) return;
-    if (ROTAS_EXTENSAO.has(normalizada) && !extensaoDisponivel) return;
+    if (!validas.has(normalizada) || candidatas.includes(normalizada)) return;
+    if ((ROTAS_EXTENSAO.has(normalizada) || descobertas.includes(normalizada)) && !extensaoDisponivel) return;
     candidatas.push(normalizada);
   };
   adicionar(preferida);
   adicionar('pollinations-text-api');
   if (extensaoDisponivel) {
-    const extensao = [...ROTAS_EXTENSAO].sort((a, b) => (saude[b]?.score ?? .5) - (saude[a]?.score ?? .5));
+    const extensao = [...ROTAS_EXTENSAO, ...descobertas].sort((a, b) => (saude[b]?.score ?? .5) - (saude[a]?.score ?? .5));
     for (const id of extensao) if (saude[id]?.estado !== 'open') adicionar(id);
   }
   adicionar('webgpu-local');
@@ -172,7 +174,7 @@ export async function* conversar({ texto, sessao = 'local', projeto = '', escopo
     extensaoOk ? extensao.listarRotas().catch(() => null) : null,
   ]);
   const saude = Object.fromEntries((catalogoExtensao?.rotas || []).map((r) => [r.id, r.saude]));
-  const rotas = selecionarRotas({ rota, preferida, extensaoDisponivel: extensaoOk, effort: nivel, saude });
+  const rotas = selecionarRotas({ rota, preferida, extensaoDisponivel: extensaoOk, effort: nivel, saude, catalogoExtensao: catalogoExtensao?.rotas || [] });
   if (!rotas.length) throw new Error('rota inválida ou extensão não instalada');
   const [historico, relacionada, fontes] = await Promise.all([
     contexto(sessaoLimpa, 40, projetoLimpo, escopoLimpo),
@@ -208,4 +210,7 @@ export async function* conversar({ texto, sessao = 'local', projeto = '', escopo
 
 export async function extensaoDisponivel() { return extensao.disponivel(); }
 export async function abrirVMExtensao() { return extensao.abrirVM(); }
+export async function descobrirRotaExtensao(url) { return extensao.descobrirRota(url); }
+export async function descobrirAbaAtualExtensao() { return extensao.descobrirAbaAtual(); }
+export async function ativarDescobertaExtensao(id, seletores = {}) { return extensao.ativarDescoberta(id, seletores); }
 export { ESFORCOS, memoria, rag };

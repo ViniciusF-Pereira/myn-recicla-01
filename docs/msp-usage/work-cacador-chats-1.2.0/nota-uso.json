@@ -1,0 +1,35 @@
+{
+  "schema": "MspUsageNote.v1",
+  "document_kind": "technical_usage_not_tax_invoice",
+  "project_id": "myn-Recicla-01",
+  "task_id": "work-cacador-chats-1.2.0",
+  "session_id": "ses_dfb7e44bbffepzBlwFy3j0hcSl",
+  "status": "completed",
+  "started_at": "2026-11-27T19:19:28Z",
+  "finished_at": "2026-11-27T21:02:26Z",
+  "letter_sha256": "95ed55480d1a7001a0e0427fbde26654f8acc912c5086fe03607c10396159187",
+  "receipts": [
+    {
+      "path": "receipts/validacao-local.md",
+      "sha256": "090638e420f5fee8aacfb20c6ea67e991d1b15af69709d1457380f45b21b67ea"
+    }
+  ],
+  "events": [
+    {
+      "id": "sha256:090638e420f5fee8aacfb20c6ea67e991d1b15af69709d1457380f45b21b67ea",
+      "route": "local:node-test+edge-acceptance",
+      "status": "passed",
+      "receipt": "receipts/validacao-local.md"
+    }
+  ],
+  "metrics": {
+    "calls": { "value": 0, "unit": "chamadas MSP", "source": "nenhuma chamada MSP nesta tarefa", "state": "measured" },
+    "failed_attempts": { "value": 0, "unit": "tentativas MSP falhas", "source": "nenhuma chamada MSP nesta tarefa", "state": "measured" },
+    "input_tokens": { "value": null, "unit": "tokens", "source": "contador não exposto pelo harness", "state": "unknown" },
+    "output_tokens": { "value": null, "unit": "tokens", "source": "contador não exposto pelo harness", "state": "unknown" },
+    "total_tokens": { "value": null, "unit": "tokens", "source": "contador não exposto pelo harness", "state": "unknown" },
+    "cost": { "value": null, "unit": "USD", "source": "sem recibo de custo", "state": "unknown" }
+  },
+  "savings": null,
+  "notes": "Os 74 testes e 13 aceites são validação do produto, não chamadas MSP. O início usa o marco da release anterior às 19:19:28Z; o horário exato do primeiro insumo desta tarefa não foi instrumentado."
+}

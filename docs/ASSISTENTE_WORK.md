@@ -13,7 +13,7 @@ O WORK aparece flutuante na home, no Playground, no mapa de evidências e no pai
 - integração real com `/mcp`;
 - indicação da ferramenta MCP em uso durante a execução;
 - botão para cancelar a chamada em andamento;
-- ações rápidas (rotas, pesquisa, catálogo, sobre);
+- ações rápidas (caçar chats, rotas, pesquisa, catálogo, sobre);
 - histórico persistente das últimas 40 mensagens no navegador;
 - navegação local pela página (`ir para catálogo`, `abrir playground`, etc.);
 - renderização de imagem retornada pelas ferramentas de mídia.
@@ -37,6 +37,15 @@ O WORK aparece flutuante na home, no Playground, no mapa de evidências e no pai
 - `myn_mensagem`
 
 Google/Gemini não fazem parte do catálogo.
+
+## Ferramentas locais de descoberta
+
+- `chats_catalogo` — lista os 23 chats conhecidos;
+- `extensao_descobrir` — mapeia um chat autorizado sem enviar mensagens;
+- `extensao_descobrir_aba_atual` — mapeia a aba atual com `activeTab`;
+- `extensao_ativar` — ativa o último adaptador descoberto após pedido explícito.
+
+Comandos úteis: `liste os chats`, `mapear Perplexity`, `mapear esta aba` e `ativar adaptador descoberto`.
 
 ## Privacidade
 
@@ -62,6 +71,8 @@ Google/Gemini não fazem parte do catálogo.
 - Cancelamento: chamada lenta interrompida e estado restaurado.
 - Histórico: mensagens mantidas após recarregar a página.
 - Três abas abertas: chamada MCP respondida em 9 ms, sem esgotar conexões (SSE combinado).
+- `chats_catalogo`: 23 chats retornados no Edge isolado.
+- Descoberta local: confiança 87%, adaptador ativado e rota executada.
 
 ## Atalhos
 

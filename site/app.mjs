@@ -47,7 +47,7 @@ window.myn = {
   agentes: { lista: AGENTES, avaliar, avaliarTodos },
   sessao: { carregar: sessao.carregar, salvar: sessao.salvar, markdown: sessao.markdown },
   midia: { capacidade: midia.capacidade, gerarImagem: midia.gerarImagem, narrar: midia.narrar, gravarNarracao: midia.gravarNarracao, gerarVideo: midia.gerarVideo, gerarGif: midia.gerarGif, extrairArquivo: midia.extrairArquivo, baixar: midia.baixar },
-  cliente: { conversar: cliente.conversar, extensaoDisponivel: cliente.extensaoDisponivel, abrirVM: cliente.abrirVMExtensao, selecionarRotas: cliente.selecionarRotas },
+  cliente: { conversar: cliente.conversar, extensaoDisponivel: cliente.extensaoDisponivel, abrirVM: cliente.abrirVMExtensao, selecionarRotas: cliente.selecionarRotas, descobrirRota: cliente.descobrirRotaExtensao, descobrirAbaAtual: cliente.descobrirAbaAtualExtensao, ativarDescoberta: cliente.ativarDescobertaExtensao },
   memoria: cliente.memoria,
   rag: { ...ragStore, ...cliente.rag },
   pronto: (async () => { await semear(); await goal.retomar(); window.myn.vm.padrao = await new VMWeb('myn-vm-padrao').iniciar(); })(),

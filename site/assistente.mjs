@@ -1,4 +1,6 @@
 /** WORK — assistente virtual flutuante com MCP, voz e interação com a página. */
+import { CATALOGO_CHATS } from './extensao/catalogo-chats.js';
+
 const CSS = `
 .wa-root{position:fixed;right:18px;bottom:18px;z-index:120;font:500 14px/1.45 "IBM Plex Sans",system-ui,sans-serif;color:var(--tinta,#1b2730)}
 .wa-root *{box-sizing:border-box}.wa-root button,.wa-root input{font:inherit}
@@ -31,8 +33,15 @@ const CSS = `
 @media(max-width:520px){.wa-root{right:10px;bottom:10px}.wa-bolha{right:80px;bottom:16px;max-width:170px}.wa-olho{width:72px;height:72px}.wa-painel{bottom:86px}.wa-halo{left:12px}.wa-pupila.e{left:14px}.wa-pupila.d{right:14px}.wa-boca{left:25px;bottom:16px}}
 `;
 
-const INTRO = 'Oi, eu sou WORK, o assistente virtual do Myn Recicla/01. Posso conversar, pesquisar, consultar rotas, gerar mídia, usar ferramentas MCP e navegar pela página. Clique na bolha para falar comigo.';
-let ferramentas = [];
+const INTRO = 'Oi, eu sou WORK, o assistente virtual do Myn Recicla/01. Posso conversar, pesquisar, consultar rotas, caçar chats no catálogo, mapear páginas autorizadas, gerar mídia e navegar pela página. Clique na bolha para falar comigo.';
+const FERRAMENTAS_LOCAIS = [
+  { name: 'chats_catalogo', description: 'Lista chats conhecidos e o estado de verificação.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'extensao_descobrir', description: 'Mapeia o DOM de um chat autorizado sem enviar mensagens.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } },
+  { name: 'extensao_descobrir_aba_atual', description: 'Mapeia a aba atual autorizada temporariamente.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'extensao_ativar', description: 'Ativa o último adaptador descoberto após revisão.', inputSchema: { type: 'object', properties: {} } },
+];
+let ferramentas = [...FERRAMENTAS_LOCAIS];
+let ultimaDescoberta = null;
 function lerLocal(k,d=''){try{return localStorage.getItem(k)??d}catch{return d}}
 function salvarLocal(k,v){try{localStorage.setItem(k,v)}catch{}}
 function removerLocal(k){try{localStorage.removeItem(k)}catch{}}
@@ -134,15 +143,59 @@ function estado(texto, modo = 'online') {
     ? 'Oi, eu sou WORK. Clique para conversar.' : texto;
 }
 
+function formatarDescoberta(r) {
+  const s = r?.sugestao || {};
+  return [
+    'Mapeamento concluído: ' + (r?.titulo || r?.origem || 'página'),
+    'Confiança: ' + Math.round((s.confianca || 0) * 100) + '%',
+    'Composer: ' + (s.compositor || 'não encontrado'),
+    'Envio: ' + (s.envio || 'não encontrado'),
+    'Resposta: ' + (s.resposta || 'não encontrado'),
+    r?.bloqueio ? 'Bloqueio detectado: ' + r.bloqueio + '. Nenhum contorno será tentado.' : 'Nenhuma mensagem foi enviada.',
+    'Para ativar, revise no painel da extensão ou peça “ativar adaptador descoberto”.',
+  ].join('\n');
+}
+
+async function ferramentaLocal(nome, args = {}) {
+  if (nome === 'chats_catalogo') {
+    return CATALOGO_CHATS.map((c) => '- ' + c.nome + ' · ' + c.categoria + ' · ' + c.verificacao + ' · ' + c.url).join('\n') + '\n\nPeça “mapear Perplexity”, por exemplo. A autorização é individual.';
+  }
+  if (nome === 'extensao_descobrir') {
+    if (!window.myn?.cliente?.descobrirRota) throw new Error('extensão não conectada; abra o painel lateral');
+    const r = await window.myn.cliente.descobrirRota(args.url);
+    if (r?.ok === false) throw new Error(r.erro || 'não foi possível mapear');
+    ultimaDescoberta = r;
+    return formatarDescoberta(r);
+  }
+  if (nome === 'extensao_descobrir_aba_atual') {
+    if (!window.myn?.cliente?.descobrirAbaAtual) throw new Error('extensão não conectada; abra o painel lateral');
+    const r = await window.myn.cliente.descobrirAbaAtual();
+    if (r?.ok === false) throw new Error(r.erro || 'não foi possível mapear');
+    ultimaDescoberta = r;
+    return formatarDescoberta(r);
+  }
+  if (nome === 'extensao_ativar') {
+    if (!ultimaDescoberta?.id) throw new Error('nenhuma descoberta recente; primeiro peça para mapear um chat');
+    if (!window.myn?.cliente?.ativarDescoberta) throw new Error('extensão não conectada; abra o painel lateral');
+    const r = await window.myn.cliente.ativarDescoberta(ultimaDescoberta.id);
+    if (r?.ok === false) throw new Error(r.erro || 'não foi possível ativar');
+    return 'Adaptador ativado: ' + r.adaptador.nome + ' (' + r.adaptador.id + '). Nenhuma mensagem foi enviada.';
+  }
+  return null;
+}
+
 async function ferramenta(nome, args = {}) {
   estado('🔧 ' + nome, 'pensando');
   const chip = document.createElement('div'); chip.className = 'wa-tool'; chip.textContent = '🔧 ' + nome;
   document.getElementById('waMsgs')?.appendChild(chip);
-  const result = await rpc('tools/call', { name: nome, arguments: args }, controleAtual?.signal);
-  chip.remove();
-  const texto = result?.content?.map((c) => c.text || '').join('\n') || 'Concluído.';
-  if (result?.isError) throw new Error(texto);
-  return texto;
+  try {
+    const local = await ferramentaLocal(nome, args);
+    if (local !== null) return local;
+    const result = await rpc('tools/call', { name: nome, arguments: args }, controleAtual?.signal);
+    const texto = result?.content?.map((c) => c.text || '').join('\n') || 'Concluído.';
+    if (result?.isError) throw new Error(texto);
+    return texto;
+  } finally { chip.remove(); }
 }
 
 function interagirPagina(texto) {
@@ -161,8 +214,22 @@ function interagirPagina(texto) {
   return null;
 }
 
+function referenciaChat(texto) {
+  const url = String(texto).match(/https?:\/\/[^\s]+/i)?.[0]?.replace(/[),.;]+$/, '');
+  if (url) return url;
+  const t = texto.toLowerCase();
+  return CATALOGO_CHATS.find((c) => t.includes(c.nome.toLowerCase()) || t.includes(c.id.replace(/-web$/, '')))?.url || '';
+}
+
 function decidir(texto) {
   const t = texto.toLowerCase();
+  if (/lista|liste|listar|quais|catalogo|catálogo|mostre|ache|procure|cace|caçar/.test(t) && /chats?|provedores?/.test(t)) return { nome: 'chats_catalogo', args: {} };
+  if (/mapear|mapeie|rastrear|rastreie|descobrir|descubra|nova forma|conectar/.test(t)) {
+    if (/aba atual|essa aba|esta aba/.test(t)) return { nome: 'extensao_descobrir_aba_atual', args: {} };
+    const url = referenciaChat(texto);
+    if (url) return { nome: 'extensao_descobrir', args: { url } };
+  }
+  if (/ativar|usar/.test(t) && /adaptador|descoberta|rota encontrada/.test(t)) return { nome: 'extensao_ativar', args: {} };
   if (/gerar|criar|fazer/.test(t) && /imagem|foto|desenho|ilustra/.test(t)) return { nome: 'myn_imagem', args: { prompt: texto } };
   if (/gerar|criar|fazer/.test(t) && /vídeo|video|clipe|anima/.test(t)) return { nome: 'myn_video', args: { prompt: texto, segundos: 6 } };
   if (/fale|narre|narrar|áudio|audio|voz/.test(t)) return { nome: 'myn_audio', args: { prompt: texto.replace(/^(fale|narre|narrar)\s*/i, '') } };
@@ -195,9 +262,9 @@ async function enviar(texto) {
         else { const r = await window.myn.midia.gerarVideo(texto, { segundos: 6 }); msg('[🎬 vídeo](' + r.url + ')\n' + r.fonte); }
       } else { const resposta = await ferramenta(d.nome, d.args); msg(resposta); falar(resposta); }
     }
-    estado('online · ' + ferramentas.length + ' ferramentas MCP');
+    estado('online · ' + ferramentas.length + ' ferramentas');
   } catch (e) {
-    if (controleAtual?.signal.aborted) { msg('Chamada cancelada.', 'erro'); estado('online · ' + ferramentas.length + ' ferramentas MCP'); }
+    if (controleAtual?.signal.aborted) { msg('Chamada cancelada.', 'erro'); estado('online · ' + ferramentas.length + ' ferramentas'); }
     else { msg('Não consegui concluir: ' + e.message, 'erro'); estado('offline · ' + e.message); }
   } finally {
     ocupado = false; controleAtual = null;
@@ -224,9 +291,9 @@ async function processarAnexo(file) {
     });
     const resposta = await ferramenta('myn_documento', { nome: file.name, base64 });
     msg(resposta); falar(resposta);
-    estado('online · ' + ferramentas.length + ' ferramentas MCP');
+    estado('online · ' + ferramentas.length + ' ferramentas');
   } catch (e) {
-    if (controleAtual?.signal.aborted) { msg('Leitura cancelada.', 'erro'); estado('online · ' + ferramentas.length + ' ferramentas MCP'); }
+    if (controleAtual?.signal.aborted) { msg('Leitura cancelada.', 'erro'); estado('online · ' + ferramentas.length + ' ferramentas'); }
     else { msg('Não consegui ler o anexo: ' + e.message, 'erro'); estado('offline · ' + e.message); }
   } finally {
     ocupado = false; controleAtual = null;
@@ -256,12 +323,12 @@ export function iniciarAssistente() {
     <span class="wa-halo"></span><span class="wa-asa e"></span><span class="wa-asa d"></span>
     <span class="wa-rosto"><span class="wa-pupila e"><i></i></span><span class="wa-pupila d"><i></i></span><span class="wa-boca"></span></span>
    </button>
-   <button class="wa-bolha" id="waBolha"><b>WORK · assistente MCP</b><span>Clique e fale comigo</span></button>
+   <button class="wa-bolha" id="waBolha"><b>WORK · assistente</b><span>Clique e fale comigo</span></button>
    <section class="wa-painel" id="waPainel" aria-label="Mini chat do WORK">
-    <div class="wa-topo"><b>WORK /01</b><small id="waTools">conectando MCP...</small><button id="waSom" title="Ativar/desativar som">${somAtivo ? '🔔' : '🔕'}</button><button id="waVoz" title="Ativar/desativar voz">${vozAtiva ? '🗣' : '🤐'}</button><button id="waLimpar" title="Limpar conversa">🧹</button><button id="waFechar" aria-label="Fechar">✕</button></div>
+    <div class="wa-topo"><b>WORK /01</b><small id="waTools">conectando...</small><button id="waSom" title="Ativar/desativar som">${somAtivo ? '🔔' : '🔕'}</button><button id="waVoz" title="Ativar/desativar voz">${vozAtiva ? '🗣' : '🤐'}</button><button id="waLimpar" title="Limpar conversa">🧹</button><button id="waFechar" aria-label="Fechar">✕</button></div>
     <div class="wa-status"><span class="wa-led"></span><span id="waStatus">online</span></div>
-    <div class="wa-acoes"><button data-acao="quais são as rotas?">ver rotas</button><button data-acao="pesquise worker">pesquisar</button><button data-acao="ir para catálogo">ir ao catálogo</button><button data-acao="explique o que é o Myn">sobre o Myn</button><button data-acao="mostre a arquitetura">arquitetura</button></div>
-    <div class="wa-msgs" id="waMsgs"><div class="wa-msg bot">Oi, eu sou o WORK. Posso conversar, pesquisar, consultar rotas, gerar mídia e navegar pela página. As ferramentas MCP aparecem aqui enquanto eu uso.</div></div>
+    <div class="wa-acoes"><button data-acao="liste os chats">caçar chats</button><button data-acao="quais são as rotas?">ver rotas</button><button data-acao="pesquise worker">pesquisar</button><button data-acao="ir para catálogo">ir ao catálogo</button><button data-acao="explique o que é o Myn">sobre o Myn</button><button data-acao="mostre a arquitetura">arquitetura</button></div>
+    <div class="wa-msgs" id="waMsgs"><div class="wa-msg bot">Oi, eu sou o WORK. Posso conversar, caçar chats, mapear páginas autorizadas, consultar rotas, gerar mídia e navegar pela página. As ferramentas aparecem aqui enquanto eu uso.</div></div>
     <form class="wa-form" id="waForm"><input type="file" id="waArquivo" hidden accept=".txt,.md,.csv,.json,.html,.pdf,.png,.jpg,.jpeg,.webp"><input id="waInput" autocomplete="off" placeholder="Escreva ou use o microfone..."><button type="button" class="sec" id="waAnexar" title="Anexar documento ou imagem">📎</button><button type="button" class="sec" id="waMic" title="Falar">🎙</button><button type="button" class="cancel" id="waCancelar" title="Cancelar chamada" disabled>■</button><button id="waSend" type="submit">ENVIAR</button></form>
    </section>`;
   document.body.appendChild(root);
@@ -298,10 +365,10 @@ export function iniciarAssistente() {
     try { tokenMcp = await fetch('/api/token').then((r) => r.json()).then((d) => d.token); } catch { /* MCP pode estar offline */ }
     try {
       const r = await rpc('tools/list');
-      ferramentas = r.tools || [];
-      document.getElementById('waTools').textContent = ferramentas.length + ' tools MCP';
-      estado('online · ' + ferramentas.length + ' ferramentas MCP');
-    } catch (e) { document.getElementById('waTools').textContent = 'MCP offline'; estado('MCP offline · ' + e.message); }
+      ferramentas = [...(r.tools || []), ...FERRAMENTAS_LOCAIS];
+      document.getElementById('waTools').textContent = ferramentas.length + ' ferramentas';
+      estado('online · ' + ferramentas.length + ' ferramentas');
+    } catch (e) { document.getElementById('waTools').textContent = ferramentas.length + ' ferramentas locais'; estado('MCP offline · descoberta local disponível'); }
   })();
   window.WORK = { abrir, fechar, apresentar, cancelar: () => controleAtual?.abort(), ferramentas: () => ferramentas, enviar };
 }

@@ -57,3 +57,6 @@ export function listarRotas() { return enviar('listar_rotas', {}, 3000); }
 export function diagnosticarRota(rotaId, timeoutMs = 35000) { return enviar('diagnosticar_rota', { rotaId }, timeoutMs); }
 export function executarRota(rotaId, texto, timeoutMs = 100000) { return enviar('executar_rota', { rotaId, texto }, timeoutMs); }
 export function capturarManual(rotaId, timeoutMs = 35000) { return enviar('capturar_manual', { rotaId }, timeoutMs); }
+export function descobrirRota(url, timeoutMs = 45000) { return enviar('descobrir_rota', { url }, timeoutMs); }
+export function descobrirAbaAtual(timeoutMs = 45000) { return enviar('descobrir_aba_atual', {}, timeoutMs); }
+export function ativarDescoberta(id, seletores = {}, timeoutMs = 10000) { return enviar('ativar_descoberta', { descobertaId: id, seletores }, timeoutMs); }

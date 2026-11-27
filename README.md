@@ -12,6 +12,7 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 | Playground (chat, streaming, mídia) | ![Playground](docs/prints/02-playground.png) |
 | Mapa de provedores com input/output | ![Mapeamento](docs/prints/03-mapeamento.png) |
 | Extensão com VM Web no painel lateral | ![Extensão](docs/prints/extensao-painel.png) |
+| WORK caçador de chats | ![Descoberta de chats](docs/prints/extensao-descoberta.png) |
 | Playground conectado à extensão | ![Playground com extensão](docs/prints/extensao-playground.png) |
 | Memória e RAG local | ![Memória e RAG](docs/prints/memoria-rag.png) |
 | Painel da API comercial | ![API comercial](docs/prints/api-comercial.png) |
@@ -22,9 +23,10 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 
 Baixe a extensão, instale no Chrome/Edge e clique no ícone para abrir a VM Web no painel lateral. As rotas de aba usam a sessão do próprio navegador, com permissão opcional por site.
 
-- Download: [`site/extensao/myn-recicla-extensao.zip`](site/extensao/myn-recicla-extensao.zip)
+- Download: [`v1.2.0 · myn-recicla-extensao.zip`](https://github.com/ViniciusF-Pereira/myn-Recicla-01/releases/download/v1.2.0/myn-recicla-extensao.zip)
 - Guia completo: [`docs/EXTENSAO.md`](docs/EXTENSAO.md)
-- Rotas: ChatGPT Web, Claude Web, HuggingChat, OpenRouter :free e Z.ai/GLM
+- WORK caçador: catálogo de 23 chats, mapeamento do DOM e adaptadores descobertos
+- Rotas internas: ChatGPT Web, Claude Web, HuggingChat, OpenRouter :free e Z.ai/GLM
 - Sem `<all_urls>`, sem contorno de login/CAPTCHA/paywall
 
 ```powershell
@@ -42,7 +44,7 @@ node scripts/testar-extensao.mjs
 - **Scoreboard**: score = 0,45·sucesso + 0,35·velocidade + 0,2·recência, com circuit breaker de 3 estados.
 - **MCP** JSON-RPC com 15 ferramentas para agentes externos.
 - **Memória/RAG local:** escopos sessão/projeto/global, busca híbrida, resumo persistido e exportação/importação em JSON.
-- **Extensão confiável:** adaptadores versionados, saúde por rota, diagnóstico de layout e modo manual.
+- **Extensão confiável:** adaptadores versionados, saúde por rota, diagnóstico de layout, modo manual e WORK caçador de chats com descoberta de novos adaptadores.
 - **Goal autônomo**: `/plan` → `/loop` → `/goal` com agendador usando a própria API.
 - **WEBdocker.NODEJS**: container com Chromium headless — as rotas rodam no aparelho de quem executa.
 

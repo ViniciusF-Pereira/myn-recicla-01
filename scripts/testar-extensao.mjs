@@ -1,5 +1,6 @@
 /** Teste de aceite da extensão em Chromium isolado, incluindo ponte, VM e API direta. */
 import { spawn, execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { mkdtemp, mkdir, writeFile, readFile, rm } from 'node:fs/promises';
 import { createServer } from 'node:net';
 import os from 'node:os';
@@ -9,7 +10,11 @@ import { fileURLToPath } from 'node:url';
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const EXT = path.join(RAIZ, 'site', 'extensao');
 const BASE = process.env.MYN_API_BASE || 'http://127.0.0.1:5188';
-const CHROME = process.env.MYN_CHROME || 'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe';
+const CHROME = process.env.MYN_CHROME || [
+  'C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Microsoft\\Edge\\Application\\msedge.exe',
+  'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+].find(existsSync) || 'chrome';
 const dir = await mkdtemp(path.join(os.tmpdir(), 'myn-extensao-'));
 const perfil = path.join(dir, 'perfil');
 const prints = path.join(RAIZ, 'docs', 'prints');
@@ -43,6 +48,9 @@ class CDP {
       const p = c.pendentes.get(m.id);
       if (p) { c.pendentes.delete(m.id); m.error ? p.reject(new Error(m.error.message)) : p.resolve(m.result); }
     };
+    const encerrar = () => { for (const p of c.pendentes.values()) p.reject(new Error('conexão CDP encerrada')); c.pendentes.clear(); };
+    ws.onclose = encerrar;
+    ws.onerror = encerrar;
     return c;
   }
   enviar(metodo, params = {}) {
@@ -123,6 +131,13 @@ try {
     relatorio.cliente.diagnosticoLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.diagnosticarRota('myn-teste-local'))`);
     relatorio.cliente.rotaLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.executarRota('myn-teste-local','teste de automação'))`);
     relatorio.cliente.manualLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.capturarManual('myn-teste-local'))`);
+    relatorio.cliente.descobertaLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.descobrirRota('${BASE}/extensao/teste.html'))`);
+    try { relatorio.cliente.adaptadorLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.ativarDescoberta(${JSON.stringify(relatorio.cliente.descobertaLocal?.id || '')}))`); }
+    catch (e) { relatorio.cliente.erroAtivacao = String(e.message); }
+    if (relatorio.cliente.adaptadorLocal?.ok) relatorio.cliente.rotaDescoberta = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.executarRota(${JSON.stringify(relatorio.cliente.adaptadorLocal?.adaptador?.id || '')},'teste descoberto'))`);
+    await cdp.avaliar("window.WORK.enviar('liste os chats')");
+    try { relatorio.cliente.workCatalogo = await esperar(() => cdp.avaliar("[...document.querySelectorAll('#waMsgs .wa-msg.bot')].some(m=>m.textContent.includes('Perplexity')&&m.textContent.includes('Qwen'))"), 30000); }
+    catch (e) { relatorio.cliente.erroWork = String(e.message); }
   }
 
   try {
@@ -147,15 +162,28 @@ try {
   const painel = await alvo('chrome-extension://' + idExt + '/painel.html?base=' + encodeURIComponent(BASE), porta);
   const cp = await CDP.conectar(painel.webSocketDebuggerUrl);
   await cp.enviar('Page.enable');
-  await esperar(() => cp.avaliar("document.querySelectorAll('#rotas .rota').length===5"), 30000);
+  await esperar(() => cp.avaliar("document.querySelectorAll('#rotas .rota').length>=5"), 30000);
   await esperar(() => cp.avaliar("document.getElementById('vm').src.includes('/playground.html')"), 30000);
+  await esperar(() => cp.avaliar("document.querySelectorAll('#chats .chat-item').length>=20"), 30000);
+  await cp.avaliar(`(()=>{const u=document.getElementById('descobertaUrl');u.value='${BASE}/extensao/teste.html';document.getElementById('rastrear').click();return true})()`);
+  await esperar(() => cp.avaliar("document.getElementById('relatorioDescoberta').hidden===false"), 30000);
+  relatorio.extensao.ativacaoDireta = await cp.avaliar(`(async()=>{const d=await chrome.storage.local.get('myn-descobertas-v1');const r=d['myn-descobertas-v1'].at(-1);const t=Date.now();const out=await chrome.runtime.sendMessage({tipo:'ativar_descoberta',origemPagina:'${BASE}',descobertaId:r.id,seletores:{compositor:document.getElementById('candidatoCompositor').value,envio:document.getElementById('candidatoEnvio').value,resposta:document.getElementById('candidatoResposta').value}});return {ms:Date.now()-t,ok:out.ok,id:out.adaptador?.id,erro:out.erro}})()`);
   await new Promise((r) => setTimeout(r, 2500));
-  relatorio.extensao.painel = await cp.avaliar("({rotas:document.querySelectorAll('#rotas .rota').length,manuais:document.querySelectorAll('#rotas button.manual').length,iframe:document.getElementById('vm').src,status:document.getElementById('status').textContent})");
+  relatorio.extensao.painel = await cp.avaliar("({rotas:document.querySelectorAll('#rotas .rota').length,manuais:document.querySelectorAll('#rotas button.manual').length,chats:document.querySelectorAll('#chats .chat-item').length,descoberta:!document.getElementById('relatorioDescoberta').hidden,iframe:document.getElementById('vm').src,status:document.getElementById('status').textContent})");
   relatorio.extensao.painelPing = await cp.avaliar("chrome.runtime.sendMessage({tipo:'ping',origemPagina:'http://127.0.0.1:5188'})").catch((e) => String(e.message));
   relatorio.extensao.sidePanelAberto = await cp.avaliar(`chrome.tabs.query({url:'http://127.0.0.1:5188/*'}).then(async(ts)=>{const t=ts.find(x=>x.url.includes('/playground.html'));if(!t)return false;await chrome.sidePanel.open({tabId:t.id});return true})`).catch((e) => String(e.message));
   await cp.foto(path.join(prints, 'extensao-painel.png'), 440, 920);
-  relatorio.prints.push('docs/prints/extensao-painel.png'); cp.fechar();
+  relatorio.prints.push('docs/prints/extensao-painel.png');
+  await cp.foto(path.join(prints, 'extensao-descoberta.png'), 440, 1100);
+  relatorio.prints.push('docs/prints/extensao-descoberta.png'); cp.fechar();
 } catch (e) {
+  try {
+    if (ce) {
+      const infos = await ce.avaliar('chrome.developerPrivate.getExtensionsInfo()');
+      const ext = infos.find((i) => i.name?.startsWith('Myn Recicla/01'));
+      relatorio.extensao.errosFinais = { runtimeErrors: ext?.runtimeErrors, runtimeWarnings: ext?.runtimeWarnings, manifestErrors: ext?.manifestErrors };
+    }
+  } catch { /* diagnóstico final indisponível */ }
   relatorio.erros.push(String(e.stack || e));
 } finally {
   try { cdp?.fechar(); } catch {}
@@ -172,6 +200,11 @@ const aceites = [
   relatorio.cliente.rotaLocal?.ok === true,
   relatorio.cliente.manualLocal?.ok === true,
   relatorio.cliente.pollinations?.via === 'pollinations-text-api',
+  relatorio.cliente.descobertaLocal?.sugestao?.confianca >= .55,
+  relatorio.cliente.adaptadorLocal?.ok === true,
+  relatorio.cliente.rotaDescoberta?.ok === true,
+  relatorio.cliente.workCatalogo === true,
+  relatorio.extensao.painel?.descoberta === true,
 ];
 relatorio.aceites = { total: aceites.length, aprovados: aceites.filter(Boolean).length };
 await mkdir(path.join(RAIZ, 'outputs'), { recursive: true });

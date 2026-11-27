@@ -9,6 +9,7 @@ A extensão abre a **VM Web** no painel lateral do navegador e conecta o Myn a r
 | Home com chamada para a extensão | ![Home](prints/extensao-home.png) |
 | Playground com a VM Web aberta | ![Playground](prints/extensao-playground.png) |
 | Painel lateral da extensão | ![Painel](prints/extensao-painel.png) |
+| WORK caçador de chats e adaptador descoberto | ![Descoberta](prints/extensao-descoberta.png) |
 
 ## Instalar
 
@@ -40,6 +41,21 @@ Cada rota possui versão própria e listas alternativas de composer, envio e res
 - devolve `codigo`, `etapa`, `rota` e `versaoAdaptador`;
 - oferece modo manual para abrir a aba e capturar a resposta.
 
+## WORK caçador de chats
+
+A versão `1.2.0` inclui um catálogo de **23 chats** e um motor local de descoberta. Ele lê o DOM de uma página autorizada, pontua candidatos de composer, envio e resposta, e mostra os seletores antes de criar um adaptador.
+
+Use no WORK:
+
+- `liste os chats` — mostra o catálogo e o estado de verificação;
+- `mapear Perplexity` (ou outro provedor) — abre e mapeia a página autorizada;
+- `mapear esta aba` — usa `activeTab` para leitura temporária da aba atual;
+- `ativar adaptador descoberto` — ativa somente o último mapa revisado.
+
+No painel lateral, a seção **WORK · caçador de chats** permite filtrar provedores, autorizar um site, rastrear, escolher entre os candidatos e ativar o adaptador. O mapeamento **não envia mensagens**. A ativação também não envia: ela apenas salva a rota descoberta.
+
+O catálogo foi verificado por alcance HTTP em 27/11/2026. `http-200` não prova automação; `protegido`, `login` e `limitado` indicam que o site pode exigir navegador, autenticação ou aguardar cota. Sites fora do catálogo podem ser mapeados na aba atual, mas acesso permanente continua exigindo origem declarada na extensão.
+
 ## Como usar
 
 1. Clique no ícone da extensão para abrir o painel lateral.
@@ -48,13 +64,15 @@ Cada rota possui versão própria e listas alternativas de composer, envio e res
 4. Volte ao Playground e selecione a rota desejada.
 5. Com `effort=low`, uma rota é tentada; `medium` tenta duas; `high` tenta três.
 
-Rotas de aba suportadas:
+Adaptadores internos iniciais:
 
 - ChatGPT Web;
 - Claude Web;
 - HuggingChat;
 - OpenRouter :free;
 - Z.ai / GLM.
+
+O catálogo de descoberta inclui ainda Perplexity, Microsoft Copilot, Mistral, Grok, DeepSeek, Qwen, Meta AI, Pi, Poe, You.com, DuckDuckGo AI Chat, Blackbox AI, T3 Chat, Brave Leo, Ecosia, Phind, Writesonic e HIX. Esses entram como adaptadores descobertos após mapeamento e revisão.
 
 A automação é experimental. O Myn não contorna login, CAPTCHA, paywall ou controles do provedor.
 
@@ -94,6 +112,7 @@ O servidor continua disponível como fallback para memória do projeto, RAG, MCP
 | `tabs` | localizar e ativar a aba da rota |
 | `scripting` | preencher o composer e ler a resposta |
 | `sidePanel` | abrir a VM Web no painel lateral |
+| `activeTab` | permitir rastreio temporário da aba atual após clique no ícone |
 | origens opcionais | liberar somente o provedor escolhido |
 
 Nenhuma permissão `<all_urls>` é solicitada.
@@ -104,6 +123,7 @@ Nenhuma permissão `<all_urls>` é solicitada.
 - service worker valida a origem da página;
 - rotas sem permissão retornam erro antes de abrir a aba;
 - nenhum token, cookie ou segredo é retornado ao site;
+- a descoberta não persiste o texto das respostas; guarda URL, título e seletores no storage local;
 - a saída dos modelos é dado, nunca instrução;
 - a extensão não instala binários no computador;
 - a VM Web é um Web Worker, não uma VM de sistema;
@@ -125,16 +145,18 @@ O teste automatizado abre um Chromium isolado, instala a extensão descompactada
 - abertura da VM;
 - bloqueio de rota sem permissão;
 - automação de uma rota local inocente;
+- descoberta dos seletores, ativação e execução do adaptador criado;
+- catálogo de chats respondido pelo WORK;
 - resposta real do Pollinations no navegador;
-- geração dos três prints.
+- geração dos quatro prints.
 
 Relatório detalhado em `outputs/extensao-teste.json`.
 
 ## Resultado executado
 
 - Chromium: Microsoft Edge `158.0.4370.45`;
-- extensão `1.1.0`: `ENABLED`, sem erros de manifesto ou runtime;
-- adaptadores: versão 2;
+- extensão `1.2.0`: `ENABLED`, sem erros de manifesto ou runtime;
+- adaptadores internos: versão 2;
 - ponte site ↔ extensão: `true`;
 - painel lateral aberto: `true`;
 - VM Web pronta: `true`;
@@ -142,9 +164,12 @@ Relatório detalhado em `outputs/extensao-teste.json`.
 - diagnóstico local: composer encontrado;
 - rota local automatizada: `OK local: teste de automação`;
 - captura manual: `OK local: teste de automação`;
+- descoberta local: confiança `87%`, composer/envio/resposta encontrados;
+- adaptador descoberto ativado e executado: `OK local: teste descoberto`;
+- WORK: catálogo com 23 chats retornado;
 - Pollinations no navegador: `OK`;
-- aceite da extensão: **8/8**;
-- suíte Node: **71/71**.
+- aceite da extensão: **13/13**;
+- suíte Node: **74/74**.
 
 ## Produção
 

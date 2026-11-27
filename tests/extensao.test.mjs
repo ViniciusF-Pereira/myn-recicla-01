@@ -8,8 +8,11 @@ test('manifest da extensão é MV3 e não pede acesso amplo', async () => {
   assert.equal(manifesto.manifest_version, 3);
   assert.ok(manifesto.permissions.includes('sidePanel'));
   assert.ok(manifesto.permissions.includes('scripting'));
+  assert.ok(manifesto.permissions.includes('activeTab'));
   assert.ok(!manifesto.host_permissions.includes('<all_urls>'));
+  assert.ok(!manifesto.optional_host_permissions.includes('<all_urls>'));
   assert.ok(manifesto.optional_host_permissions.every((p) => /^https:\/\//.test(p)));
+  assert.ok(manifesto.optional_host_permissions.length >= 20);
   assert.ok(!JSON.stringify(manifesto).match(/google|gemini/i));
   assert.deepEqual(Object.keys(manifesto.icons), ['16', '32', '48', '128']);
   for (const arquivo of Object.values(manifesto.icons)) assert.ok((await stat('site/extensao/' + arquivo)).size > 100);
@@ -37,6 +40,8 @@ test('ponte da extensão valida origem e máscara de canais', async () => {
   assert.match(conteudo, /event\.origin !== location\.origin/);
   assert.match(fundo, /SITE_PERMITIDO/);
   assert.match(fundo, /permissão necessária/);
+  assert.match(fundo, /descobrir_aba_atual/);
+  assert.match(fundo, /CATALOGO_CHATS/);
   const rotas = await readFile('site/extensao/rotas.js', 'utf8');
   assert.match(rotas, /myn-teste-local/);
   assert.match(rotas, /oculta: true/);

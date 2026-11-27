@@ -24,6 +24,28 @@
     <div class="manual" id="manual" hidden><b>Modo manual</b><small id="manualInfo"></small><div><button type="button" class="sec" id="capturar">Capturar resposta</button><button type="button" class="sec" id="diagnosticar">Diagnosticar</button></div><pre id="respostaManual"></pre></div>
   </section>
 
+  <section class="descoberta">
+    <div class="titulo"><b>WORK · caçador de chats</b><small>mapeia o DOM sem enviar mensagens</small></div>
+    <div class="descoberta-acao">
+      <input id="descobertaUrl" aria-label="URL do chat" placeholder="https://..." spellcheck="false">
+      <button type="button" id="rastrear">RASTREAR</button>
+      <button type="button" class="sec" id="rastrearAtual">ABA ATUAL</button>
+    </div>
+    <details class="catalogo">
+      <summary>Catálogo de chats verificados</summary>
+      <input id="chatBusca" aria-label="Filtrar catálogo" placeholder="filtrar provedor...">
+      <div id="chats"></div>
+    </details>
+    <div class="relatorio" id="relatorioDescoberta" hidden>
+      <b id="descobertaTitulo"></b><small id="descobertaInfo"></small>
+      <label>Composer<select id="candidatoCompositor"></select></label>
+      <label>Envio<select id="candidatoEnvio"></select></label>
+      <label>Resposta<select id="candidatoResposta"></select></label>
+      <div><button type="button" id="ativarDescoberta">ATIVAR ADAPTADOR</button><button type="button" class="sec" id="limparDescoberta">limpar</button></div>
+      <pre id="descobertaDetalhe"></pre>
+    </div>
+  </section>
+
   <iframe id="vm" title="VM Web do Myn Recicla/01" src="about:blank"></iframe>
 
   <footer>O Myn não contorna login, CAPTCHA ou paywall. A automação é experimental e respeita a disponibilidade de cada site.</footer>
