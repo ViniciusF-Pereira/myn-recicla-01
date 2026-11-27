@@ -214,3 +214,8 @@ Módulo do Myn Recicla/01.
 Exports: permitir, executarComRetry, circuitoAberto, registrarResultado, estadoConfiabilidade
 
 Módulo do Myn Recicla/01.
+## avaliacao-qualidade.mjs
+
+Exports: avaliarResposta, executarCaso, rodarAvaliacao, ultimaAvaliacao
+
+Módulo do Myn Recicla/01.
