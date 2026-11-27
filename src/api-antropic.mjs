@@ -84,14 +84,14 @@ export async function handleAnthropic({ body, req, res, base }) {
   passos.push(toolResult(body.messages.at(-1)?.content) ? 'Incorporei o tool_result enviado pelo agente.' : 'Executei a rota e preparei a resposta final.');
 
   const rota = ['auto', 'myn-auto'].includes(modelo) ? 'auto' : modelo;
-  const chat = await fetch(base + '/api/chat', {
+  const chat = await fetch(base + '/api/agente', {
     method: 'POST', headers: { 'content-type': 'application/json' },
-    body: JSON.stringify({ message: (system ? system + '\n\n' : '') + pergunta + contextoRag, rota }),
+    body: JSON.stringify({ mensagem: (system ? system + '\n\n' : '') + pergunta + contextoRag, sessao: 'anthropic-' + String(body.metadata?.user_id || 'local').slice(0, 80), canal: 'anthropic', rota }),
     signal: AbortSignal.timeout(180000),
   });
   const dados = await chat.json();
-  if (!chat.ok || !dados.reply) return erro(res, 502, 'api_error', dados.error || 'rota não respondeu');
-  const resposta = String(dados.reply).slice(0, maxTokens * 4);
+  if (!chat.ok || !dados.resposta) return erro(res, 502, 'api_error', dados.error || 'rota não respondeu');
+  const resposta = String(dados.resposta).slice(0, maxTokens * 4);
   const content = [];
   if (body.thinking?.type === 'enabled') content.push({ type: 'thinking', thinking: passos.join('\n'), signature: 'local-' + randomBytes(8).toString('hex') });
   content.push({ type: 'text', text: resposta });

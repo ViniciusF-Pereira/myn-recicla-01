@@ -145,8 +145,8 @@ async function processarMensagem(msg, base) {
   } else if (/^\/opencode$/i.test(texto)) {
     resposta = `Ponte conectada ao OpenCode.\nSessão: ${process.env.MYN_OPENCODE_SESSION || 'configurada localmente'}\nAlvo padrão: ${ALVO}`;
   } else if (/^\/myn\s+/i.test(texto)) {
-    const r = await fetch(base + '/api/chat', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ message: texto.replace(/^\/myn\s+/i, ''), rota: 'auto' }) });
-    const d = await r.json(); resposta = d.reply || d.error || 'Myn não respondeu.';
+    const r = await fetch(base + '/api/agente', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mensagem: texto.replace(/^\/myn\s+/i, ''), sessao: 'telegram-' + config.allowedUserId, canal: 'telegram', rota: 'auto' }) });
+    const d = await r.json(); resposta = d.resposta || d.error || 'Myn não respondeu.';
   } else if (/^\/melhorar\s+/i.test(texto)) {
     const m = /^\/melhorar\s+(\S+)\s*\|\s*([\s\S]+)$/i.exec(texto);
     if (!m) resposta = 'Use: /melhorar src/arquivo.mjs | descreva a correção';

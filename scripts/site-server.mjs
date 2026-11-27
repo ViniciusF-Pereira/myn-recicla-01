@@ -27,6 +27,8 @@ import { emitirToken, validarToken, bearer, ehLoopback } from '../src/token-loca
 import { handleAnthropic } from '../src/api-antropic.mjs';
 import { iniciarPonteTelegram, enviarTelegram, statusPonte } from '../src/telegram-ponte.mjs';
 import { criarPedido, listarPendentes } from '../src/pedidos.mjs';
+import { executarAgente } from '../src/nucleo.mjs';
+import { contextoMemoria, buscarMemoria, preferencias, salvarPreferencia } from '../src/memoria.mjs';
 import { iniciarSupervisor, statusSupervisor, pararSupervisor } from '../src/supervisor.mjs';
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
@@ -319,6 +321,42 @@ const servidor = http.createServer(async (req, res) => {
       res.writeHead(200, { 'content-type': 'application/json; charset=utf-8', 'content-length': Buffer.byteLength(bytes) });
       res.end(bytes);
     }
+    return;
+  }
+  if (url.pathname === '/api/agente' && req.method === 'POST') {
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const b = JSON.parse(corpo || '{}');
+      const resultado = await executarAgente({
+        mensagem: b.mensagem, sessao: b.sessao || 'local', canal: b.canal || 'api',
+        rota: b.rota || 'auto', planejar: b.planejar === true, meta: b.meta || {},
+      });
+      enviarJson(req, res, resultado);
+    } catch (erro) {
+      res.writeHead(502, { 'content-type': 'application/json; charset=utf-8' });
+      res.end(JSON.stringify({ error: String(erro.message).slice(0, 300) }));
+    }
+    return;
+  }
+  if (url.pathname === '/api/memoria' && req.method === 'GET') {
+    const sessao = String(url.searchParams.get('sessao') || 'local').slice(0, 120);
+    const q = url.searchParams.get('q') || '';
+    const limite = Math.max(1, Math.min(50, Number(url.searchParams.get('limite')) || 8));
+    enviarJson(req, res, {
+      sessao, contexto: await contextoMemoria(sessao, limite),
+      busca: q ? await buscarMemoria(q, { sessao, limite }) : [],
+      preferencias: await preferencias(sessao),
+    });
+    return;
+  }
+  if (url.pathname === '/api/memoria' && req.method === 'POST') {
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const b = JSON.parse(corpo || '{}');
+      if (!b.chave) throw new Error('chave obrigatória');
+      const item = await salvarPreferencia(String(b.chave).slice(0, 80), b.valor, String(b.sessao || 'global').slice(0, 120));
+      enviarJson(req, res, { ok: true, item });
+    } catch (erro) { res.writeHead(400, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(erro.message).slice(0, 200) })); }
     return;
   }
   if (url.pathname === '/api/chat/stream' && req.method === 'GET') {

@@ -55,8 +55,8 @@ async function get(base, caminho) {
 async function executar(nome, a, base) {
   switch (nome) {
     case 'myn_chat': {
-      const d = await post(base, '/api/chat', { message: a.message, rota: a.rota || 'auto' });
-      return (d.reply || '') + (d.via ? '\n[via: ' + d.via + ']' : '');
+      const d = await post(base, '/api/agente', { mensagem: a.message, sessao: 'mcp-local', canal: 'mcp', rota: a.rota || 'auto' });
+      return (d.resposta || '') + (d.via ? '\n[via: ' + d.via + ']' : '') + (d.passos?.length ? '\n[passos: ' + d.passos.join(' → ') + ']' : '');
     }
     case 'myn_pesquisar': {
       const d = await post(base, '/api/rag', { q: a.query });

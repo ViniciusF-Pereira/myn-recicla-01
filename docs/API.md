@@ -2,6 +2,8 @@
 
 ## Chat e dados
 
+- `POST /api/agente` — núcleo único com memória, classificação, RAG e plano.
+- `GET/POST /api/memoria` — contexto, busca e preferências por sessão.
 - `POST /api/chat`
 - `GET /api/chat/stream`
 - `POST /api/rag`

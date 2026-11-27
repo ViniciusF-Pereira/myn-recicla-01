@@ -13,6 +13,7 @@ async function comMock(fn) {
     const rota = req.url;
     res.setHeader('content-type', 'application/json');
     if (rota === '/api/chat') return res.end(JSON.stringify({ reply: 'Resposta local do Myn.', via: 'conhecimento-local' }));
+    if (rota === '/api/agente') return res.end(JSON.stringify({ resposta: 'Resposta local do Myn.', via: 'conhecimento-local', passos: [] }));
     if (rota === '/api/rag') return res.end(JSON.stringify({ resultados: [{ trecho: 'contexto local' }] }));
     res.statusCode = 404; res.end('{}');
   });

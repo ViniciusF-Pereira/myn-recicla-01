@@ -99,6 +99,8 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Ponte Telegram:** `docs/PONTE_TELEGRAM.md`. O bot local injeta mensagens em uma sessão real do OpenCode e devolve a resposta ao Telegram; `/myn` usa o Myn, `/status` e `/worker` mostram os workers. Token, ID e sessão ficam em `dados/`, fora do Git.
 
+**Núcleo do agente:** `/api/agente` centraliza memória, classificação, RAG, planejamento e resposta. A memória persistente fica em `dados/memoria.jsonl`. Veja `docs/NUCLEO_AGENTE.md`.
+
 **Rota local de agente:** `npm run token` ou o botão **agente local** no Playground emite/copia/renova o token para usar o Myn por MCP ou por uma rota estilo Anthropic Messages (`/v1/messages`), com streaming, tools e resumo de raciocínio. Veja `docs/ROTA_AGENTE_LOCAL.md`.
 
 **WORK — assistente virtual:** presente em todas as telas, com mascote animado, apresentação narrada, som, mini-chat, voz, microfone, anexos, players de áudio/vídeo, ações rápidas, histórico persistente, cancelamento e ferramentas MCP visíveis em uso. Veja `docs/ASSISTENTE_WORK.md`.
