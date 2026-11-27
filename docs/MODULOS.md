@@ -229,3 +229,8 @@ Módulo do Myn Recicla/01.
 Exports: executarLoopFerramentas
 
 Módulo do Myn Recicla/01.
+## permissoes.mjs
+
+Exports: POLITICAS, verificarPermissao, lerAuditoria
+
+Módulo do Myn Recicla/01.
