@@ -101,6 +101,8 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Avaliação de qualidade:** `node scripts/avaliar-qualidade.mjs` mede identidade, código, fontes, recusa e latência. Relatório em `docs/AVALIACAO_QUALIDADE.md`.
 
+**Gateway:** diagnóstico e recuperação automática de token expirado via `MYN_GATEWAY_RECOVER_CMD` ou `MYN_GATEWAY_AUTO_START=1`. Veja `docs/GATEWAY.md`.
+
 **Confiabilidade:** rate limit local, retry 429/503, circuit breaker e `/api/confiabilidade`. MCP e `/v1/messages` exigem token por padrão. Veja `docs/CONFIABILIDADE.md`.
 
 **Núcleo do agente:** `/api/agente` centraliza memória, classificação, RAG, planejamento e resposta. A memória persistente fica em `dados/memoria.jsonl`. Veja `docs/NUCLEO_AGENTE.md`.

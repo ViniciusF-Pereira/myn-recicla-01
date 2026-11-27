@@ -23,9 +23,28 @@ export async function tokenGateway(arquivo) {
   }
 }
 
-export function criarGateway({ base, tokenFile }) {
-  let tokenCache;
-  async function token() { tokenCache = await tokenGateway(tokenFile); return tokenCache; }
+export async function estadoGateway(arquivo) {
+  try {
+    const cru = (await readFile(arquivo, 'utf8')).trim();
+    const cap = JSON.parse(cru);
+    if (!cap.token) throw new Error('capability inválida');
+    const expirada = typeof cap.expiresAt === 'number' && Date.now() > cap.expiresAt;
+    return { ok: !expirada, temToken: true, expirada, expiresAt: cap.expiresAt || null, erro: expirada ? 'capability expirada' : null };
+  } catch (e) { return { ok: false, temToken: false, expirada: false, expiresAt: null, erro: e.message }; }
+}
+
+export function criarGateway({ base, tokenFile, recuperar }) {
+  let tokenCache, ultimoErro = null, recuperando = null;
+  async function recuperarUmaVez() {
+    if (!recuperar) throw new Error('recuperação do gateway não configurada');
+    if (!recuperando) recuperando = Promise.resolve().then(recuperar).finally(() => { recuperando = null; });
+    await recuperando;
+    tokenCache = await tokenGateway(tokenFile);
+  }
+  async function token() {
+    try { tokenCache = await tokenGateway(tokenFile); ultimoErro = null; return tokenCache; }
+    catch (e) { ultimoErro = e.message; await recuperarUmaVez(); return tokenCache; }
+  }
   async function op(nome, body = {}, signal = AbortSignal.timeout(60000)) {
     const executar = async () => {
       const tok = await token();
@@ -36,13 +55,19 @@ export function criarGateway({ base, tokenFile }) {
       });
     };
     let r = await executar();
-    if (r.status === 401) { tokenCache = undefined; r = await executar(); } // gateway reiniciado: renova o token
-    const valor = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(nome + ' ' + r.status + ' ' + JSON.stringify(valor));
+    if (r.status === 401) {
+      await recuperarUmaVez();
+      r = await executar();
+    }
+    const valor = await r.json().catch(() => (({})));
+    if (!r.ok) { ultimoErro = nome + ' ' + r.status; throw new Error(nome + ' ' + r.status + ' ' + JSON.stringify(valor)); }
+    ultimoErro = null;
     return valor;
   }
   return {
     op,
+    recuperar: recuperarUmaVez,
+    async status() { return { base, ...await estadoGateway(tokenFile), ultimoErro }; },
     async targets() {
       const tok = await token();
       const r = await fetch(base.replace(/\/$/, '') + '/v1/browser/targets', { headers: { authorization: 'Bearer ' + tok } });

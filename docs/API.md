@@ -13,6 +13,8 @@
 - `GET /api/saude`
 - `GET /api/desempenho`
 - `GET /api/confiabilidade`
+- `GET /api/gateway/status`
+- `POST /api/gateway/recuperar`
 - `GET/POST /api/avaliacao`
 - `GET /api/arquitetura`
 

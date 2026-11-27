@@ -1,10 +1,12 @@
 /** Site Myn - Recicla/01 + API do chat -01, ligada somente ao gateway Browser. */
 import http from 'node:http';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { readFile, stat } from 'node:fs/promises';
 import { gzipSync } from 'node:zlib';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { carregarConfigAsync, criarGateway, criarTrava } from '../src/gateway.mjs';
+import { carregarConfigAsync, criarGateway, criarTrava, estadoGateway } from '../src/gateway.mjs';
 import { buscar } from '../src/rag.mjs';
 import { rodarLoop } from '../src/loop.mjs';
 import { criarFerramentas } from '../src/tools.mjs';
@@ -39,11 +41,28 @@ import { iniciar as iniciarWorker, parar as pararWorker, status as statusWorker,
 import { iniciar as iniciarAnalise, parar as pararAnalise, status as statusAnalise, assinar as assinarAnalise } from '../src/worker-analise.mjs';
 import { iniciar as iniciarMelhoria, parar as pararMelhoria, status as statusMelhoria, assinar as assinarMelhoria } from '../src/worker-melhoria.mjs';
 
+const run = promisify(execFile);
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const site = path.join(raiz, 'site');
 const config = await carregarConfigAsync(path.join(raiz, 'config/rotas.json'));
 if (process.env.MYN_GATEWAY_TOKEN_FILE) config.gateway.tokenFile = process.env.MYN_GATEWAY_TOKEN_FILE;
-const gateway = criarGateway(config.gateway);
+let recuperacaoGateway = null;
+async function recuperarGateway() {
+  const comando = process.env.MYN_GATEWAY_RECOVER_CMD || (process.env.MYN_GATEWAY_AUTO_START === '1' ? 'node docker/gateway-headless.mjs' : '');
+  if (!comando) throw new Error('defina MYN_GATEWAY_RECOVER_CMD ou MYN_GATEWAY_AUTO_START=1');
+  if (recuperacaoGateway) return recuperacaoGateway;
+  recuperacaoGateway = (async () => {
+    await run(comando, { shell: true, cwd: raiz, timeout: 60_000 });
+    for (let i = 0; i < 20; i++) {
+      if ((await estadoGateway(config.gateway.tokenFile)).ok) return;
+      await new Promise((r) => setTimeout(r, 500));
+    }
+    throw new Error('gateway não recuperou o token em 10 segundos');
+  })();
+  try { return await recuperacaoGateway; }
+  finally { recuperacaoGateway = null; }
+}
+const gateway = criarGateway({ ...config.gateway, recuperar: recuperarGateway });
 const trava = criarTrava();
 // Política do produto: sem Google/Gemini, inclusive no catálogo público.
 const plugins = (await carregarPlugins()).filter((p) => !/google|gemini/i.test([p.id, p.nome, p.url, p.categoria].join(' ')));
@@ -139,6 +158,16 @@ const servidor = http.createServer(async (req, res) => {
   if (url.pathname === '/api/melhoria/pedidos' && req.method === 'GET') {
     if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
     enviarJson(req, res, { pendentes: await listarPendentes() });
+    return;
+  }
+  if (url.pathname === '/api/gateway/status' && req.method === 'GET') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    enviarJson(req, res, await gateway.status()); return;
+  }
+  if (url.pathname === '/api/gateway/recuperar' && req.method === 'POST') {
+    if (!ehLoopback(req)) { res.writeHead(403); res.end(); return; }
+    try { await gateway.recuperar(); enviarJson(req, res, { ok: true, status: await gateway.status() }); }
+    catch (e) { res.writeHead(502, { 'content-type': 'application/json; charset=utf-8' }); res.end(JSON.stringify({ error: String(e.message).slice(0, 240) })); }
     return;
   }
   if (url.pathname === '/api/telegram/status' && req.method === 'GET') {
