@@ -1,6 +1,6 @@
 # Ponte Telegram ↔ WORK
 
-A ponte usa o Bot API do Telegram e fica ativa junto com o servidor do Myn.
+A ponte usa o Bot API do Telegram e fica ativa junto com o servidor do Myn. Por padrão, as mensagens são injetadas em uma sessão real do OpenCode e a resposta volta ao Telegram. Use `/myn texto` para conversar diretamente com o Myn.
 
 ## Configuração local
 
@@ -15,10 +15,23 @@ Crie `dados/telegram-token.json`:
 
 O arquivo fica fora do Git. Nunca coloque o token em `config/`, `site/`, docs ou commits.
 
+A sessão do OpenCode fica em `dados/opencode-session.json`:
+
+```json
+{
+  "sessionID": "ses_...",
+  "bin": "C:/Users/Vini/.opencode/bin/opencode.exe"
+}
+```
+
+O CLI do OpenCode usa a descoberta e autenticação da própria máquina. Não é necessário guardar token do OpenCode nesse arquivo.
+
 ## Comandos
 
 - `/start` ou `/ajuda` — apresentação e comandos.
 - `/status` — workers e arquitetura.
+- `/opencode` — sessão atual do OpenCode.
+- `/myn texto` — conversa direta com o Myn.
 - `/worker` — estado do worker de melhoria.
 - `/melhorar src/arquivo.mjs | descreva a correção` — pedido de código que o worker testa antes de aplicar.
 - Fotos e documentos — são baixados, enviados ao `/api/documento` e respondidos com OCR/arquivo.
@@ -52,4 +65,4 @@ Os endpoints só respondem para loopback.
 
 ## Limite
 
-A ponte conecta o Telegram ao **Myn/WORK** e às notificações dos workers. Ela não injeta mensagens diretamente em uma sessão do OpenCode; para isso seria necessária uma integração autenticada com a API/sessão do OpenCode.
+A ponte conecta o Telegram à sessão do OpenCode configurada em `dados/opencode-session.json`. As mensagens entram nessa sessão e a resposta do agente volta ao Telegram. `/myn` mantém o caminho alternativo para o Myn.
