@@ -477,7 +477,7 @@ const servidor = http.createServer(async (req, res) => {
     try {
       let corpo = '';
       for await (const pedaco of req) corpo += pedaco;
-      const { message, rota: id, arquivos = [], sessao = 'chat-auto', effort } = JSON.parse(corpo);
+      const { message, rota: id = 'auto', arquivos = [], sessao = 'chat-auto', effort } = JSON.parse(corpo);
       const nivelEffort = normalizarEffort(effort), configEffort = ESFORCOS[nivelEffort];
       if (!message || message.length > 8000) throw new Error('mensagem inválida');
       const emitido = Date.now();

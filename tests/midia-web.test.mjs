@@ -18,4 +18,6 @@ test('interface usa a camada de mídia do navegador', async () => {
   assert.match(play, /window\.myn\?\.midia/);
   assert.match(html, /id="effort"/);
   assert.match(play, /&effort=/);
+  const server = await readFile('scripts/site-server.mjs', 'utf8');
+  assert.match(server, /rota: id = 'auto'/);
 });
