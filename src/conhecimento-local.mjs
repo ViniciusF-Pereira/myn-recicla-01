@@ -32,7 +32,7 @@ export async function respostaLocal(pergunta) {
   if (/quem (criou|desenvolveu)|autor|created by|vinicius/i.test(p)) {
     return 'O Myn Recicla/01 foi criado por **Vinicius de Freitas Pereira**. Os links de GitHub, LinkedIn e Myncellium estão na seção **06 · Created By** da home.';
   }
-  if (/worker|workers|melhoria|análise|analise|autônomo|autonomo/i.test(p)) {
+  if (/^(o que (são|sao) (os )?workers?|como (funcionam|funciona) (os )?workers?|worker aut[oô]nomo|workers? do projeto)/i.test(p.trim())) {
     return 'Os workers funcionam em duas frentes: **análise** mede código, desempenho, modelos e arquitetura; **melhoria** aplica achados concretos, roda testes, faz smoke e merge automático guardado. Quando não existe achado real, a melhoria fica vigiando em vez de inventar commits.';
   }
   if (/mcp|ferramenta|tool/i.test(p)) {
