@@ -224,3 +224,8 @@ Módulo do Myn Recicla/01.
 Exports: selecionarRotas, executarConversa
 
 Módulo do Myn Recicla/01.
+## loop-ferramentas.mjs
+
+Exports: executarLoopFerramentas
+
+Módulo do Myn Recicla/01.
