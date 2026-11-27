@@ -82,7 +82,7 @@ export async function enviarTelegram(texto) {
 }
 
 export function statusPonte() {
-  return { ativo, botUsername, allowedUserId: config?.allowedUserId || null, ultimoErro, ultimaMensagemEm };
+  return { ativo, alvo: ALVO, botUsername, allowedUserId: config?.allowedUserId || null, ultimoErro, ultimaMensagemEm };
 }
 
 async function responder(texto, base, opcoes = {}) {
