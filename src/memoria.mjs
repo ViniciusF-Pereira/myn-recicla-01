@@ -27,14 +27,45 @@ function tokens(texto) {
   return new Set(String(texto || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').split(/[^a-z0-9]+/).filter((t) => t.length > 2));
 }
 
+function vetor(texto, dimensao = 256) {
+  const v = new Float32Array(dimensao);
+  for (const t of tokens(texto)) {
+    let h = 2166136261;
+    for (const c of t) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+    v[(h >>> 0) % dimensao] += 1;
+  }
+  return v;
+}
+function similaridade(a, b) {
+  let produto = 0, normaA = 0, normaB = 0;
+  for (let i = 0; i < a.length; i++) { produto += a[i] * b[i]; normaA += a[i] * a[i]; normaB += b[i] * b[i]; }
+  return normaA && normaB ? produto / (Math.sqrt(normaA) * Math.sqrt(normaB)) : 0;
+}
+
 export async function buscarMemoria(consulta, { sessao, limite = 6 } = {}) {
-  const q = tokens(consulta), todos = await registros();
+  const q = tokens(consulta), vq = vetor(consulta), todos = await registros();
   return todos.filter((r) => (!sessao || r.sessao === sessao) && !['preferencia', 'resumo'].includes(r.papel))
     .map((r) => {
-      const ts = tokens(r.texto); let score = 0;
-      for (const t of q) if (ts.has(t)) score++;
-      return { ...r, score };
-    }).filter((r) => r.score > 0).sort((a, b) => b.score - a.score || b.t.localeCompare(a.t)).slice(0, limite);
+      const ts = tokens(r.texto); let lexical = 0;
+      for (const t of q) if (ts.has(t)) lexical++;
+      const vetorial = similaridade(vq, vetor(r.texto));
+      return { ...r, score: lexical * 2 + vetorial, lexical, vetorial: Math.round(vetorial * 100) / 100 };
+    }).filter((r) => r.score > 0.15).sort((a, b) => b.score - a.score || b.t.localeCompare(a.t)).slice(0, limite);
+}
+
+export async function resumirMemoria(sessao = 'local', limite = 6) {
+  const ctx = await contextoMemoria(sessao, 40);
+  if (!ctx.length) return '';
+  const texto = ctx.map((r) => r.texto).join(' ');
+  const frequencia = {};
+  for (const t of tokens(texto)) frequencia[t] = (frequencia[t] || 0) + 1;
+  const frases = texto.split(/(?<=[.!?])\s+|\n+/).map((s) => s.trim()).filter((s) => s.length > 25);
+  const melhores = frases.map((frase, i) => {
+    const ts = [...tokens(frase)];
+    const score = ts.reduce((n, t) => n + (frequencia[t] || 0), 0) / Math.sqrt(ts.length || 1);
+    return { frase, score, i };
+  }).sort((a, b) => b.score - a.score).slice(0, limite).sort((a, b) => a.i - b.i);
+  return melhores.map((x) => '- ' + x.frase.slice(0, 400)).join('\n');
 }
 
 export async function salvarPreferencia(chave, valor, sessao = 'global') {

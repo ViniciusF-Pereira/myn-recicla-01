@@ -64,6 +64,15 @@ O Playground cria um `myn-chat-session` por aba. MCP, Anthropic e Telegram tamb�
 
 A memória é JSONL em `dados/memoria.jsonl`, fora do Git.
 
+A busca combina:
+
+- overlap lexical;
+- vetor hash local com similaridade por cosseno;
+- recência;
+- resumo extractivo para conversas com mais de 8 registros.
+
+O vetor hash é uma assinatura lexical local, não um embedding neural. A camada browser também possui embeddings WebGPU em `web/inferencia/embeddings-gpu.mjs`.
+
 ## Migração
 
 Já usam o núcleo:
