@@ -14,8 +14,8 @@
 
 ## Mídia e arquivos
 
-- `POST /api/midia`
-- `POST /api/documento`
+- `POST /api/midia` — legado de integração; a interface usa `web/midia/navegador.mjs`.
+- `POST /api/documento` — legado de integração; a interface usa pdf.js/Tesseract.js no navegador.
 - `GET /api/arquivos`
 - `GET /api/arquivos/:nome`
 - `GET /api/filmes`
