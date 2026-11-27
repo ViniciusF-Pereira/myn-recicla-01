@@ -97,7 +97,8 @@ $('imagemInput').onchange=async e=>{
 };
 $('btnImagem').onclick=()=>$('imagemInput').click();
 function artifact(d){
- if(d.tipo==='imagem'||d.tipo==='gif')return '<figure class="arte-chat"><img src="'+d.url+'" alt="mídia gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>';
+ if(d.tipo==='imagem')return '<figure class="arte-chat"><img src="'+d.url+'" alt="mídia gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>';
+ if(d.tipo==='gif')return '<figure class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+' · animação WebM</figcaption></figure>';
  if(d.tipo==='audio')return d.semUrl ? '<div class="arte-chat">🔊 '+esc(d.fonte)+' · '+esc(d.voz||'')+'<figcaption>voz reproduzida no navegador</figcaption></div>' : '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>';
  if(d.tipo==='video')return '<div class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+'</figcaption></div>';
  return '<a href="'+d.url+'" target="_blank">'+esc(d.nome)+'</a>';
