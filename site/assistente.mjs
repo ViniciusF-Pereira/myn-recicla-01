@@ -294,7 +294,15 @@ export function iniciarAssistente() {
     tocarSom();
     setTimeout(() => { apresentar(); falar(INTRO); }, 650);
   }, { once: true });
-  rpc('tools/list').then((r) => { ferramentas = r.tools || []; document.getElementById('waTools').textContent = ferramentas.length + ' tools MCP'; estado('online · ' + ferramentas.length + ' ferramentas MCP'); }).catch((e) => { document.getElementById('waTools').textContent = 'MCP offline'; estado('MCP offline · ' + e.message); });
+  (async () => {
+    try { tokenMcp = await fetch('/api/token').then((r) => r.json()).then((d) => d.token); } catch { /* MCP pode estar offline */ }
+    try {
+      const r = await rpc('tools/list');
+      ferramentas = r.tools || [];
+      document.getElementById('waTools').textContent = ferramentas.length + ' tools MCP';
+      estado('online · ' + ferramentas.length + ' ferramentas MCP');
+    } catch (e) { document.getElementById('waTools').textContent = 'MCP offline'; estado('MCP offline · ' + e.message); }
+  })();
   window.WORK = { abrir, fechar, apresentar, cancelar: () => controleAtual?.abort(), ferramentas: () => ferramentas, enviar };
 }
 
