@@ -234,3 +234,8 @@ Módulo do Myn Recicla/01.
 Exports: POLITICAS, verificarPermissao, lerAuditoria
 
 Módulo do Myn Recicla/01.
+## esforco.mjs
+
+Exports: ESFORCOS, normalizarEffort
+
+Módulo do Myn Recicla/01.
