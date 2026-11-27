@@ -77,9 +77,8 @@ $('anexar').onclick=()=>$('arquivoInput').click();
 $('arquivoInput').onchange=async e=>{
  for(const f of e.target.files){
   try{
-   const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(f)});
-   const d=await post('/api/documento',{nome:f.name,base64:b64});
-   anexos.push(d);
+    const d=window.myn?.midia?.extrairArquivo ? await window.myn.midia.extrairArquivo(f) : {nome:f.name,texto:await f.text().catch(()=>''),aviso:'extrator web ainda não pronto',url:URL.createObjectURL(f)};
+    anexos.push(d);
    const chip=document.createElement('span');chip.innerHTML=chipHtml(d);$('anexos').appendChild(chip);
    if(d.aviso)add('Aviso sobre <b>'+esc(d.nome)+'</b>: '+esc(d.aviso),'ele');
   }catch(er){add('Falha ao anexar '+esc(f.name)+': '+esc(er.message),'err')}
@@ -89,9 +88,8 @@ $('arquivoInput').onchange=async e=>{
 $('imagemInput').onchange=async e=>{
  for(const f of e.target.files){
   try{
-   const b64=await new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(String(r.result).split(',')[1]||'');r.onerror=rej;r.readAsDataURL(f)});
-   const d=await post('/api/documento',{nome:f.name,base64:b64});
-   imagensAnexadas.push(d);
+    const d=window.myn?.midia?.extrairArquivo ? await window.myn.midia.extrairArquivo(f) : {nome:f.name,texto:'',aviso:'OCR web ainda não pronto',url:URL.createObjectURL(f)};
+    imagensAnexadas.push(d);
    const chip=document.createElement('span');chip.innerHTML=chipHtml(d);$('anexos').appendChild(chip);
   }catch(er){add('Falha na imagem '+esc(f.name)+': '+esc(er.message),'err')}
  }
@@ -100,7 +98,7 @@ $('imagemInput').onchange=async e=>{
 $('btnImagem').onclick=()=>$('imagemInput').click();
 function artifact(d){
  if(d.tipo==='imagem'||d.tipo==='gif')return '<figure class="arte-chat"><img src="'+d.url+'" alt="mídia gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>';
- if(d.tipo==='audio')return '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>';
+ if(d.tipo==='audio')return d.semUrl ? '<div class="arte-chat">🔊 '+esc(d.fonte)+' · '+esc(d.voz||'')+'<figcaption>voz reproduzida no navegador</figcaption></div>' : '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>';
  if(d.tipo==='video')return '<div class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+'</figcaption></div>';
  return '<a href="'+d.url+'" target="_blank">'+esc(d.nome)+'</a>';
 }
@@ -108,7 +106,7 @@ let modoMidiaPendente=null;
 async function gerarMidia(tipo,prompt,origem){
  const b=origem||null;if(b)b.disabled=true;
  const espera=add('gerando '+tipo+'...','ele');
- try{const d=await post('/api/midia',{tipo,prompt,voz:'pt-BR-FranciscaNeural',segundos:6});espera.innerHTML=artifact(d);$('texto').value=''}
+  try{const m=window.myn?.midia;if(!m)throw new Error('mídia web não inicializou');let d;if(tipo==='imagem')d=await m.gerarImagem(prompt);else if(tipo==='audio')d=await m.narrar(prompt);else if(tipo==='video')d=await m.gerarVideo(prompt,{segundos:6});else d=await m.gerarGif(prompt,{segundos:4});espera.innerHTML=artifact(d);$('texto').value=''}
  catch(er){espera.className='msg err';espera.textContent='Não gerou: '+er.message}
  finally{if(b)b.disabled=false}
 }

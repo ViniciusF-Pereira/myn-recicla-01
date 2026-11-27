@@ -186,7 +186,15 @@ async function enviar(texto) {
   try {
     const pagina = interagirPagina(texto);
     if (pagina) { estado('🧭 interagir_pagina', 'pensando'); await new Promise((r) => setTimeout(r, 450)); msg(pagina); falar(pagina); }
-    else { const d = decidir(texto); const resposta = await ferramenta(d.nome, d.args); msg(resposta); falar(resposta); }
+    else {
+      const d = decidir(texto);
+      if (['myn_imagem', 'myn_audio', 'myn_video'].includes(d.nome) && window.myn?.midia) {
+        estado('🔧 ' + d.nome + ' · navegador', 'pensando');
+        if (d.nome === 'myn_imagem') { const r = await window.myn.midia.gerarImagem(texto); msg('![imagem](' + r.url + ')\n' + r.fonte); }
+        else if (d.nome === 'myn_audio') { const r = await window.myn.midia.narrar(texto.replace(/^(fale|narre|narrar)\s*/i, '')); msg('🔊 ' + r.fonte + ' · ' + r.voz); }
+        else { const r = await window.myn.midia.gerarVideo(texto, { segundos: 6 }); msg('[🎬 vídeo](' + r.url + ')\n' + r.fonte); }
+      } else { const resposta = await ferramenta(d.nome, d.args); msg(resposta); falar(resposta); }
+    }
     estado('online · ' + ferramentas.length + ' ferramentas MCP');
   } catch (e) {
     if (controleAtual?.signal.aborted) { msg('Chamada cancelada.', 'erro'); estado('online · ' + ferramentas.length + ' ferramentas MCP'); }

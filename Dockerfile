@@ -1,9 +1,8 @@
 FROM node:22-bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    chromium fonts-liberation python3 python3-pip python3-pil tesseract-ocr \
-    ffmpeg ca-certificates curl git \
- && pip3 install --no-cache-dir --break-system-packages edge-tts pypdf \
+    chromium fonts-liberation \
+    ca-certificates curl git \
  && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app

@@ -17,12 +17,13 @@ Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`).
 - `GET /api/arquitetura` → 57 módulos, 78 dependências, 0 ciclos/violações/imports quebrados.
 - Worker de análise: `start` → 1 ciclo → `finalizado`.
 - Git local: branch `master`, commit `base do container`.
-- `node --test` dentro do container → 31/31 testes passando.
+- `node --test` dentro do container → 33/33 testes passando.
 - Processo executado como usuário `myn` (UID 10001), não root.
 - Healthcheck respondeu `200` em `/api/saude`.
 - Assets do WORK e painel atual presentes: `site/assistente.mjs`, `site/dados-atuais.mjs` e `docs/RELATORIO_UNICO.html`.
 - Token local no container: sem `Authorization` → 401; com token válido → 200.
 - `.dockerignore` reduziu o contexto de dezenas de MB para cerca de 1,3 MB, excluindo `dados/`, logs e outputs.
+- Imagem browser-only: sem Python, PIL, ffmpeg, edge-tts ou Tesseract; mídia acontece no navegador.
 
 ## Infra
 

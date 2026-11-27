@@ -10,6 +10,7 @@ import * as db from '../web/db/leve.mjs';
 import { VMWeb } from '../web/vm/vm.mjs';
 import { avaliar, avaliarTodos, AGENTES } from '../web/agentes/avaliadores.mjs';
 import * as sessao from './sessao.mjs';
+import * as midia from '../web/midia/navegador.mjs';
 
 async function semear() {
   try {
@@ -27,7 +28,7 @@ async function semear() {
 }
 
 window.myn = {
-  versao: 'web-only-1',
+  versao: 'web-only-2',
   capacidade: gpu.capacidade(),
   orquestrar: orq.orquestrar,
   plano: orq.plano,
@@ -44,6 +45,7 @@ window.myn = {
   vm: { criar: (nome) => new VMWeb(nome), padrao: null },
   agentes: { lista: AGENTES, avaliar, avaliarTodos },
   sessao: { carregar: sessao.carregar, salvar: sessao.salvar, markdown: sessao.markdown },
+  midia: { capacidade: midia.capacidade, gerarImagem: midia.gerarImagem, narrar: midia.narrar, gravarNarracao: midia.gravarNarracao, gerarVideo: midia.gerarVideo, gerarGif: midia.gerarGif, extrairArquivo: midia.extrairArquivo, baixar: midia.baixar },
   pronto: (async () => { await semear(); await goal.retomar(); window.myn.vm.padrao = await new VMWeb('myn-vm-padrao').iniciar(); })(),
 };
 document.documentElement.dataset.myn = 'pronto';

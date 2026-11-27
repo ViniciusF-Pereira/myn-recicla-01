@@ -19,7 +19,7 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 - **154 plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade. Google/Gemini foram removidos do catálogo público.
 - **Descoberta de modelos livres** via Pollinations, OpenRouter e HuggingFace (endpoints públicos, sem chave), com filtro de preço e modalidade.
 - **Chat com streaming SSE** (primeiro token em ~15 ms), pesquisa com RAG + catálogo, anexos, tabelas markdown e arquivos.
-- **Mídia free**: imagem (Pollinations → desenho local), voz (edge-tts), vídeo (ffmpeg local).
+- **Mídia browser-only**: imagem (Pollinations/Canvas), voz (SpeechSynthesis), vídeo/animação (Canvas + MediaRecorder), OCR (Tesseract.js) e PDF (pdf.js).
 - **Myn-01 Auto**: escolhe rotas por capacidade e saúde, roda em paralelo e escolhe a melhor resposta.
 - **Scoreboard**: score = 0,45·sucesso + 0,35·velocidade + 0,2·recência, com circuit breaker de 3 estados.
 - **MCP** JSON-RPC com 11 ferramentas para agentes externos.
@@ -119,7 +119,7 @@ Ele cria o goal com as 6 fases do planejamento e roda um ciclo imediato. Acompan
 4. Mensageria real só com confirmação explícita.
 5. Nenhuma chave, `.env`, token ou senha no repo.
 
-Limites honestos: o Pollinations tem cota comunitária; HuggingFace/OpenRouter são descobertos por API pública, mas execução depende do provedor. Mídia ainda pode usar binários locais opcionais (ffmpeg/PIL/edge-tts/Tesseract); o caminho padrão de texto é web/API. Google/Gemini estão desativados.
+Limites honestos: o Pollinations tem cota comunitária; HuggingFace/OpenRouter são descobertos por API pública, mas execução depende do provedor. A mídia padrão é browser-only; endpoints locais antigos ficam apenas como legado de integração. Google/Gemini estão desativados. Veja `docs/MIDIA_WEB.md`.
 ## Provas
 
 Veja `docs/PROVAS.md` para relatório, mapa e bateria de testes.
