@@ -40,6 +40,16 @@ Ou pela ferramenta MCP `myn_loop`.
 - histórico;
 - chat.
 
+## Execução ao vivo
+
+Objetivo: “verifique a arquitetura e o desempenho”.
+
+Resultado:
+
+- `myn_arquitetura` → 77 módulos, 126 dependências, 0 violações;
+- `myn_desempenho` → medição retornada;
+- **2/2 ferramentas concluídas**.
+
 ## Limites
 
 - máximo de 6 passos;

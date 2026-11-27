@@ -31,6 +31,21 @@ O Myn executa o comando, aguarda até 10 segundos pelo token e tenta a rota nova
 curl -X POST http://127.0.0.1:5188/api/gateway/recuperar
 ```
 
+## Diagnóstico executado
+
+O endpoint detectou corretamente:
+
+```json
+{
+  "ok": false,
+  "temToken": true,
+  "expirada": true,
+  "erro": "capability expirada"
+}
+```
+
+A recuperação automática só é executada quando um comando de recuperação está configurado.
+
 ## Segurança
 
 - endpoints de status/recuperação aceitam apenas loopback;
