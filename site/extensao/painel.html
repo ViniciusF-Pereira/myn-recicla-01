@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Myn Recicla/01 · VM Web</title>
+  <link rel="stylesheet" href="painel.css">
+</head>
+<body>
+  <header class="topo">
+    <div class="marca"><span class="selo">♻</span><div><b>Myn Recicla/01</b><small>VM Web + rotas de abas</small></div></div>
+    <span class="status" id="status">conectando...</span>
+  </header>
+
+  <div class="acoes">
+    <input id="siteBase" aria-label="Endereço do Myn" value="https://mynrecicla.com" spellcheck="false">
+    <button id="abrirVm">ABRIR VM</button>
+    <button id="usarLocal" title="Usar o servidor local">local</button>
+  </div>
+
+  <section class="permissoes">
+    <div class="titulo"><b>Acessos opcionais</b><small>autorize apenas o site que quiser usar</small></div>
+    <div id="rotas"></div>
+  </section>
+
+  <iframe id="vm" title="VM Web do Myn Recicla/01" src="about:blank"></iframe>
+
+  <footer>O Myn não contorna login, CAPTCHA ou paywall. A automação é experimental e respeita a disponibilidade de cada site.</footer>
+  <script type="module" src="painel.js"></script>
+</body>
+</html>

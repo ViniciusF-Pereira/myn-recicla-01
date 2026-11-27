@@ -239,3 +239,13 @@ Módulo do Myn Recicla/01.
 Exports: ESFORCOS, normalizarEffort
 
 Módulo do Myn Recicla/01.
+## extensao.mjs
+
+Exports: disponivel, versao, abrirVM, listarRotas, executarRota, diagnostico
+
+Ponte do site para a extensão Chromium.
+## rotas-cliente.mjs
+
+Exports: normalizarEffort, normalizarRota, selecionarRotas, conversar, extensaoDisponivel, abrirVMExtensao, ESFORCOS
+
+Conversa no navegador via API direta, extensão e WebGPU.

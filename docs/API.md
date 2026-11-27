@@ -38,6 +38,13 @@
 - `/api/worker-analise/{status,start,stop,stream,eventos}`
 - `/api/worker-melhoria/{status,start,stop,stream,eventos}`
 
+## Extensão e modo cliente
+
+- `GET /extensao/myn-recicla-extensao.zip` — download da extensão Chromium.
+- `GET /playground.html?extensao=1&vm=1` — Playground embeddable no painel da extensão.
+- `web/core/rotas-cliente.mjs` — execução no navegador via API direta, extensão e WebGPU.
+- Guia: [`EXTENSAO.md`](EXTENSAO.md).
+
 ## Páginas
 
 - `/`

@@ -73,7 +73,7 @@ const IDENTIDADE = 'Você é o Myn Recicla/01, um produto open-source de engenha
 let tokenLocal = await emitirToken();
 const EXIGIR_TOKEN_AGENTE = process.env.MYN_EXIGIR_TOKEN_AGENTE !== '0';
 
-const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' };
+const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.zip': 'application/zip' };
 
 /** Estático com ETag, 304 e gzip sob demanda (só texto). Evita rebaixar bytes a cada visita. */
 const cacheGzip = new Map();
@@ -143,7 +143,9 @@ function dentroDe(base, alvo) {
 const servidor = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://localhost');
   res.setHeader('x-content-type-options', 'nosniff');
-  res.setHeader('x-frame-options', 'DENY');
+  const embedExtensao = url.pathname === '/playground.html' && url.searchParams.get('extensao') === '1';
+  if (embedExtensao) res.setHeader('content-security-policy', "frame-ancestors chrome-extension:");
+  else res.setHeader('x-frame-options', 'DENY');
   res.setHeader('referrer-policy', 'no-referrer');
   res.setHeader('permissions-policy', 'camera=(), microphone=(), geolocation=()');
   if (url.pathname === '/api/melhoria/pedido' && req.method === 'POST') {

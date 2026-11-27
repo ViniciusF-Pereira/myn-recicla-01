@@ -1,6 +1,6 @@
 # Myn — Recicla/01
 
-**De aba descartada a rota reaproveitada.** Agente portátil que transforma chats e serviços gratuitos da web em rotas utilizáveis — sem chave de API, sem assinatura, sem Codex, sem abrir navegador no PC.
+**De aba descartada a rota reaproveitada.** Agente portátil que transforma chats e serviços gratuitos da web em rotas utilizáveis — sem chave de API, sem assinatura e sem Codex. Roda no navegador, na extensão ou em container.
 
 Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 
@@ -11,18 +11,34 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 | Início (catalog, plugins, ciclo, sobre) | ![Início](docs/prints/01-home.jpg) |
 | Playground (chat, streaming, mídia) | ![Playground](docs/prints/02-playground.png) |
 | Mapa de provedores com input/output | ![Mapeamento](docs/prints/03-mapeamento.png) |
+| Extensão com VM Web no painel lateral | ![Extensão](docs/prints/extensao-painel.png) |
+| Playground conectado à extensão | ![Playground com extensão](docs/prints/extensao-playground.png) |
 
 > O Playground **não fica na tela inicial**. O botão **ABRIR PLAYGROUND /01** abre `playground.html` em uma nova aba.
 
+## Extensão + VM Web
+
+Baixe a extensão, instale no Chrome/Edge e clique no ícone para abrir a VM Web no painel lateral. As rotas de aba usam a sessão do próprio navegador, com permissão opcional por site.
+
+- Download: [`site/extensao/myn-recicla-extensao.zip`](site/extensao/myn-recicla-extensao.zip)
+- Guia completo: [`docs/EXTENSAO.md`](docs/EXTENSAO.md)
+- Rotas: ChatGPT Web, Claude Web, HuggingChat, OpenRouter :free e Z.ai/GLM
+- Sem `<all_urls>`, sem contorno de login/CAPTCHA/paywall
+
+```powershell
+npm run extensao
+node scripts/testar-extensao.mjs
+```
+
 ## O que é
 
-- **154 plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade. Google/Gemini foram removidos do catálogo público.
+- **Catálogo dinâmico de plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade. Google/Gemini foram removidos do catálogo público.
 - **Descoberta de modelos livres** via Pollinations, OpenRouter e HuggingFace (endpoints públicos, sem chave), com filtro de preço e modalidade.
 - **Chat com streaming SSE** (primeiro token em ~15 ms), pesquisa com RAG + catálogo, anexos, tabelas markdown e arquivos.
 - **Mídia browser-only**: imagem (Pollinations/Canvas), voz (SpeechSynthesis), vídeo/animação (Canvas + MediaRecorder), OCR (Tesseract.js) e PDF (pdf.js).
 - **Myn-01 Auto**: escolhe rotas por capacidade e saúde, roda em paralelo e escolhe a melhor resposta.
 - **Scoreboard**: score = 0,45·sucesso + 0,35·velocidade + 0,2·recência, com circuit breaker de 3 estados.
-- **MCP** JSON-RPC com 11 ferramentas para agentes externos.
+- **MCP** JSON-RPC com 15 ferramentas para agentes externos.
 - **Goal autônomo**: `/plan` → `/loop` → `/goal` com agendador usando a própria API.
 - **WEBdocker.NODEJS**: container com Chromium headless — as rotas rodam no aparelho de quem executa.
 
@@ -50,12 +66,29 @@ node scripts/gateway-vm.mjs
 - Escreva e aperte **Enter** → streaming token a token.
 - **🔎 pesquisar** ou `/pesquisa pergunta` → cruza RAG + plugins antes de responder.
 - **🖼 imagem / 🔊 áudio / 🎬 vídeo** → clique com texto no campo gera na hora; com campo vazio fica “armado” para o próximo Enter.
-- **🔌 plugins** → painel com os 154 plugins; clique insere `/id ` no campo.
+- **🔌 plugins** → painel com o catálogo atual; clique insere `/id ` no campo.
 - **🧠 modelos** → catálogo descoberto por fontes públicas, sem Google/Gemini.
 - **📜** → gaveta com histórico, cache e tempos.
 - Comandos: `/plan objetivo`, `/loop objetivo`, `/goal objetivo`, `/id mensagem`. Mensageria exige `/id confirmar: texto`.
 
-## APIs
+## API — use o Myn no seu produto
+
+O Myn pode virar a camada de agente de um app, bot ou serviço interno. Você hospeda a API e mantém controle total dos dados.
+
+- `POST /api/agente` — chat unificado com memória, classificação, RAG, plano e `effort`.
+- `GET /api/chat/stream` — tokens via SSE.
+- `POST /mcp` — ferramentas MCP JSON-RPC.
+- `POST /v1/messages` — compatibilidade Anthropic Messages, streaming, tools e thinking resumido.
+- `POST /api/orquestrar` — seleção paralela por capacidade e saúde.
+- `GET /api/plugins` · `/api/modelos` · `/api/saude` — catálogo e observabilidade.
+
+```bash
+curl http://127.0.0.1:5188/api/agente \
+  -H 'content-type: application/json' \
+  -d '{"mensagem":"Explique o Myn","sessao":"app-1","effort":"high"}'
+```
+
+Para MCP e `/v1/messages`, obtenha o token local em `/api/token` e envie `Authorization: Bearer SEU_TOKEN`. O token fica fora do Git.
 
 | Método | Rota | Uso |
 |---|---|---|
@@ -83,7 +116,7 @@ Sobem: site (5188), gateway headless (36877 interno) e Chromium sem janela. Para
 docker save myn-recicla-01:dev -o myn-recicla-01.tar
 # na outra máquina: docker load -i myn-recicla-01.tar; docker run -d -p 5188:5188 -v myn-recicla-dados:/data myn-recicla-01:dev
 ```
-Validação executada em [`docs/DOCKER_VALIDACAO.md`](docs/DOCKER_VALIDACAO.md): build, web, APIs, worker, Git, renovação de token, volume e 11 testes.
+Validação executada em [`docs/DOCKER_VALIDACAO.md`](docs/DOCKER_VALIDACAO.md): build, web, APIs, worker, Git, renovação de token, volume e suíte automatizada.
 
 ## Verificação (prova)
 

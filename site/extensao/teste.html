@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="pt-BR">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Myn · teste de rota</title>
+<style>body{font:16px/1.5 system-ui;max-width:640px;margin:60px auto;padding:20px;background:#f4efe3;color:#1b2430}textarea{width:100%;min-height:90px;padding:12px;font:inherit}button{margin-top:10px;padding:10px 16px;background:#1f6fe0;color:#fff;border:0;border-radius:5px;font-weight:700;cursor:pointer}pre{background:#fff;padding:16px;border:1px solid #c9d2de;white-space:pre-wrap}</style>
+</head>
+<body>
+  <h1>Rota local de teste</h1>
+  <p>Página inocente usada apenas pelo teste automatizado da extensão.</p>
+  <textarea id="mensagem" aria-label="Mensagem"></textarea>
+  <button id="enviar" type="submit">Responder</button>
+  <pre id="resposta"></pre>
+  <script>
+    document.getElementById('enviar').onclick = () => {
+      const texto = document.getElementById('mensagem').value.trim();
+      document.getElementById('resposta').textContent = texto ? 'OK local: ' + texto : 'vazio';
+    };
+  </script>
+</body>
+</html>

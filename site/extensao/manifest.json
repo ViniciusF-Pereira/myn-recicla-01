@@ -1,0 +1,51 @@
+{
+  "manifest_version": 3,
+  "name": "Myn Recicla/01 — VM Web",
+  "version": "1.0.0",
+  "description": "Abre a VM Web do Myn e conecta rotas de abas gratuitas ao seu navegador, com permissão por site.",
+  "permissions": ["storage", "tabs", "scripting", "sidePanel"],
+  "host_permissions": [
+    "https://mynrecicla.com/*",
+    "http://127.0.0.1:5188/*"
+  ],
+  "optional_host_permissions": [
+    "https://chatgpt.com/*",
+    "https://claude.ai/*",
+    "https://huggingface.co/*",
+    "https://openrouter.ai/*",
+    "https://chat.z.ai/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "icons": {
+    "16": "icons/icon16.png",
+    "32": "icons/icon32.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "action": {
+    "default_title": "Abrir VM Web do Myn",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  },
+  "side_panel": {
+    "default_path": "painel.html"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://mynrecicla.com/*",
+        "http://127.0.0.1:5188/*"
+      ],
+      "js": ["content-script.js"],
+      "run_at": "document_start",
+      "all_frames": true
+    }
+  ]
+}

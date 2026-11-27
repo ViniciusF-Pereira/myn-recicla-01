@@ -3,6 +3,10 @@ import './assistente.mjs';
 const $=id=>document.getElementById(id);
 const MYN_SESSION=sessionStorage.getItem('myn-chat-session')||('chat-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8));
 sessionStorage.setItem('myn-chat-session',MYN_SESSION);
+const PARAMS=new URLSearchParams(location.search);
+const MODO_EXTENSAO=PARAMS.get('extensao')==='1';
+let deteccaoExtensao=null;
+function temExtensao(){if(deteccaoExtensao===true)return Promise.resolve(true);if(!deteccaoExtensao){if(window.myn?.cliente?.extensaoDisponivel)deteccaoExtensao=window.myn.cliente.extensaoDisponivel();else deteccaoExtensao=new Promise(resolve=>{const esperar=()=>window.myn?.cliente?.extensaoDisponivel?resolve(window.myn.cliente.extensaoDisponivel()):setTimeout(esperar,50);esperar()})}return deteccaoExtensao.then(ok=>{if(ok)deteccaoExtensao=true;else deteccaoExtensao=null;return ok})}
 const ROTAS={
  auto:['Myn-01 Auto','resposta rápida sem chave, com fallback no navegador'],
  'brave-leo':['Brave Leo','nativo · OCR da conversa'],
@@ -119,6 +123,12 @@ document.querySelectorAll('.ferr[data-midia]').forEach(b=>b.onclick=async()=>{
  await gerarMidia(b.dataset.midia,prompt,b);
 });
 
+async function* eventosServidor(url){
+ const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
+ if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
+ const leitor=r.body.getReader(),dec=new TextDecoder();let resto='';
+ for(;;){const {done,value}=await leitor.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';for(const bloco of blocos){const m=/^data:\s*(.+)$/m.exec(bloco);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}yield ev}}
+}
 let ocupado=false;
 async function enviar(pesquisa=false){
  if(ocupado)return;
@@ -144,29 +154,26 @@ async function enviar(pesquisa=false){
  ocupado=true;const btn=$('enviar');btn.disabled=true;
  const espera=add('<span class="pensando">pensando<span class="pontos">...</span></span>','ele');
  try{
-  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&sessao='+encodeURIComponent(MYN_SESSION)+'&effort='+encodeURIComponent($('effort').value)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
-  const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
-  if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
-  const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false,via='',streamEl=null,metaHtml='';
-  for(;;){
-   const {done,value}=await leitor.read();if(done)break;
-   resto+=dec.decode(value,{stream:true});
-   const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';
-   for(const bloco of blocos){
-    const m=/^data:\s*(.+)$/m.exec(bloco);if(!m)continue;
-    const ev=JSON.parse(m[1]);
-         if(ev.inicio){
+  const rota=$('rota').value,effort=$('effort').value;
+  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent(rota)+'&sessao='+encodeURIComponent(MYN_SESSION)+'&effort='+encodeURIComponent(effort)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
+  const extensaoOk=await temExtensao();
+  const rotaApiCliente=/^(pollinations-text-api|webgpu-local)$/.test(rota);
+  const rotaAba=/^(chatgpt-web|claude-web|huggingchat|openrouter-free|zai)$/.test(rota);
+  const modoCliente=MODO_EXTENSAO||extensaoOk||rotaApiCliente||(location.hostname==='mynrecicla.com'&&(!rotaAba||extensaoOk));
+  const fluxo=modoCliente&&window.myn?.cliente?window.myn.cliente.conversar({texto:mensagem,sessao:MYN_SESSION,rota,effort}):eventosServidor(url);
+  let texto='',iniciado=false,via='',streamEl=null,metaHtml='';
+  for await(const ev of fluxo){
+    if(ev.inicio){
       via=ev.via||ev.rota||'';
-      const bits=[];if(ev.rota)bits.push(esc(ev.rota));if(ev.effort)bits.push('effort '+esc(ev.effort));if(ev.capacidades?.length)bits.push(esc(ev.capacidades.join('/')));if(ev.fontes?.length)bits.push(ev.fontes.length+' fontes');if(ev.ferramentas?.length)bits.push(ev.ferramentas.length+' ferramentas');
+      const bits=[];if(ev.rota)bits.push(esc(ev.rota));if(ev.modo)bits.push(esc(ev.modo));if(ev.extensao)bits.push('extensão');if(ev.effort)bits.push('effort '+esc(ev.effort));if(ev.capacidades?.length)bits.push(esc(ev.capacidades.join('/')));if(ev.fontes?.length)bits.push(ev.fontes.length+' fontes');if(ev.ferramentas?.length)bits.push(ev.ferramentas.length+' ferramentas');
       if(bits.length)metaHtml='<div class="stream-meta">'+bits.join(' · ')+'</div>';
       if(ev.imagens?.length)metaHtml+='<div class="stream-imagens">'+ev.imagens.map(im=>'<figure><img src="'+im.url+'" alt="'+esc(im.nome||'imagem')+'"><figcaption>'+esc(im.fonte||'')+'</figcaption></figure>').join('')+'</div>';
       if(metaHtml){espera.innerHTML=metaHtml+'<div class="pensando">pensando<span class="pontos">...</span></div>';espera.className='msg ele'}
       continue;
-     }
-if(ev.erro)throw new Error(ev.erro);
-    if(ev.token){texto+=ev.token;if(!streamEl){espera.innerHTML=metaHtml+'<div class="stream-text"></div>';streamEl=espera.querySelector('.stream-text')}streamEl.textContent+=ev.token;$('msgs').scrollTop=$('msgs').scrollHeight;iniciado=true}
-        if(ev.done){espera.innerHTML=metaHtml+md(texto||ev.texto||'(vazio)')+(ev.via||via?'<br><small class="meta-chat">via '+esc(ev.via||via)+'</small>':'');$('msgs').scrollTop=$('msgs').scrollHeight}
-   }
+    }
+    if(ev.erro)throw new Error(ev.erro);
+    if(ev.token){texto+=ev.token;if(!streamEl){espera.innerHTML=metaHtml+'<div class="stream-text"></div>';streamEl=espera.querySelector('.stream-text')}streamEl.textContent+=ev.token;$('msgs').scrollTop=$('msgs').scrollHeight;iniciado=true;if(ev.via)via=ev.via}
+    if(ev.done){espera.innerHTML=metaHtml+md(texto||ev.texto||'(vazio)')+(ev.via||via?'<br><small class="meta-chat">via '+esc(ev.via||via)+'</small>':'');$('msgs').scrollTop=$('msgs').scrollHeight}
   }
   if(!iniciado)espera.innerHTML=metaHtml+'(sem resposta)';
   if(window.myn&&texto){
@@ -188,6 +195,9 @@ if(ev.erro)throw new Error(ev.erro);
 }
 $('enviar').onclick=()=>enviar(false);
 $('pesq').onclick=()=>enviar(true);
+$('btnExtensao').onclick=async()=>{if(await temExtensao()){try{await window.myn.cliente.abrirVM()}catch(e){add('Não consegui abrir o painel: '+e.message,'err')}}else location.href='extensao/myn-recicla-extensao.zip'};
+if(MODO_EXTENSAO)document.body.classList.add('modo-extensao');
+temExtensao().then(ok=>{const b=$('extensaoBanner');if(!b)return;b.querySelector('span').textContent=ok?'conectada · clique no ícone para abrir a VM':'não detectada · baixe e carregue a extensão';b.style.borderLeftColor=ok?'var(--verde)':'var(--mostarda)';if(ok||MODO_EXTENSAO){const validas=new Set(['auto','pollinations-text-api','webgpu-local','chatgpt-web','claude-web','huggingchat','openrouter-free','zai']);for(const o of $('rota').options)if(!validas.has(o.value))o.disabled=true}});
 $('texto').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('enviar').click()}});
 
 function abrirHist(){ $('gaveta').classList.add('aberta');$('fundo').classList.add('on');$('gaveta').setAttribute('aria-hidden','false');carregarHist() }
@@ -313,21 +323,30 @@ $('btnModelos').onclick=async()=>{
 
 const pv=$('painelVM'), pag=$('painelAgentes');
 $('btnVM').onclick=()=>{pv.classList.toggle('on');if(pv.classList.contains('on'))carregarVM()};
+if(PARAMS.get('vm')==='1'){pv.classList.add('on');carregarVM()}
 $('fecharVM').onclick=()=>pv.classList.remove('on');
 $('btnAgentes').onclick=()=>{pag.classList.toggle('on');if(pag.classList.contains('on'))$('agCap').textContent=window.myn?.capacidade?.modo||'—'};
 $('fecharAgentes').onclick=()=>pag.classList.remove('on');
+async function esperarMyn(){
+ for(let i=0;i<200&&!window.myn;i++)await new Promise(r=>setTimeout(r,50));
+ if(!window.myn)throw new Error('camada web não carregou');
+ await window.myn.pronto;
+}
 async function carregarVM(){
  try{
-  await window.myn.pronto;
+  $('vmSaida').textContent='carregando VM Web...';
+  await esperarMyn();
   $('pvCap').textContent=window.myn.capacidade.modo;
   const hd=await window.myn.vm.padrao.HD();
   $('vmHD').textContent=hd.length?hd.slice(-5).map(x=>x.nome).join(', '):'vazio — grave algo para começar';
   const cache=await window.myn.db.listar('cache',5);
   $('vmCache').textContent=cache.length?cache.map(x=>x.id).join(', '):'vazio';
+  $('vmSaida').textContent='vm pronta...';
  }catch(e){$('vmSaida').textContent='Erro: '+e.message}
 }
 $('vmExec').onclick=async()=>{
  try{
+  await esperarMyn();
   const args=JSON.parse($('vmArgs').value||'{}');
   const r=await window.myn.vm.padrao.executar($('vmOp').value.trim(),args);
   $('vmSaida').textContent=JSON.stringify(r,null,2);

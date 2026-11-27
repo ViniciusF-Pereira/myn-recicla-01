@@ -10,7 +10,8 @@
     "token": "node scripts/emitir-token.mjs",
     "smoke": "node scripts/smoke.mjs",
     "tarefa": "node scripts/tarefa-longa.mjs",
-    "orquestrar": "node scripts/orquestrar.mjs"
+    "orquestrar": "node scripts/orquestrar.mjs",
+    "extensao": "node scripts/gerar-icones-extensao.mjs && node scripts/empacotar-extensao.mjs"
   },
   "engines": { "node": ">=20" }
 }
