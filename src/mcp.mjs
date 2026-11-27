@@ -1,10 +1,10 @@
 /** Myn MCP: expõe rotas, plugins, RAG e mídia como ferramentas. JSON-RPC sobre HTTP local. */
 import { registrar } from './historico.mjs';
 import { planejar } from './planejador.mjs';
-import { executarCiclo } from './agendador.mjs';
 import { auditarArquitetura } from './arquitetura.mjs';
 import { medirDesempenho } from './desempenho.mjs';
 import { obterModelos } from './modelos-livres.mjs';
+import { executarLoopFerramentas } from './loop-ferramentas.mjs';
 
 const T = (name, description, properties = [], required = [], extra = {}) => ({
   name, description,
@@ -73,7 +73,11 @@ async function executar(nome, a, base) {
       return JSON.stringify(d, null, 2);
     }
     case 'myn_loop': {
-      const d = await executarCiclo({ objetivo: a.objetivo, maxPassos: Math.max(1, Math.min(6, Number(a.maxPassos) || 4)), execucoes: [] });
+      const d = await executarLoopFerramentas({
+        objetivo: a.objetivo,
+        maxPassos: Math.max(1, Math.min(6, Number(a.maxPassos) || 4)),
+        executarFerramenta: (nome, args) => executar(nome, args, base),
+      });
       return JSON.stringify(d, null, 2).slice(0, 14000);
     }
     case 'myn_arquitetura': {

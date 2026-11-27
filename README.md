@@ -105,6 +105,8 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Confiabilidade:** rate limit local, retry 429/503, circuit breaker e `/api/confiabilidade`. MCP e `/v1/messages` exigem token por padrão. Veja `docs/CONFIABILIDADE.md`.
 
+**Loop de ferramentas:** `/api/agente` com `loop:true` executa ferramentas MCP, observa resultados e produz resposta final. Veja `docs/LOOP_FERRAMENTAS.md`.
+
 **Núcleo do agente:** `/api/agente` centraliza memória, classificação, RAG, planejamento e resposta. A memória persistente fica em `dados/memoria.jsonl`. Veja `docs/NUCLEO_AGENTE.md`.
 
 **Rota local de agente:** `npm run token` ou o botão **agente local** no Playground emite/copia/renova o token para usar o Myn por MCP ou por uma rota estilo Anthropic Messages (`/v1/messages`), com streaming, tools e resumo de raciocínio. Veja `docs/ROTA_AGENTE_LOCAL.md`.

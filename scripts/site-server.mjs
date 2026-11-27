@@ -37,6 +37,7 @@ import { iniciarSupervisor, statusSupervisor, pararSupervisor } from '../src/sup
 import { planejar } from '../src/planejador.mjs';
 import { criar as criarGoal, listar as listarGoals, remover as removerGoal, executarCiclo } from '../src/agendador.mjs';
 import { handleMcp } from '../src/mcp.mjs';
+import { executarLoopFerramentas } from '../src/loop-ferramentas.mjs';
 import { iniciar as iniciarWorker, parar as pararWorker, status as statusWorker, assinar as assinarWorker } from '../src/worker.mjs';
 import { iniciar as iniciarAnalise, parar as pararAnalise, status as statusAnalise, assinar as assinarAnalise } from '../src/worker-analise.mjs';
 import { iniciar as iniciarMelhoria, parar as pararMelhoria, status as statusMelhoria, assinar as assinarMelhoria } from '../src/worker-melhoria.mjs';
@@ -358,6 +359,19 @@ const servidor = http.createServer(async (req, res) => {
     try {
       let corpo = ''; for await (const p of req) corpo += p;
       const b = JSON.parse(corpo || '{}');
+      if (b.loop === true) {
+        const loop = await executarLoopFerramentas({
+          objetivo: b.mensagem,
+          maxPassos: b.maxPassos || 4,
+          executarFerramenta: async (nome, args) => {
+            const r = await handleMcp({ jsonrpc: '2.0', id: Date.now(), method: 'tools/call', params: { name: nome, arguments: args }, _ip: 'local' }, 'http://127.0.0.1:' + PORTA);
+            if (r.error) throw new Error(r.error.message);
+            return r.result?.content?.[0]?.text || '';
+          },
+        });
+        enviarJson(req, res, loop);
+        return;
+      }
       const resultado = await executarAgente({
         mensagem: b.mensagem, sessao: b.sessao || 'local', canal: b.canal || 'api',
         rota: b.rota || 'auto', planejar: b.planejar === true, meta: b.meta || {}, plugins, gateway, trava,
