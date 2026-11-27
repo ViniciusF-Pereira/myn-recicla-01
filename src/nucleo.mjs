@@ -5,6 +5,7 @@ import { contextoPara } from './rag.mjs';
 import { respostaRapida, streamResposta } from './stream.mjs';
 import { planejar } from './planejador.mjs';
 import { registrarMemoria, contextoMemoria, buscarMemoria } from './memoria.mjs';
+import { executarConversa, streamConversa } from './executor-rotas.mjs';
 
 export const IDENTIDADE_NUCLEO = 'Você é o Myn Recicla/01, produto open-source browser-only de engenharia de agentes. Responda em português, de forma útil e honesta. Não finja ser ChatGPT, Claude ou um assistente de viagem.';
 
@@ -53,6 +54,7 @@ async function preparar({ mensagem, sessao = 'local', canal = 'api', planejar: p
 }
 
 export async function executarAgente(input = {}, deps = {}) {
+  const { plugins = [], gateway, trava } = input;
   const ctx = await preparar(input, deps);
   if (ctx.local) {
     await registrarMemoria({ sessao: ctx.sessaoLimpa, canal: ctx.canal, papel: 'assistente', texto: ctx.local, meta: { via: 'conhecimento-local' } });
@@ -60,7 +62,9 @@ export async function executarAgente(input = {}, deps = {}) {
   }
   let resultado;
   try {
-    resultado = deps.responder ? await deps.responder(ctx.prompt, { rota: input.rota || 'auto', capacidades: ctx.capacidades }) : await respostaRapida(ctx.prompt, 30000);
+    if (deps.responder) resultado = await deps.responder(ctx.prompt, { rota: input.rota || 'auto', capacidades: ctx.capacidades });
+    else if (plugins.length) resultado = await executarConversa({ texto: ctx.prompt, sessao: ctx.sessaoLimpa, plugins, gateway, trava });
+    else resultado = await respostaRapida(ctx.prompt, 30000);
   } catch (e) { resultado = { ok: false, erro: e.message }; }
   if (!resultado?.ok && ctx.rag?.texto) {
     const respostaRag = 'Encontrei contexto local em ' + (ctx.fontes.length ? ctx.fontes.join(', ') : 'documentos do projeto') + '.\n\n' + ctx.rag.texto.slice(0, 5000);
@@ -77,6 +81,7 @@ export async function executarAgente(input = {}, deps = {}) {
 }
 
 export async function* executarAgenteStream(input = {}, deps = {}) {
+  const { plugins = [], gateway, trava } = input;
   const ctx = await preparar(input, deps);
   if (ctx.local) {
     yield { inicio: true, via: 'conhecimento-local', passos: ctx.passos, fontes: [], capacidades: ctx.capacidades };
@@ -88,7 +93,7 @@ export async function* executarAgenteStream(input = {}, deps = {}) {
   yield { inicio: true, passos: ctx.passos, fontes: ctx.fontes, capacidades: ctx.capacidades };
   let texto = '', via = '';
   try {
-    const fluxo = deps.streamResponder ? deps.streamResponder(ctx.prompt) : streamResposta(ctx.prompt, 30000, '');
+    const fluxo = deps.streamResponder ? deps.streamResponder(ctx.prompt) : plugins.length ? streamConversa({ texto: ctx.prompt, sessao: ctx.sessaoLimpa, plugins, gateway, trava }) : streamResposta(ctx.prompt, 30000, '');
     for await (const ev of fluxo) {
       if (ev.token) texto += ev.token;
       if (ev.via) via = ev.via;

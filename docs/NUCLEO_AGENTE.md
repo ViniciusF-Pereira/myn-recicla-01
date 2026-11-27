@@ -44,7 +44,20 @@ Retorna:
 }
 ```
 
-### Memória
+### Afinidade de rota por conversa
+
+Cada sessão mantém a rota que funcionou:
+
+1. o núcleo lista rotas compatíveis;
+2. APIs são tentadas antes dos navegadores;
+3. a primeira rota com resposta válida vira a rota da sessão;
+4. as próximas mensagens tentam essa rota primeiro;
+5. se ela falhar, o Myn tenta outra rota/modelo/navegador;
+6. a preferência fica em `dados/memoria.jsonl`.
+
+O Playground cria um `myn-chat-session` por aba. MCP, Anthropic e Telegram também podem enviar um `sessao`/`user_id`.
+
+## Memória
 
 - `GET /api/memoria?sessao=usuario-1&q=termo`
 - `POST /api/memoria` com `{ "chave": "voz", "valor": "pt-BR", "sessao": "usuario-1" }`

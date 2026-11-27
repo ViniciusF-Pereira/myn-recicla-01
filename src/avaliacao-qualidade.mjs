@@ -32,11 +32,16 @@ const CASOS = [
 
 export async function executarCaso(caso, deps = {}) {
   const inicio = Date.now();
-  const r = deps.executar ? await deps.executar({ mensagem: caso.tarefa, sessao: 'avaliacao-' + caso.id, canal: 'avaliacao' }) : await executarAgente({ mensagem: caso.tarefa, sessao: 'avaliacao-' + caso.id, canal: 'avaliacao' });
-  const latenciaMs = Date.now() - inicio;
-  const esperadoOk = String(r.resposta).toLowerCase().includes(caso.esperado.toLowerCase());
-  const qualidade = avaliarResposta({ tarefa: caso.tarefa, resposta: r.resposta, capacidades: caso.capacidades, latenciaMs });
-  return { id: caso.id, esperadoOk, ...qualidade, via: r.via, passos: r.passos };
+  try {
+    const r = deps.executar ? await deps.executar({ mensagem: caso.tarefa, sessao: 'avaliacao-' + caso.id, canal: 'avaliacao' }) : await executarAgente({ mensagem: caso.tarefa, sessao: 'avaliacao-' + caso.id, canal: 'avaliacao' });
+    const latenciaMs = Date.now() - inicio;
+    const esperadoOk = String(r.resposta).toLowerCase().includes(caso.esperado.toLowerCase());
+    const qualidade = avaliarResposta({ tarefa: caso.tarefa, resposta: r.resposta, capacidades: caso.capacidades, latenciaMs });
+    return { id: caso.id, esperadoOk, ...qualidade, via: r.via, passos: r.passos };
+  } catch (e) {
+    const latenciaMs = Date.now() - inicio;
+    return { id: caso.id, esperadoOk: false, nota: 0, aprovado: false, criterios: {}, problemas: ['erro: ' + String(e.message)], tarefa: caso.tarefa, latenciaMs, via: 'erro' };
+  }
 }
 
 export async function rodarAvaliacao(deps = {}) {

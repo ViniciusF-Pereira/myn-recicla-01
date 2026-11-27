@@ -331,7 +331,7 @@ const servidor = http.createServer(async (req, res) => {
       const b = JSON.parse(corpo || '{}');
       const resultado = await executarAgente({
         mensagem: b.mensagem, sessao: b.sessao || 'local', canal: b.canal || 'api',
-        rota: b.rota || 'auto', planejar: b.planejar === true, meta: b.meta || {},
+        rota: b.rota || 'auto', planejar: b.planejar === true, meta: b.meta || {}, plugins, gateway, trava,
       });
       enviarJson(req, res, resultado);
     } catch (erro) {
@@ -365,6 +365,7 @@ const servidor = http.createServer(async (req, res) => {
     const mensagem = String(url.searchParams.get('message') || '').slice(0, 6000);
     const pesquisa = url.searchParams.get('pesquisa') === '1';
     const rotaId = String(url.searchParams.get('rota') || 'auto') || 'auto';
+    const sessao = String(url.searchParams.get('sessao') || 'chat-stream').slice(0, 120);
     if (!mensagem) {
       res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache' });
       res.write('data: ' + JSON.stringify({ erro: 'mensagem vazia' }) + '\n\n'); res.end(); return;
@@ -416,7 +417,7 @@ const servidor = http.createServer(async (req, res) => {
         for (let i = 0; i < texto.length; i += 24) res.write('data: ' + JSON.stringify({ token: texto.slice(i, i + 24), via: 'plugin:' + plugin.id }) + '\n\n');
         res.write('data: ' + JSON.stringify({ done: true, via: 'plugin:' + plugin.id, texto, sucesso: d.ok }) + '\n\n');
       } else {
-        for await (const ev of executarAgenteStream({ mensagem: mensagem + contextoAnexos, sessao: 'chat-stream', canal: 'chat-stream', rota: 'auto' })) {
+        for await (const ev of executarAgenteStream({ mensagem: mensagem + contextoAnexos, sessao, canal: 'chat-stream', rota: 'auto', plugins, gateway, trava })) {
           if (!ev.inicio) res.write('data: ' + JSON.stringify(ev) + '\n\n');
         }
       }
@@ -430,7 +431,7 @@ const servidor = http.createServer(async (req, res) => {
     try {
       let corpo = '';
       for await (const pedaco of req) corpo += pedaco;
-      const { message, rota: id, arquivos = [] } = JSON.parse(corpo);
+      const { message, rota: id, arquivos = [], sessao = 'chat-auto' } = JSON.parse(corpo);
       if (!message || message.length > 8000) throw new Error('mensagem inválida');
       const emitido = Date.now();
       const comandoTopo = /^\/(plan|goal|loop)\s+([\s\S]+)$/i.exec(String(message).trim());
@@ -475,7 +476,7 @@ const servidor = http.createServer(async (req, res) => {
         return;
       }
       if (id === 'auto' && !(Array.isArray(arquivos) && arquivos.length)) {
-        const agente = await executarAgente({ mensagem: String(message), sessao: 'chat-auto', canal: 'chat', rota: 'auto' });
+        const agente = await executarAgente({ mensagem: String(message), sessao: String(sessao).slice(0, 120), canal: 'chat', rota: 'auto', plugins, gateway, trava });
         await registrar('chat', { input: String(message).slice(0, 300), output: agente.resposta.slice(0, 600), via: agente.via, passos: agente.passos });
         res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
         res.end(JSON.stringify({ reply: agente.resposta, rota: 'auto', via: agente.via, passos: agente.passos, fontes: agente.fontes, cache: false }));

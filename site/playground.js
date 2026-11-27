@@ -1,6 +1,8 @@
 import { carregarDados, resumoWorkers } from './dados-atuais.mjs';
 import './assistente.mjs';
 const $=id=>document.getElementById(id);
+const MYN_SESSION=sessionStorage.getItem('myn-chat-session')||('chat-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8));
+sessionStorage.setItem('myn-chat-session',MYN_SESSION);
 const ROTAS={
  auto:['Myn-01 Auto','resposta rápida sem chave, com fallback no navegador'],
  'brave-leo':['Brave Leo','nativo · OCR da conversa'],
@@ -142,7 +144,7 @@ async function enviar(pesquisa=false){
  ocupado=true;const btn=$('enviar');btn.disabled=true;
  const espera=add('<span class="pensando">pensando<span class="pontos">...</span></span>','ele');
  try{
-  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
+  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&sessao='+encodeURIComponent(MYN_SESSION)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
   const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
   if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
   const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false,via='',streamEl=null,metaHtml='';
