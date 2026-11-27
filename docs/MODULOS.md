@@ -219,3 +219,8 @@ Módulo do Myn Recicla/01.
 Exports: avaliarResposta, executarCaso, rodarAvaliacao, ultimaAvaliacao
 
 Módulo do Myn Recicla/01.
+## executor-rotas.mjs
+
+Exports: selecionarRotas, executarConversa
+
+Módulo do Myn Recicla/01.
