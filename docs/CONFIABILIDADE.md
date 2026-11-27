@@ -27,6 +27,13 @@ O Myn aplica proteções locais antes de chamar serviços externos.
 - evento `confiabilidade` no worker de análise
 - contagem de baldes e circuitos abertos na home/Playground.
 
+## Validação executada
+
+- `/mcp` sem token → 401; com token → 200.
+- `/v1/messages` sem token → 401; com token → 200.
+- Chamada real via `/api/agente` registrou 1 balde e circuito `closed`.
+- Resposta obtida via `pollinations:openai-fast`.
+
 ## Autenticação
 
 - `/mcp` e `/v1/messages` exigem token por padrão.
