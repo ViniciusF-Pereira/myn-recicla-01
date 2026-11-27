@@ -3,6 +3,7 @@ import { readFile } from 'node:fs/promises';
 import path from 'node:path';
 import { salvarArquivo } from './midia.mjs';
 import { gerarImagem, gerarAudio, gerarVideo } from './midia.mjs';
+import { permitir, executarComRetry, circuitoAberto, registrarResultado } from './confiabilidade.mjs';
 
 const RAIZ = process.cwd();
 const ARQUIVO = path.join(RAIZ, 'config/plugins.json');
@@ -23,18 +24,29 @@ async function executarApi(plugin, entrada) {
   const url = String(plugin.api.url)
     .replace('{encode}', encodeURIComponent(prompt))
     .replace('{input}', prompt);
-  let r = await fetch(url, { signal: AbortSignal.timeout(120000) });
-  if (!r.ok && plugin.id === 'pollinations-text-api' && [429, 503].includes(r.status)) {
-    await new Promise((ok) => setTimeout(ok, 10_000));
-    r = await fetch(url, { signal: AbortSignal.timeout(120000) });
-  }
-  if (!r.ok) throw new Error('API HTTP ' + r.status);
-  if (plugin.api.tipo === 'imagem') {
-    const bytes = Buffer.from(await r.arrayBuffer());
-    const nome = await salvarArquivo('plugin-' + plugin.id + '-' + Date.now() + '.jpg', bytes);
-    return { texto: '![' + plugin.nome + '](/api/arquivos/' + encodeURIComponent(nome) + ')', nome };
-  }
-  return { texto: (await r.text()).slice(0, 20000) };
+  if (circuitoAberto(plugin.id)) throw new Error('circuit breaker aberto para ' + plugin.id);
+  if (!permitir(plugin.id)) throw new Error('rate limit local para ' + plugin.id);
+  try {
+    const r = await executarComRetry(async () => {
+      const resposta = await fetch(url, { signal: AbortSignal.timeout(120000) });
+      if (!resposta.ok) {
+        const erro = new Error('API HTTP ' + resposta.status);
+        erro.status = resposta.status;
+        erro.retryAfter = resposta.headers.get('retry-after') || '';
+        throw erro;
+      }
+      return resposta;
+    }, { tentativas: 2, atrasoMs: 10_000, deveRepetir: (e) => [429, 503].includes(e.status) });
+    if (plugin.api.tipo === 'imagem') {
+      const bytes = Buffer.from(await r.arrayBuffer());
+      const nome = await salvarArquivo('plugin-' + plugin.id + '-' + Date.now() + '.jpg', bytes);
+      registrarResultado(plugin.id, true);
+      return { texto: '![' + plugin.nome + '](/api/arquivos/' + encodeURIComponent(nome) + ')', nome };
+    }
+    const texto = (await r.text()).slice(0, 20000);
+    registrarResultado(plugin.id, true);
+    return { texto };
+  } catch (e) { registrarResultado(plugin.id, false); throw e; }
 }
 
 async function executarLocal(plugin, entrada) {

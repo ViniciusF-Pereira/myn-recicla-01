@@ -8,6 +8,7 @@ import { medirDesempenho } from './desempenho.mjs';
 import { obterModelos } from './modelos-livres.mjs';
 import { auditarArquitetura } from './arquitetura.mjs';
 import { auditarCodigo } from './auditoria-codigo.mjs';
+import { estadoConfiabilidade } from './confiabilidade.mjs';
 import { registrarEvento } from './eventlog.mjs';
 
 const RAIZ = process.cwd();
@@ -85,6 +86,8 @@ async function ciclo(n, objetivo) {
   if (modelos) emitir('modelos', { n, total: modelos.total, porFonte: modelos.porFonte, erros: modelos.erros.length, exemplos: modelos.modelos.slice(0, 5).map((m) => m.fonte + ':' + m.id) });
   if (arquitetura) emitir('arquitetura', { n, ...arquitetura.resumo, violacoes: arquitetura.violacoes.slice(0, 5) });
   if (codigo) emitir('codigo', { n, ...codigo.resumo, achados: codigo.achados.map((f) => ({ id: f.id, arquivo: f.arquivo, descricao: f.descricao })) });
+  const confiabilidade = estadoConfiabilidade();
+  emitir('confiabilidade', { n, baldes: confiabilidade.baldes.length, circuitosAbertos: confiabilidade.circuitos.filter((c) => c.estado === 'open').length });
   emitir('achados', { n, achados, plugins });
   emitir('analise_fim', { n, mudou, score: Math.round((media * 0.5 + Math.max(0, 1 - achados.length / 5) * 0.5) * 100) / 100 });
   return { mudou, achados };

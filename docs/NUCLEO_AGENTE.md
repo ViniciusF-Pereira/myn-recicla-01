@@ -56,8 +56,9 @@ A memória é JSONL em `dados/memoria.jsonl`, fora do Git.
 Já usam o núcleo:
 
 - `/api/agente`;
+- `/api/chat` no modo `auto` sem anexos;
 - `/v1/messages`;
 - `myn_chat` do MCP;
 - comando `/myn` da ponte Telegram.
 
-O chat legado `/api/chat` ainda existe para compatibilidade e será migrado depois.
+O chat legado `/api/chat` continua para rotas explícitas, anexos e streaming.

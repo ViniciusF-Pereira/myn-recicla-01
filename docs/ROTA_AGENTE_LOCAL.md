@@ -110,8 +110,9 @@ Ao enviar `tools`, o endpoint pode responder com `content[].type = "tool_use"` e
 ## 4. Segurança
 
 - O endpoint de token só responde para loopback (`127.0.0.1`/`::1`).
-- Para exigir autenticação em `/mcp` e `/v1/messages`, inicie com `MYN_EXIGIR_TOKEN_AGENTE=1`.
-- Sem essa variável, o token é opcional para compatibilidade local.
+- A autenticação em `/mcp` e `/v1/messages` é obrigatória por padrão.
+- Para compatibilidade local excepcional, use `MYN_EXIGIR_TOKEN_AGENTE=0`.
+- O WORK obtém o token automaticamente pela rota loopback `/api/token`.
 - Validação executada: sem token e com exigência ativa → 401; com token válido → 200.
 - Se publicar a porta em Docker/rede, use firewall e obrigatoriamente `MYN_EXIGIR_TOKEN_AGENTE=1`.
 - Nunca coloque o token em `site/`, `config/`, commits ou prints públicos.

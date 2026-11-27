@@ -1,5 +1,6 @@
 /** Resposta rápida sem chave: Pollinations Text API. Primeiro modelo válido vence. */
 import { MODELOS_POLLINATIONS } from './modelos-pollinations.mjs';
+import { executarComRetry, permitir, circuitoAberto, registrarResultado } from './confiabilidade.mjs';
 const MODELOS = MODELOS_POLLINATIONS;
 // Sem prompt de sistema: instruções vazam na resposta do Pollinations.
 const SISTEMA = '';
@@ -14,14 +15,19 @@ function valido(texto) {
 
 async function tentar(modelo, pergunta, ms) {
   const url = 'https://text.pollinations.ai/' + encodeURIComponent(SISTEMA + pergunta) + '?model=' + modelo;
-  let r = await fetch(url, { signal: AbortSignal.timeout(ms) });
-  if (!r.ok && [429, 503].includes(r.status)) {
-    await new Promise((ok) => setTimeout(ok, 10_000));
-    r = await fetch(url, { signal: AbortSignal.timeout(ms) });
-  }
-  const texto = await r.text();
-  if (!r.ok || !valido(texto)) throw new Error('modelo ' + modelo + ' indisponível');
-  return texto.trim();
+  const chave = 'pollinations:' + modelo;
+  if (circuitoAberto(chave) || !permitir(chave)) throw new Error('modelo ' + modelo + ' limitado');
+  try {
+    const r = await executarComRetry(async () => {
+      const resposta = await fetch(url, { signal: AbortSignal.timeout(ms) });
+      if (!resposta.ok) { const erro = new Error('HTTP ' + resposta.status); erro.status = resposta.status; erro.retryAfter = resposta.headers.get('retry-after') || ''; throw erro; }
+      return resposta;
+    }, { tentativas: 2, atrasoMs: 10_000, deveRepetir: (e) => [429, 503].includes(e.status) });
+    const texto = await r.text();
+    if (!valido(texto)) throw new Error('modelo ' + modelo + ' indisponível');
+    registrarResultado(chave, true);
+    return texto.trim();
+  } catch (e) { registrarResultado(chave, false); throw e; }
 }
 
 /** Tenta o modelo principal; se falhar, dispara os outros em paralelo e pega o primeiro válido. */

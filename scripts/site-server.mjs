@@ -28,6 +28,7 @@ import { handleAnthropic } from '../src/api-antropic.mjs';
 import { iniciarPonteTelegram, enviarTelegram, statusPonte } from '../src/telegram-ponte.mjs';
 import { criarPedido, listarPendentes } from '../src/pedidos.mjs';
 import { executarAgente } from '../src/nucleo.mjs';
+import { estadoConfiabilidade } from '../src/confiabilidade.mjs';
 import { contextoMemoria, buscarMemoria, preferencias, salvarPreferencia } from '../src/memoria.mjs';
 import { iniciarSupervisor, statusSupervisor, pararSupervisor } from '../src/supervisor.mjs';
 import { planejar } from '../src/planejador.mjs';
@@ -49,7 +50,7 @@ const PORTA = Number(process.env.PORT || 5188);
 const HOST = process.env.MYN_HOST || '127.0.0.1';
 const IDENTIDADE = 'Você é o Myn Recicla/01, um produto open-source de engenharia de software browser-only que transforma abas de chat gratuitas em rotas de agente. Tem Playground, workers de análise/melhoria, MCP, RAG local e descoberta de modelos livres. NÃO é um assistente de viagem, itinerário, trânsito ou transporte. Responda em português, seja útil e honesto, e nunca invente essa função de rotas de deslocamento. Não diga que é ChatGPT, Claude ou outro produto.';
 let tokenLocal = await emitirToken();
-const EXIGIR_TOKEN_AGENTE = process.env.MYN_EXIGIR_TOKEN_AGENTE === '1';
+const EXIGIR_TOKEN_AGENTE = process.env.MYN_EXIGIR_TOKEN_AGENTE !== '0';
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml' };
 
@@ -482,6 +483,13 @@ const servidor = http.createServer(async (req, res) => {
         res.end(JSON.stringify({ reply: respostaPlugin, rota: plugin.id, plugin: d, cache: false }));
         return;
       }
+      if (id === 'auto' && !(Array.isArray(arquivos) && arquivos.length)) {
+        const agente = await executarAgente({ mensagem: String(message), sessao: 'chat-auto', canal: 'chat', rota: 'auto' });
+        await registrar('chat', { input: String(message).slice(0, 300), output: agente.resposta.slice(0, 600), via: agente.via, passos: agente.passos });
+        res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
+        res.end(JSON.stringify({ reply: agente.resposta, rota: 'auto', via: agente.via, passos: agente.passos, fontes: agente.fontes, cache: false }));
+        return;
+      }
       const respostaProduto = await respostaLocal(String(message));
       if (respostaProduto) {
         await registrar('chat', { input: String(message).slice(0, 300), output: respostaProduto.slice(0, 600), via: 'conhecimento-local' });
@@ -746,6 +754,9 @@ const servidor = http.createServer(async (req, res) => {
   if (url.pathname === '/api/saude' && req.method === 'GET') {
     enviarJson(req, res, { rotas: relatorioSaude(), estrategia: 'score = 0.45*sucesso + 0.35*velocidade + 0.2*recencia; circuit breaker 3-estados' });
     return;
+  }
+  if (url.pathname === '/api/confiabilidade' && req.method === 'GET') {
+    enviarJson(req, res, estadoConfiabilidade()); return;
   }
   if (url.pathname === '/api/desempenho' && req.method === 'GET') {
     try {

@@ -12,6 +12,7 @@
 - `GET /api/modelos/descobertos`
 - `GET /api/saude`
 - `GET /api/desempenho`
+- `GET /api/confiabilidade`
 - `GET /api/arquitetura`
 
 ## Mídia e arquivos
