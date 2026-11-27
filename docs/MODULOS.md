@@ -209,3 +209,8 @@ Módulo do Myn Recicla/01.
 Exports: IDENTIDADE_NUCLEO, executarAgente
 
 Módulo do Myn Recicla/01.
+## confiabilidade.mjs
+
+Exports: permitir, executarComRetry, circuitoAberto, registrarResultado, estadoConfiabilidade
+
+Módulo do Myn Recicla/01.
