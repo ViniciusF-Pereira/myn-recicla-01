@@ -31,6 +31,14 @@ Ou:
 
 Resultados ficam em `dados/avaliacao-qualidade.jsonl`.
 
+## Último resultado
+
+- identidade: 0.80;
+- documentação: 0.80;
+- código: 0.90;
+- pesquisa: 0.85 via RAG local;
+- **4/4 aprovados**.
+
 ## Limite
 
 A nota é heurística e não substitui avaliação humana ou benchmarks de modelo. Ela serve para detectar regressões óbvias.
