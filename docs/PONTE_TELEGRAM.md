@@ -26,6 +26,8 @@ A sessão do OpenCode fica em `dados/opencode-session.json`:
 
 O CLI do OpenCode usa a descoberta e autenticação da própria máquina. Não é necessário guardar token do OpenCode nesse arquivo.
 
+No Docker, o alvo padrão é `myn` porque a imagem não inclui o CLI/sessão do OpenCode. Para usar OpenCode em container, seria necessário montar o binário e a configuração autenticada.
+
 ## Comandos
 
 - `/start` ou `/ajuda` — apresentação e comandos.

@@ -27,6 +27,7 @@ ENV MYN_DADOS=/data \
     PORTA=36877 \
     CHROME=/usr/bin/chromium \
     MYN_HOST=0.0.0.0 \
+    MYN_TELEGRAM_TARGET=myn \
     TTL=1800000 \
     NODE_ENV=production
 
