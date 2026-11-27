@@ -8,6 +8,8 @@ test('MCP lista ferramentas atuais sem Google', async () => {
   assert.ok(nomes.includes('myn_chat'));
   assert.ok(nomes.includes('myn_pesquisar'));
   assert.ok(nomes.includes('myn_mensagem'));
+  const chat = r.result.tools.find((t) => t.name === 'myn_chat');
+  assert.deepEqual(chat.inputSchema.properties.effort.enum, ['low', 'medium', 'high']);
   assert.ok(nomes.includes('myn_planejar'));
   assert.ok(nomes.includes('myn_loop'));
   assert.ok(nomes.includes('myn_arquitetura'));

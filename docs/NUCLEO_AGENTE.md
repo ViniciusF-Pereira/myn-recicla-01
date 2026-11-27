@@ -27,7 +27,8 @@ mensagem
   "sessao": "usuario-1",
   "canal": "telegram",
   "rota": "auto",
-  "planejar": false
+  "planejar": false,
+  "effort": "medium"
 }
 ```
 
@@ -40,9 +41,29 @@ Retorna:
   "sessao": "usuario-1",
   "passos": ["..."],
   "fontes": [],
-  "capacidades": ["chat"]
+  "capacidades": ["chat"],
+  "effort": "medium",
+  "tentativas": 1
 }
 ```
+
+## Effort
+
+O parâmetro `effort` controla profundidade e custo de tentativas:
+
+| valor | planejamento | rotas máximas | RAG local |
+|---|---:|---:|---:|
+| `low` | não | 1 | 3.000 caracteres |
+| `medium` | não | 2 | 5.000 caracteres |
+| `high` | sim | 3 | 8.000 caracteres |
+
+- valor ausente ou inválido vira `medium`;
+- `planejar:false` desliga o plano mesmo em `high`;
+- `planejar:true` força o plano mesmo em `low`/`medium`;
+- a rota fixa da sessão continua sendo a primeira candidata;
+- o resultado e o SSE informam `effort` e `tentativas`.
+
+No Playground há um seletor **effort**. No MCP, use `myn_chat` com `effort`. Em `/v1/messages`, use `effort` ou `output_config.effort`. No Telegram: `/myn high sua mensagem`.
 
 ### Afinidade de rota por conversa
 

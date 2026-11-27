@@ -7,10 +7,11 @@ function respostaMock() {
   return { status: 0, headers: {}, corpo: '', eventos: '', writeHead(s, h) { this.status = s; this.headers = h; }, end(b = '') { this.corpo += b; }, write(b) { this.eventos += b; } };
 }
 
-async function comMock(fn) {
+async function comMock(fn, captura = null) {
   const server = http.createServer(async (req, res) => {
     let corpo = ''; for await (const p of req) corpo += p;
     const rota = req.url;
+    if (rota === '/api/agente' && captura) captura.push(JSON.parse(corpo || '{}'));
     res.setHeader('content-type', 'application/json');
     if (rota === '/api/chat') return res.end(JSON.stringify({ reply: 'Resposta local do Myn.', via: 'conhecimento-local' }));
     if (rota === '/api/agente') return res.end(JSON.stringify({ resposta: 'Resposta local do Myn.', via: 'conhecimento-local', passos: [] }));
@@ -46,6 +47,16 @@ test('Messages API devolve tool_use quando a tarefa corresponde a uma tool', asy
     assert.equal(d.content[0].type, 'tool_use');
     assert.equal(d.content[0].name, 'search');
   });
+});
+
+test('Messages API repassa effort high ao núcleo', async () => {
+  const captura = [];
+  await comMock(async (base) => {
+    const res = respostaMock();
+    await handleAnthropic({ body: { model: 'myn-auto', effort: 'high', messages: [{ role: 'user', content: 'Explique o Myn.' }] }, req: {}, res, base });
+    assert.equal(res.status, 200);
+  }, captura);
+  assert.equal(captura[0].effort, 'high');
 });
 
 test('Messages API streaming emite eventos Anthropic', async () => {

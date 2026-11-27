@@ -13,6 +13,9 @@ test('mídia web não depende de Node ou binários locais', async () => {
 test('interface usa a camada de mídia do navegador', async () => {
   const app = await readFile('site/app.mjs', 'utf8');
   const play = await readFile('site/playground.js', 'utf8');
+  const html = await readFile('site/playground.html', 'utf8');
   assert.match(app, /midia:/);
   assert.match(play, /window\.myn\?\.midia/);
+  assert.match(html, /id="effort"/);
+  assert.match(play, /&effort=/);
 });

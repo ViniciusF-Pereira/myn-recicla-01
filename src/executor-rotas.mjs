@@ -9,9 +9,12 @@ function rotaValida(rota, plugins) {
   return plugin && !plugin.confirmacao && !/google|gemini/i.test(plugin.id + ' ' + plugin.nome);
 }
 
-export async function selecionarRotas({ texto, sessao = 'local', plugins = [] }) {
+export async function selecionarRotas({ texto, sessao = 'local', plugins = [], max = 5 }) {
   const preferida = (await preferencias(sessao)).rota;
-  let rotas = await escolherPara(texto, 5, false);
+  const limite = Math.max(1, Math.min(10, Number(max) || 5));
+  // Busca a lista completa antes de aplicar o limite: a rota fixa da conversa
+  // precisa continuar elegível mesmo quando não for a primeira do scoreboard.
+  let rotas = await escolherPara(texto, 100, false);
   rotas = rotas.filter((r) => rotaValida(r, plugins));
   // APIs primeiro; navegadores ficam como fallback quando a rota fixa falha.
   rotas.sort((a, b) => {
@@ -21,13 +24,13 @@ export async function selecionarRotas({ texto, sessao = 'local', plugins = [] })
   });
   if (preferida) {
     const i = rotas.findIndex((r) => r.id === preferida);
-    if (i > 0) rotas.unshift(...rotas.splice(i, 1));
+    if (i >= 0) rotas.unshift(...rotas.splice(i, 1));
   }
-  return rotas;
+  return rotas.slice(0, limite);
 }
 
-export async function executarConversa({ texto, sessao = 'local', plugins = [], gateway, trava }) {
-  const rotas = await selecionarRotas({ texto, sessao, plugins });
+export async function executarConversa({ texto, sessao = 'local', plugins = [], gateway, trava, maxRotas = 5 }) {
+  const rotas = await selecionarRotas({ texto, sessao, plugins, max: maxRotas });
   const erros = [];
   for (const rota of rotas) {
     const plugin = plugins.find((p) => p.id === rota.id);
@@ -44,10 +47,12 @@ export async function executarConversa({ texto, sessao = 'local', plugins = [], 
   return { ok: false, erro: erros.join(' | ') || 'nenhuma rota disponível', erros };
 }
 
-export async function* streamConversa({ texto, sessao = 'local', plugins = [], gateway, trava }) {
-  const rotas = await selecionarRotas({ texto, sessao, plugins });
+export async function* streamConversa({ texto, sessao = 'local', plugins = [], gateway, trava, maxRotas = 5 }) {
+  const rotas = await selecionarRotas({ texto, sessao, plugins, max: maxRotas });
   const erros = [];
+  let tentativas = 0;
   for (const rota of rotas) {
+    tentativas++;
     const plugin = plugins.find((p) => p.id === rota.id);
     try {
       if (rota.id === 'pollinations-text-api') {
@@ -58,13 +63,13 @@ export async function* streamConversa({ texto, sessao = 'local', plugins = [], g
           if (ev.done && ev.texto) textoFinal = ev.texto;
           yield ev;
         }
-        if (textoFinal.trim()) { await salvarPreferencia('rota', rota.id, sessao); yield { done: true, texto: textoFinal, via: via || rota.id }; return; }
+        if (textoFinal.trim()) { await salvarPreferencia('rota', rota.id, sessao); yield { done: true, texto: textoFinal, via: via || rota.id, tentativas }; return; }
       } else {
         const d = await executarPlugin({ plugin, entrada: texto, gateway, trava });
         if (d.ok && String(d.resposta || '').trim()) {
           await salvarPreferencia('rota', rota.id, sessao);
           for (let i = 0; i < d.resposta.length; i += 48) yield { token: d.resposta.slice(i, i + 48), via: rota.id };
-          yield { done: true, texto: d.resposta, via: rota.id };
+          yield { done: true, texto: d.resposta, via: rota.id, tentativas };
           return;
         }
         erros.push(rota.id + ': ' + (d.erro || 'sem resposta'));

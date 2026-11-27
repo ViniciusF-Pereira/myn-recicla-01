@@ -141,12 +141,16 @@ async function processarMensagem(msg, base) {
   await registrar({ direcao: 'recebida', texto: texto.slice(0, 500) });
   let resposta;
   if (/^\/(start|ajuda|help)$/i.test(texto)) {
-    resposta = 'Ponte WORK ↔ Telegram ativa.\n\nEnvie qualquer mensagem para conversar.\n/status — workers e arquitetura\n/worker — estado dos workers\n/opencode — informações desta sessão\n/myn texto — conversa direta com o Myn\n/melhorar arquivo | correção — envia código para o worker testar\n/ajuda — esta ajuda';
+    resposta = 'Ponte WORK ↔ Telegram ativa.\n\nEnvie qualquer mensagem para conversar.\n/status — workers e arquitetura\n/worker — estado dos workers\n/opencode — informações desta sessão\n/myn [low|medium|high] texto — conversa direta com o Myn e nível de esforço\n/melhorar arquivo | correção — envia código para o worker testar\n/ajuda — esta ajuda';
   } else if (/^\/opencode$/i.test(texto)) {
     resposta = `Ponte conectada ao OpenCode.\nSessão: ${process.env.MYN_OPENCODE_SESSION || 'configurada localmente'}\nAlvo padrão: ${ALVO}`;
-  } else if (/^\/myn\s+/i.test(texto)) {
-    const r = await fetch(base + '/api/agente', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mensagem: texto.replace(/^\/myn\s+/i, ''), sessao: 'telegram-' + config.allowedUserId, canal: 'telegram', rota: 'auto' }) });
-    const d = await r.json(); resposta = d.resposta || d.error || 'Myn não respondeu.';
+  } else if (/^\/myn(?:\s|$)/i.test(texto)) {
+    const m = /^\/myn(?:\s+(low|medium|high))?\s+([\s\S]+)$/i.exec(texto);
+    if (!m) resposta = 'Use: /myn [low|medium|high] sua mensagem';
+    else {
+      const r = await fetch(base + '/api/agente', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mensagem: m[2], sessao: 'telegram-' + config.allowedUserId, canal: 'telegram', rota: 'auto', effort: m[1] || 'medium' }) });
+      const d = await r.json(); resposta = d.resposta || d.error || 'Myn não respondeu.';
+    }
   } else if (/^\/melhorar\s+/i.test(texto)) {
     const m = /^\/melhorar\s+(\S+)\s*\|\s*([\s\S]+)$/i.exec(texto);
     if (!m) resposta = 'Use: /melhorar src/arquivo.mjs | descreva a correção';

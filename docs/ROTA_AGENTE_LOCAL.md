@@ -66,6 +66,7 @@ Requisição:
 {
   "model": "myn-auto",
   "max_tokens": 1024,
+  "effort": "medium",
   "thinking": { "type": "enabled", "budget_tokens": 512 },
   "messages": [
     { "role": "user", "content": "Explique o que é o Myn Recicla/01." }
@@ -91,6 +92,8 @@ Resposta compatível com o formato de mensagem:
 ```
 
 O bloco `thinking` é um **resumo de alto nível do loop local**, não cadeia de pensamento oculta.
+
+`effort` aceita `low`, `medium` e `high`: respectivamente 1, 2 e 3 rotas; `high` também gera um plano e usa até 8.000 caracteres de RAG. O padrão é `medium`. Também é aceito em `output_config.effort`.
 
 ### Streaming
 

@@ -29,7 +29,7 @@ import { emitirToken, validarToken, bearer, ehLoopback } from '../src/token-loca
 import { handleAnthropic } from '../src/api-antropic.mjs';
 import { iniciarPonteTelegram, enviarTelegram, statusPonte } from '../src/telegram-ponte.mjs';
 import { criarPedido, listarPendentes } from '../src/pedidos.mjs';
-import { executarAgente, executarAgenteStream } from '../src/nucleo.mjs';
+import { executarAgente, executarAgenteStream, normalizarEffort, ESFORCOS } from '../src/nucleo.mjs';
 import { estadoConfiabilidade } from '../src/confiabilidade.mjs';
 import { rodarAvaliacao, ultimaAvaliacao } from '../src/avaliacao-qualidade.mjs';
 import { contextoMemoria, buscarMemoria, preferencias, salvarPreferencia } from '../src/memoria.mjs';
@@ -374,7 +374,8 @@ const servidor = http.createServer(async (req, res) => {
       }
       const resultado = await executarAgente({
         mensagem: b.mensagem, sessao: b.sessao || 'local', canal: b.canal || 'api',
-        rota: b.rota || 'auto', planejar: b.planejar === true, meta: b.meta || {}, plugins, gateway, trava,
+        rota: b.rota || 'auto', planejar: typeof b.planejar === 'boolean' ? b.planejar : undefined,
+        effort: b.effort, meta: b.meta || {}, plugins, gateway, trava,
       });
       enviarJson(req, res, resultado);
     } catch (erro) {
@@ -409,6 +410,8 @@ const servidor = http.createServer(async (req, res) => {
     const pesquisa = url.searchParams.get('pesquisa') === '1';
     const rotaId = String(url.searchParams.get('rota') || 'auto') || 'auto';
     const sessao = String(url.searchParams.get('sessao') || 'chat-stream').slice(0, 120);
+    const effort = normalizarEffort(url.searchParams.get('effort'));
+    const configEffort = ESFORCOS[effort];
     if (!mensagem) {
       res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache' });
       res.write('data: ' + JSON.stringify({ erro: 'mensagem vazia' }) + '\n\n'); res.end(); return;
@@ -434,7 +437,7 @@ const servidor = http.createServer(async (req, res) => {
     let ferramentas = [];
     if (pesquisa) {
       try {
-        const ctx = await contextoPara(mensagem);
+        const ctx = await contextoPara(mensagem, configEffort.rag);
         fontes = (ctx.fontes || []).slice(0, 5);
         const termos = mensagem.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
         ferramentas = plugins.filter((p) => termos.some((t) => (p.nome + ' ' + p.categoria + ' ' + p.capacidades.join(' ')).toLowerCase().includes(t)))
@@ -449,7 +452,7 @@ const servidor = http.createServer(async (req, res) => {
     }
     const plugin = pluginSelecionado;
     const imagens = [...imagensAnexadas, ...(imagemPesquisa ? [{ url: imagemPesquisa.url, nome: imagemPesquisa.nome, fonte: imagemPesquisa.fonte }] : [])];
-    res.write('data: ' + JSON.stringify({ inicio: true, fontes, ferramentas, rota: rotaId, imagens,
+    res.write('data: ' + JSON.stringify({ inicio: true, fontes, ferramentas, rota: rotaId, imagens, effort,
       via: plugin ? 'plugin:' + plugin.id : 'auto', capacidades: classificarTarefa(mensagem) }) + '\n\n');
     try {
       if (plugin) {
@@ -460,7 +463,7 @@ const servidor = http.createServer(async (req, res) => {
         for (let i = 0; i < texto.length; i += 24) res.write('data: ' + JSON.stringify({ token: texto.slice(i, i + 24), via: 'plugin:' + plugin.id }) + '\n\n');
         res.write('data: ' + JSON.stringify({ done: true, via: 'plugin:' + plugin.id, texto, sucesso: d.ok }) + '\n\n');
       } else {
-        for await (const ev of executarAgenteStream({ mensagem: mensagem + contextoAnexos, sessao, canal: 'chat-stream', rota: 'auto', plugins, gateway, trava })) {
+        for await (const ev of executarAgenteStream({ mensagem: mensagem + contextoAnexos, sessao, canal: 'chat-stream', rota: 'auto', effort, plugins, gateway, trava })) {
           if (!ev.inicio) res.write('data: ' + JSON.stringify(ev) + '\n\n');
         }
       }
@@ -474,7 +477,8 @@ const servidor = http.createServer(async (req, res) => {
     try {
       let corpo = '';
       for await (const pedaco of req) corpo += pedaco;
-      const { message, rota: id, arquivos = [], sessao = 'chat-auto' } = JSON.parse(corpo);
+      const { message, rota: id, arquivos = [], sessao = 'chat-auto', effort } = JSON.parse(corpo);
+      const nivelEffort = normalizarEffort(effort), configEffort = ESFORCOS[nivelEffort];
       if (!message || message.length > 8000) throw new Error('mensagem inválida');
       const emitido = Date.now();
       const comandoTopo = /^\/(plan|goal|loop)\s+([\s\S]+)$/i.exec(String(message).trim());
@@ -519,10 +523,10 @@ const servidor = http.createServer(async (req, res) => {
         return;
       }
       if (id === 'auto' && !(Array.isArray(arquivos) && arquivos.length)) {
-        const agente = await executarAgente({ mensagem: String(message), sessao: String(sessao).slice(0, 120), canal: 'chat', rota: 'auto', plugins, gateway, trava });
+        const agente = await executarAgente({ mensagem: String(message), sessao: String(sessao).slice(0, 120), canal: 'chat', rota: 'auto', effort: nivelEffort, plugins, gateway, trava });
         await registrar('chat', { input: String(message).slice(0, 300), output: agente.resposta.slice(0, 600), via: agente.via, passos: agente.passos });
         res.writeHead(200, { 'content-type': 'application/json; charset=utf-8' });
-        res.end(JSON.stringify({ reply: agente.resposta, rota: 'auto', via: agente.via, passos: agente.passos, fontes: agente.fontes, cache: false }));
+        res.end(JSON.stringify({ reply: agente.resposta, rota: 'auto', via: agente.via, passos: agente.passos, fontes: agente.fontes, effort: agente.effort, tentativas: agente.tentativas, cache: false }));
         return;
       }
       const respostaProduto = await respostaLocal(String(message));
@@ -545,7 +549,7 @@ const servidor = http.createServer(async (req, res) => {
       let via = cached?.via || null;
       if (!resposta) {
         if (id === 'auto') {
-          const orq = await orquestrar({ tarefa: mensagem, gateway, trava, plugins, max: 2, rapido: true,
+          const orq = await orquestrar({ tarefa: mensagem, gateway, trava, plugins, max: configEffort.rotas, rapido: true,
             log: (x) => console.log('[auto-chat]', JSON.stringify(x)) });
           const vencedor = (orq.resultados || []).filter((r) => r.ok && r.rota !== 'deterministico')
             .sort((a, b) => (b.nota || 0) - (a.nota || 0))[0];

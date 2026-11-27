@@ -14,9 +14,10 @@ const T = (name, description, properties = [], required = [], extra = {}) => ({
 const S = (desc) => ({ type: 'string', description: desc });
 const N = (desc) => ({ type: 'number', description: desc });
 const B = (desc) => ({ type: 'boolean', description: desc });
+const E = (desc) => ({ type: 'string', enum: ['low', 'medium', 'high'], default: 'medium', description: desc });
 
 export const FERRAMENTAS = [
-  T('myn_chat', 'Conversa com o Myn-01. Rotas free, sem chave. Use rota="auto" para escolher a melhor.', [['message', S('Mensagem do usuário')], ['rota', S('auto, brave-leo, zai, openrouter, chatgpt, claude')], ['sessao', S('ID da conversa para manter a rota fixa')]], ['message']),
+  T('myn_chat', 'Conversa com o Myn-01. Rotas free, sem chave. Use rota="auto" e effort para controlar profundidade.', [['message', S('Mensagem do usuário')], ['rota', S('auto, brave-leo, zai, openrouter, chatgpt, claude')], ['sessao', S('ID da conversa para manter a rota fixa')], ['effort', E('low=1 rota; medium=2; high=3 com planejamento')]], ['message']),
   T('myn_pesquisar', 'Pesquisa local: RAG nos docs + catálogo atual de plugins.', [['query', S('Pergunta ou termo')]], ['query']),
   T('myn_rotas', 'Lista rotas, saúde (score/circuito) e plugins disponíveis.', [], []),
   T('myn_planejar', 'Planeja passos executáveis para um objetivo usando o planejador do Myn.', [['objetivo', S('Objetivo')], ['maxPassos', N('Máximo de passos, até 6')]], ['objetivo']),
@@ -55,7 +56,7 @@ async function get(base, caminho) {
 async function executar(nome, a, base) {
   switch (nome) {
     case 'myn_chat': {
-      const d = await post(base, '/api/agente', { mensagem: a.message, sessao: a.sessao || 'mcp-local', canal: 'mcp', rota: a.rota || 'auto' });
+      const d = await post(base, '/api/agente', { mensagem: a.message, sessao: a.sessao || 'mcp-local', canal: 'mcp', rota: a.rota || 'auto', effort: a.effort });
       return (d.resposta || '') + (d.via ? '\n[via: ' + d.via + ']' : '') + (d.passos?.length ? '\n[passos: ' + d.passos.join(' → ') + ']' : '');
     }
     case 'myn_pesquisar': {

@@ -276,12 +276,13 @@ body>header,main,footer{position:relative;z-index:1}
  <a class="pg-voltar" href="index.html">← voltar ao início</a>
  <section id="playground" class="pg-section"><div class="wrap">
  <div class="st"><span class="num">01</span><h2>Playground</h2><span class="traco"></span><span class="nota">um chat · uma rota · um caderno</span></div>
- <p class="sub">Escolha a rota (padrão <strong>Myn-01 Auto</strong>), escreva, anexe documentos e peça tabelas, arquivos ou mídia. O histórico fica na gaveta.</p>
+ <p class="sub">Escolha a rota (padrão <strong>Myn-01 Auto</strong>) e o esforço: low tenta 1 rota, medium tenta 2 e high planeja antes de tentar 3. Escreva, anexe documentos e peça tabelas, arquivos ou mídia. O histórico fica na gaveta.</p>
  <div class="chat-shell">
   <div class="chat-top">
    <div class="chat-id"><span class="ponto"></span><div><b id="chatTitulo">Myn-01 Auto</b><small id="chatSub">resposta rápida sem chave, com fallback no navegador</small></div></div>
    <div class="chat-controles">
     <select id="rota" aria-label="Rota"><option value="auto">⚡ Myn-01 Auto · free</option><option value="brave-leo">Brave Leo · nativo</option><option value="zai">Z.ai · guest</option><option value="hugging">HuggingChat</option><option value="openrouter">OpenRouter</option><option value="chatgpt">ChatGPT web</option><option value="claude">Claude web</option></select>
+     <select id="effort" aria-label="Nível de esforço" title="low: 1 rota; medium: 2 rotas; high: 3 rotas com planejamento"><option value="low">effort · low</option><option value="medium" selected>effort · medium</option><option value="high">effort · high</option></select>
     <button class="icobtn" id="abrirHist" title="Abrir histórico" aria-label="Abrir histórico"><svg class="ico"><use href="#i-history"/></svg></button>
    </div>
   </div>

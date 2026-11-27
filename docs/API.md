@@ -2,10 +2,10 @@
 
 ## Chat e dados
 
-- `POST /api/agente` — núcleo único com memória, classificação, RAG e plano.
+- `POST /api/agente` — núcleo único com memória, classificação, RAG, plano e `effort` (`low`, `medium`, `high`).
 - `GET/POST /api/memoria` — contexto, busca e preferências por sessão.
 - `POST /api/chat`
-- `GET /api/chat/stream`
+- `GET /api/chat/stream?message=&effort=medium` — SSE token a token; `effort` aceita `low`, `medium` e `high`.
 - `POST /api/rag`
 - `GET /api/plugins`
 - `GET /api/modelos`

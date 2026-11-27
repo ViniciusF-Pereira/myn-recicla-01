@@ -144,7 +144,7 @@ async function enviar(pesquisa=false){
  ocupado=true;const btn=$('enviar');btn.disabled=true;
  const espera=add('<span class="pensando">pensando<span class="pontos">...</span></span>','ele');
  try{
-  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&sessao='+encodeURIComponent(MYN_SESSION)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
+  const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent($('rota').value)+'&sessao='+encodeURIComponent(MYN_SESSION)+'&effort='+encodeURIComponent($('effort').value)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
   const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
   if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
   const leitor=r.body.getReader(),dec=new TextDecoder();let resto='',texto='',iniciado=false,via='',streamEl=null,metaHtml='';
@@ -157,7 +157,7 @@ async function enviar(pesquisa=false){
     const ev=JSON.parse(m[1]);
          if(ev.inicio){
       via=ev.via||ev.rota||'';
-      const bits=[];if(ev.rota)bits.push(esc(ev.rota));if(ev.capacidades?.length)bits.push(esc(ev.capacidades.join('/')));if(ev.fontes?.length)bits.push(ev.fontes.length+' fontes');if(ev.ferramentas?.length)bits.push(ev.ferramentas.length+' ferramentas');
+      const bits=[];if(ev.rota)bits.push(esc(ev.rota));if(ev.effort)bits.push('effort '+esc(ev.effort));if(ev.capacidades?.length)bits.push(esc(ev.capacidades.join('/')));if(ev.fontes?.length)bits.push(ev.fontes.length+' fontes');if(ev.ferramentas?.length)bits.push(ev.ferramentas.length+' ferramentas');
       if(bits.length)metaHtml='<div class="stream-meta">'+bits.join(' · ')+'</div>';
       if(ev.imagens?.length)metaHtml+='<div class="stream-imagens">'+ev.imagens.map(im=>'<figure><img src="'+im.url+'" alt="'+esc(im.nome||'imagem')+'"><figcaption>'+esc(im.fonte||'')+'</figcaption></figure>').join('')+'</div>';
       if(metaHtml){espera.innerHTML=metaHtml+'<div class="pensando">pensando<span class="pontos">...</span></div>';espera.className='msg ele'}
