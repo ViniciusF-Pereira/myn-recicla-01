@@ -204,3 +204,8 @@ Módulo do Myn Recicla/01.
 Exports: registrarMemoria, contextoMemoria, buscarMemoria, salvarPreferencia, preferencias, resumirSessao
 
 Módulo do Myn Recicla/01.
+## nucleo.mjs
+
+Exports: IDENTIDADE_NUCLEO, executarAgente
+
+Módulo do Myn Recicla/01.
