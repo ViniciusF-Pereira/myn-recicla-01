@@ -99,6 +99,8 @@ node scripts/mapear.mjs      # grava input/output/print de cada provider
 
 **Ponte Telegram:** `docs/PONTE_TELEGRAM.md`. O bot local injeta mensagens em uma sessão real do OpenCode e devolve a resposta ao Telegram; `/myn` usa o Myn, `/status` e `/worker` mostram os workers. Token, ID e sessão ficam em `dados/`, fora do Git.
 
+**Avaliação de qualidade:** `node scripts/avaliar-qualidade.mjs` mede identidade, código, fontes, recusa e latência. Relatório em `docs/AVALIACAO_QUALIDADE.md`.
+
 **Confiabilidade:** rate limit local, retry 429/503, circuit breaker e `/api/confiabilidade`. MCP e `/v1/messages` exigem token por padrão. Veja `docs/CONFIABILIDADE.md`.
 
 **Núcleo do agente:** `/api/agente` centraliza memória, classificação, RAG, planejamento e resposta. A memória persistente fica em `dados/memoria.jsonl`. Veja `docs/NUCLEO_AGENTE.md`.

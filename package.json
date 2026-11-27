@@ -6,6 +6,7 @@
   "description": "Myn mínimo, portátil, somente com rotas Browser (gateway mediado). Sem chaves de API.",
   "scripts": {
     "test": "node --test",
+    "avaliar": "node scripts/avaliar-qualidade.mjs",
     "token": "node scripts/emitir-token.mjs",
     "smoke": "node scripts/smoke.mjs",
     "tarefa": "node scripts/tarefa-longa.mjs",

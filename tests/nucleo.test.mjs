@@ -32,6 +32,19 @@ test('núcleo injeta memória relacionada no prompt do modelo', async () => {
   });
 });
 
+test('streaming do núcleo emite início, tokens e fim', async () => {
+  await comNucleo(async (nucleo, memoria) => {
+    const eventos = [];
+    for await (const e of nucleo.executarAgenteStream({ mensagem: 'conte uma piada', sessao: 'stream' }, {
+      streamResponder: async function* () { yield { token: 'piada ' }; yield { token: 'curta', via: 'teste' }; yield { done: true, texto: 'piada curta', via: 'teste' }; },
+    })) eventos.push(e);
+    assert.ok(eventos.some((e) => e.inicio));
+    assert.ok(eventos.some((e) => e.token));
+    assert.equal(eventos.at(-1).done, true);
+    assert.ok((await memoria.contextoMemoria('stream')).some((r) => r.papel === 'assistente'));
+  });
+});
+
 test('preferências persistem por sessão', async () => {
   await comNucleo(async (_nucleo, memoria) => {
     await memoria.salvarPreferencia('voz', 'pt-BR', 's3');

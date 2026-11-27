@@ -57,6 +57,7 @@ Já usam o núcleo:
 
 - `/api/agente`;
 - `/api/chat` no modo `auto` sem anexos;
+- `/api/chat/stream` no modo `auto`, com tokens reais do stream;
 - `/v1/messages`;
 - `myn_chat` do MCP;
 - comando `/myn` da ponte Telegram.
