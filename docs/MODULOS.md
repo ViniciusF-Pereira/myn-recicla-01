@@ -194,3 +194,8 @@ Módulo do Myn Recicla/01.
 Exports: criticar, iniciarSupervisor, statusSupervisor, pararSupervisor
 
 Módulo do Myn Recicla/01.
+## opencode-ponte.mjs
+
+Exports: enviarParaSessao, aguardarResposta, conversarNoOpenCode
+
+Módulo do Myn Recicla/01.
