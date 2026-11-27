@@ -1,12 +1,13 @@
 # Endpoints
 
-Extraído de `scripts/site-server.mjs`: 43 caminhos.
+Extraído de `scripts/site-server.mjs`: 44 caminhos.
 
 - `/api/agente`
 - `/api/arquitetura`
 - `/api/arquivos`
 - `/api/arquivos/`
 - `/api/auto`
+- `/api/avaliacao`
 - `/api/cache`
 - `/api/chat`
 - `/api/chat/stream`
