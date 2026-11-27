@@ -32,6 +32,17 @@ test('núcleo injeta memória relacionada no prompt do modelo', async () => {
   });
 });
 
+test('pesquisa cai para RAG local quando a rota externa falha', async () => {
+  await comNucleo(async (nucleo) => {
+    const r = await nucleo.executarAgente({ mensagem: 'Pesquise sobre os workers do projeto.', sessao: 'rag' }, {
+      responder: async () => { throw new Error('cota'); },
+      contextoRag: async () => ({ texto: 'docs/WORKER_INFINITO.md descreve os workers.', fontes: ['docs/WORKER_INFINITO.md'] }),
+    });
+    assert.equal(r.via, 'rag-local');
+    assert.match(r.resposta, /WORKER_INFINITO/);
+  });
+});
+
 test('streaming do núcleo emite início, tokens e fim', async () => {
   await comNucleo(async (nucleo, memoria) => {
     const eventos = [];

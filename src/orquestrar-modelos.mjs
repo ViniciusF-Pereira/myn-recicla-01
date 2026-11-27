@@ -7,7 +7,7 @@ import { executarPlugin } from './plugins.mjs';
 const RAIZ = process.cwd();
 const REGRAS = [
   ['codigo', /\b(codigo|código|code|program|script|bug|refator|typescript|javascript|python|api)\b/i],
-  ['pesquisa', /\b(pesquisa|pesquisar|search|busca|buscar|fontes|citacoes|citações|research|noticias|notícias)\b/i],
+  ['pesquisa', /\b(pesquisa|pesquisar|pesquise|search|busca|buscar|busque|fontes|cita[cç][oõ]es|research|not[ií]cias)\b/i],
   ['imagem', /\b(imagem|image|foto|desenho|draw|ilustra|gerar imagem)\b/i],
   ['video', /\b(video|vídeo|clipe|animar|animação)\b/i],
   ['voz', /\b(voz|audio|áudio|narra|tts|falar)\b/i],
