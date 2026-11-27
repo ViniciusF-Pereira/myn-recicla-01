@@ -30,6 +30,16 @@ node scripts/site-server.mjs
 
 O painel detecta o servidor local automaticamente. O botão **local** força `http://127.0.0.1:5188`.
 
+## Adaptadores versionados
+
+Cada rota possui versão própria e listas alternativas de composer, envio e resposta. O service worker:
+
+- diagnostica composer, login e resposta;
+- registra sucesso, falha, latência e circuito;
+- ordena rotas pela saúde no cliente;
+- devolve `codigo`, `etapa`, `rota` e `versaoAdaptador`;
+- oferece modo manual para abrir a aba e capturar a resposta.
+
 ## Como usar
 
 1. Clique no ícone da extensão para abrir o painel lateral.
@@ -123,15 +133,18 @@ Relatório detalhado em `outputs/extensao-teste.json`.
 ## Resultado executado
 
 - Chromium: Microsoft Edge `158.0.4370.45`;
-- extensão: `ENABLED`, sem erros de manifesto ou runtime;
+- extensão `1.1.0`: `ENABLED`, sem erros de manifesto ou runtime;
+- adaptadores: versão 2;
 - ponte site ↔ extensão: `true`;
 - painel lateral aberto: `true`;
 - VM Web pronta: `true`;
-- rota sem permissão: bloqueada corretamente;
+- rota sem permissão: bloqueada com `codigo=permissao_necessaria`;
+- diagnóstico local: composer encontrado;
 - rota local automatizada: `OK local: teste de automação`;
+- captura manual: `OK local: teste de automação`;
 - Pollinations no navegador: `OK`;
-- suíte Node: **59/59**;
-- Docker: **59/59**, imagem `b7f2f20c8829`.
+- aceite da extensão: **8/8**;
+- suíte Node: **71/71**.
 
 ## Produção
 

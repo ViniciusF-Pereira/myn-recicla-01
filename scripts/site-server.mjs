@@ -31,6 +31,7 @@ import { iniciarPonteTelegram, enviarTelegram, statusPonte } from '../src/telegr
 import { criarPedido, listarPendentes } from '../src/pedidos.mjs';
 import { executarAgente, executarAgenteStream, normalizarEffort, ESFORCOS } from '../src/nucleo.mjs';
 import { estadoConfiabilidade } from '../src/confiabilidade.mjs';
+import { criarApiComercial } from '../src/api-comercial.mjs';
 import { rodarAvaliacao, ultimaAvaliacao } from '../src/avaliacao-qualidade.mjs';
 import { contextoMemoria, buscarMemoria, preferencias, salvarPreferencia } from '../src/memoria.mjs';
 import { iniciarSupervisor, statusSupervisor, pararSupervisor } from '../src/supervisor.mjs';
@@ -72,6 +73,20 @@ const HOST = process.env.MYN_HOST || '127.0.0.1';
 const IDENTIDADE = 'Você é o Myn Recicla/01, um produto open-source de engenharia de software browser-only que transforma abas de chat gratuitas em rotas de agente. Tem Playground, workers de análise/melhoria, MCP, RAG local e descoberta de modelos livres. NÃO é um assistente de viagem, itinerário, trânsito ou transporte. Responda em português, seja útil e honesto, e nunca invente essa função de rotas de deslocamento. Não diga que é ChatGPT, Claude ou outro produto.';
 let tokenLocal = await emitirToken();
 const EXIGIR_TOKEN_AGENTE = process.env.MYN_EXIGIR_TOKEN_AGENTE !== '0';
+const planosApi = JSON.parse(await readFile(path.join(raiz, 'config/planos-api.json'), 'utf8')).planos;
+const apiComercial = criarApiComercial({
+  dados: process.env.MYN_DADOS || path.join(raiz, 'dados'), planos: planosApi,
+  webhook: process.env.MYN_API_WEBHOOK_URL ? { url: process.env.MYN_API_WEBHOOK_URL, secret: process.env.MYN_API_WEBHOOK_SECRET || '' } : null,
+});
+function erroApiJson(res, erro) {
+  res.writeHead(erro.status || 500, { 'content-type': 'application/json; charset=utf-8', 'www-authenticate': erro.status === 401 ? 'Bearer' : undefined });
+  res.end(JSON.stringify({ error: { type: erro.codigo || 'api_error', message: String(erro.message).slice(0, 300) } }));
+}
+async function exigirAdmin(req, res) {
+  if (!ehLoopback(req)) { res.writeHead(403); res.end(); return false; }
+  if (!(await validarToken(bearer(req)))) { res.writeHead(401, { 'www-authenticate': 'Bearer' }); res.end(JSON.stringify({ error: 'token_local_necessario' })); return false; }
+  return true;
+}
 
 const TIPOS = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.mjs': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8', '.json': 'application/json', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.png': 'image/png', '.svg': 'image/svg+xml', '.zip': 'application/zip' };
 
@@ -318,6 +333,60 @@ const servidor = http.createServer(async (req, res) => {
     const cancelar = assinarWorker(escrever);
     const ping = setInterval(() => res.write(': ping\n\n'), 15000);
     req.on('close', () => { clearInterval(ping); cancelar(); });
+    return;
+  }
+  if (url.pathname === '/api/admin/chaves' && req.method === 'GET') {
+    if (!(await exigirAdmin(req, res))) return;
+    enviarJson(req, res, { chaves: await apiComercial.listarChaves(), planos: planosApi }); return;
+  }
+  if (url.pathname === '/api/admin/chaves' && req.method === 'POST') {
+    if (!(await exigirAdmin(req, res))) return;
+    try {
+      let corpo = ''; for await (const p of req) corpo += p;
+      const b = JSON.parse(corpo || '{}');
+      enviarJson(req, res, await apiComercial.criarChave({ nome: b.nome, plano: b.plano, expiresAt: b.expiresAt }));
+    } catch (erro) { erroApiJson(res, erro); }
+    return;
+  }
+  if (url.pathname.startsWith('/api/admin/chaves/') && req.method === 'DELETE') {
+    if (!(await exigirAdmin(req, res))) return;
+    try { enviarJson(req, res, await apiComercial.revogarChave(url.pathname.split('/').at(-1))); }
+    catch (erro) { erroApiJson(res, erro); }
+    return;
+  }
+  if (url.pathname === '/api/admin/metricas' && req.method === 'GET') {
+    if (!(await exigirAdmin(req, res))) return;
+    enviarJson(req, res, await apiComercial.metricas()); return;
+  }
+  if (url.pathname === '/v1/usage' && req.method === 'GET') {
+    try { enviarJson(req, res, await apiComercial.lerUso(bearer(req), Math.min(200, Number(url.searchParams.get('limite')) || 50))); }
+    catch (erro) { erroApiJson(res, erro); }
+    return;
+  }
+  if (url.pathname === '/v1/agent' && req.method === 'POST') {
+    let sessaoUso;
+    try {
+      let corpo = ''; for await (const p of req) { corpo += p; if (corpo.length > 1_000_000) throw new Error('payload acima de 1 MB'); }
+      const b = JSON.parse(corpo || '{}');
+      const mensagem = b.message ?? b.mensagem;
+      if (!mensagem || String(mensagem).length > 12000) throw Object.assign(new Error('message é obrigatória e deve ter até 12000 caracteres'), { status: 400, codigo: 'invalid_request' });
+      const effort = normalizarEffort(b.effort);
+      sessaoUso = await apiComercial.iniciarUso(bearer(req), { rota: '/v1/agent', effort });
+      const inicio = Date.now();
+      let resultado;
+      try {
+        resultado = await executarAgente({
+          mensagem, sessao: 'api:' + sessaoUso.item.id + ':' + String(b.session || b.sessao || 'local').slice(0, 100), canal: 'api-comercial',
+          rota: b.rota || 'auto', planejar: typeof b.planejar === 'boolean' ? b.planejar : undefined,
+          effort, meta: { cliente: sessaoUso.item.id }, plugins, gateway, trava,
+        });
+        await apiComercial.finalizarUso(sessaoUso, { ok: true, latenciaMs: Date.now() - inicio, via: resultado.via });
+        enviarJson(req, res, { ...resultado, uso: sessaoUso.uso });
+      } catch (erro) {
+        await apiComercial.finalizarUso(sessaoUso, { ok: false, latenciaMs: Date.now() - inicio, erro: erro.message });
+        throw erro;
+      }
+    } catch (erro) { erroApiJson(res, erro); }
     return;
   }
   if (url.pathname === '/v1/messages' && req.method === 'POST') {
@@ -857,6 +926,12 @@ const servidor = http.createServer(async (req, res) => {
   if (url.pathname.startsWith('/web/')) {
     const alvo = path.join(raiz, url.pathname.replace(/^\/+/, ''));
     if (!dentroDe(path.join(raiz, 'web'), alvo)) { res.writeHead(403); res.end(); return; }
+    await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || TIPOS['.js']);
+    return;
+  }
+  if (url.pathname.startsWith('/sdk/')) {
+    const alvo = path.join(raiz, url.pathname.replace(/^\/+/, ''));
+    if (!dentroDe(path.join(raiz, 'sdk'), alvo)) { res.writeHead(403); res.end(); return; }
     await servirEstatico(req, res, alvo, TIPOS[path.extname(alvo)] || TIPOS['.js']);
     return;
   }

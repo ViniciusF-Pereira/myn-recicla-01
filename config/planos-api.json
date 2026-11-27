@@ -1,0 +1,6 @@
+{
+  "planos": {
+    "gratuito": { "nome": "Gratuito", "requisicoesDia": 100, "rpm": 10, "esforcos": ["low", "medium"] },
+    "pro": { "nome": "Pro", "requisicoesDia": 10000, "rpm": 120, "esforcos": ["low", "medium", "high"] }
+  }
+}

@@ -94,6 +94,21 @@ A busca combina:
 
 O vetor hash é uma assinatura lexical local, não um embedding neural. A camada browser também possui embeddings WebGPU em `web/inferencia/embeddings-gpu.mjs`.
 
+## Memória e RAG no cliente
+
+O Playground possui um painel **Memória + RAG local**:
+
+- escopos `sessao`, `projeto` e `global`;
+- registro de mensagens e preferências em IndexedDB;
+- busca híbrida TF-IDF + vetor hash;
+- resumo extractivo persistido após 8 registros;
+- RAG em pedaços com trecho relevante;
+- embedding neural WebGPU opcional;
+- exportação/importação de memória e RAG em JSON;
+- limpeza por escopo.
+
+O banco RAG híbrido usa `myn-rag-hibrido` para evitar conflito de versão com abas antigas.
+
 ## Migração
 
 Já usam o núcleo:

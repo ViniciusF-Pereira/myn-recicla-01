@@ -50,6 +50,9 @@ test('site oferece download e modo extensão', async () => {
   assert.match(play, /id="btnExtensao"/);
   assert.match(js, /window\.myn\.cliente\.conversar/);
   assert.match(js, /MODO_EXTENSAO/);
+  assert.match(play, /id="painelMemoria"/);
+  assert.match(js, /window\.myn\.memoria\.exportar/);
+  assert.match(js, /window\.myn\.rag\.exportar/);
   const server = await readFile('scripts/site-server.mjs', 'utf8');
   assert.match(server, /frame-ancestors chrome-extension:/);
 });

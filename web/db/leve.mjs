@@ -42,6 +42,7 @@ export async function listar(tabela, limite = 100) {
   return itens.sort((a, b) => (a.t || 0) - (b.t || 0)).slice(-limite);
 }
 export async function obter(tabela, id) { return tx(tabela, 'readonly', (s) => s.get(id)); }
+export async function remover(tabela, id) { return tx(tabela, 'readwrite', (s) => s.delete(id)); }
 export async function contar(tabela) { return tx(tabela, 'readonly', (s) => s.count()); }
 export async function limpar(tabela) { return tx(tabela, 'readwrite', (s) => s.clear()); }
 export async function exportar() {

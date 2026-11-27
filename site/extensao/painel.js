@@ -3,6 +3,9 @@ import { ROTAS } from './rotas.js';
 const $ = (id) => document.getElementById(id);
 const status = $('status');
 const lista = $('rotas');
+let rotaManual = null;
+function origemMyn() { return new URL($('siteBase').value).origin; }
+function mensagem(tipo, dados = {}) { return chrome.runtime.sendMessage({ tipo, origemPagina: origemMyn(), ...dados }); }
 
 function estado(texto, classe = '') {
   status.textContent = texto;
@@ -44,14 +47,17 @@ function abrirVM() {
 
 async function pintarRotas() {
   lista.innerHTML = '';
+  let saude = {};
+  try { saude = Object.fromEntries(((await mensagem('listar_rotas')).rotas || []).map((r) => [r.id, r.saude])); } catch { /* painel ainda funciona sem saúde */ }
   for (const rota of ROTAS.filter((r) => !r.oculta)) {
     const permitido = await chrome.permissions.contains({ origins: [rota.origem + '/*'] });
     const linha = document.createElement('div');
     linha.className = 'rota';
-    linha.innerHTML = '<div><b></b><small></small></div><button type="button">' + (permitido ? 'autorizado' : 'autorizar') + '</button>';
+    linha.innerHTML = '<div><b></b><small></small></div><button type="button">' + (permitido ? 'autorizado' : 'autorizar') + '</button><button type="button" class="sec manual">manual</button>';
     linha.querySelector('b').textContent = rota.nome;
-    linha.querySelector('small').textContent = rota.origem.replace('https://', '');
-    const botao = linha.querySelector('button');
+    const s = saude[rota.id];
+    linha.querySelector('small').textContent = rota.origem.replace('https://', '') + ' · v' + rota.versao + (s ? ' · saúde ' + s.score + ' · ' + s.estado : '');
+    const [botao, manual] = linha.querySelectorAll('button');
     botao.className = permitido ? 'ok' : '';
     botao.onclick = async () => {
       botao.disabled = true;
@@ -64,6 +70,11 @@ async function pintarRotas() {
         estado(erro.message, 'erro');
       } finally { botao.disabled = false; }
     };
+    manual.onclick = async () => {
+      rotaManual = rota.id; $('manual').hidden = false; $('manualInfo').textContent = rota.nome + ' · envie sua mensagem na aba e capture a resposta.';
+      try { const d = await mensagem('diagnosticar_rota', { rotaId: rota.id }); estado(d.layout?.composer ? 'modo manual · aba pronta' : 'modo manual · envio manual necessário', !d.layout?.composer); }
+      catch (erro) { estado(erro.message, true); }
+    };
     lista.appendChild(linha);
   }
 }
@@ -71,6 +82,16 @@ async function pintarRotas() {
 $('abrirVm').onclick = abrirVM;
 $('usarLocal').onclick = () => { $('siteBase').value = 'http://127.0.0.1:5188'; abrirVM(); };
 $('siteBase').addEventListener('keydown', (e) => { if (e.key === 'Enter') abrirVM(); });
+$('capturar').onclick = async () => {
+  if (!rotaManual) return;
+  try { const d = await mensagem('capturar_manual', { rotaId: rotaManual }); $('respostaManual').textContent = d.texto || d.erro || 'sem resposta'; estado('resposta capturada', !d.ok); }
+  catch (erro) { $('respostaManual').textContent = erro.message; estado(erro.message, true); }
+};
+$('diagnosticar').onclick = async () => {
+  if (!rotaManual) return;
+  try { const d = await mensagem('diagnosticar_rota', { rotaId: rotaManual }); $('respostaManual').textContent = JSON.stringify(d, null, 2); estado('diagnóstico concluído', !d.ok); }
+  catch (erro) { $('respostaManual').textContent = erro.message; estado(erro.message, true); }
+};
 
 carregarBase().then(abrirVM).catch((erro) => estado(erro.message, 'erro'));
 pintarRotas().catch((erro) => estado(erro.message, 'erro'));

@@ -38,6 +38,18 @@
 - `/api/worker-analise/{status,start,stop,stream,eventos}`
 - `/api/worker-melhoria/{status,start,stop,stream,eventos}`
 
+## API comercial
+
+- `POST /v1/agent` — agente autenticado por chave `myn_sk_...`, com plano, cota e uso.
+- `GET /v1/usage` — consumo da própria chave.
+- `GET/POST /api/admin/chaves` — gestão local de chaves.
+- `DELETE /api/admin/chaves/:id` — revogação.
+- `GET /api/admin/metricas` — métricas locais.
+- `/api.html` — painel local.
+- `sdk/myn.mjs` — SDK sem dependências.
+- `docs/openapi.yaml` — contrato OpenAPI.
+- `docs/API_COMERCIAL.md` — guia de integração e cobrança.
+
 ## Extensão e modo cliente
 
 - `GET /extensao/myn-recicla-extensao.zip` — download da extensão Chromium.

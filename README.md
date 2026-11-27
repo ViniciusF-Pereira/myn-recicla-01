@@ -13,6 +13,8 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 | Mapa de provedores com input/output | ![Mapeamento](docs/prints/03-mapeamento.png) |
 | Extensão com VM Web no painel lateral | ![Extensão](docs/prints/extensao-painel.png) |
 | Playground conectado à extensão | ![Playground com extensão](docs/prints/extensao-playground.png) |
+| Memória e RAG local | ![Memória e RAG](docs/prints/memoria-rag.png) |
+| Painel da API comercial | ![API comercial](docs/prints/api-comercial.png) |
 
 > O Playground **não fica na tela inicial**. O botão **ABRIR PLAYGROUND /01** abre `playground.html` em uma nova aba.
 
@@ -39,6 +41,8 @@ node scripts/testar-extensao.mjs
 - **Myn-01 Auto**: escolhe rotas por capacidade e saúde, roda em paralelo e escolhe a melhor resposta.
 - **Scoreboard**: score = 0,45·sucesso + 0,35·velocidade + 0,2·recência, com circuit breaker de 3 estados.
 - **MCP** JSON-RPC com 15 ferramentas para agentes externos.
+- **Memória/RAG local:** escopos sessão/projeto/global, busca híbrida, resumo persistido e exportação/importação em JSON.
+- **Extensão confiável:** adaptadores versionados, saúde por rota, diagnóstico de layout e modo manual.
 - **Goal autônomo**: `/plan` → `/loop` → `/goal` com agendador usando a própria API.
 - **WEBdocker.NODEJS**: container com Chromium headless — as rotas rodam no aparelho de quem executa.
 
@@ -89,6 +93,16 @@ curl http://127.0.0.1:5188/api/agente \
 ```
 
 Para MCP e `/v1/messages`, obtenha o token local em `/api/token` e envie `Authorization: Bearer SEU_TOKEN`. O token fica fora do Git.
+
+### API comercial
+
+- Painel local: `http://127.0.0.1:5188/api.html`
+- `POST /v1/agent` com chave `myn_sk_...`
+- `GET /v1/usage`
+- planos `gratuito` e `pro`, cota diária, RPM e esforço por plano;
+- chaves revogáveis armazenadas apenas como hash;
+- SDK em `sdk/myn.mjs`, OpenAPI em `docs/openapi.yaml`;
+- guia completo em `docs/API_COMERCIAL.md`.
 
 | Método | Rota | Uso |
 |---|---|---|

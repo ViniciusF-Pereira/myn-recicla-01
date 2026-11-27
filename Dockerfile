@@ -14,6 +14,7 @@ COPY site ./site
 COPY web ./web
 COPY docs ./docs
 COPY tests ./tests
+COPY sdk ./sdk
 COPY docker ./docker
 
 # O worker de melhoria precisa de um repositório local para branch/commit/merge.

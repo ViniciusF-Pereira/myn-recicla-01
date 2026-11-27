@@ -249,3 +249,18 @@ Ponte do site para a extensão Chromium.
 Exports: normalizarEffort, normalizarRota, selecionarRotas, conversar, extensaoDisponivel, abrirVMExtensao, ESFORCOS
 
 Conversa no navegador via API direta, extensão e WebGPU.
+## memoria-cliente.mjs
+
+Exports: criarMemoria, memoria
+
+Memória local por sessão/projeto/global com busca híbrida e resumo.
+## ranking.mjs
+
+Exports: tokens, conjuntoTokens, vetorHash, similaridade, scoreLexico, idfDocumentos, scoreHibrido, trechoRelevante, resumirExtrativo
+
+Ranking híbrido compartilhado por memória e RAG.
+## api-comercial.mjs
+
+Exports: PLANOS_PADRAO, criarApiComercial
+
+Chaves, planos, cota, uso, métricas e webhook.

@@ -2,7 +2,7 @@
 
 Data: 27/11/2026.
 
-Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`), hash `b7f2f20c8829`.
+Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`), hash `ec12bd152e45`.
 
 ## Build
 
@@ -17,7 +17,7 @@ Imagem construída: `myn-recicla-01:dev` (`node:22-bookworm-slim`), hash `b7f2f2
 - `GET /api/arquitetura` → 57 módulos, 78 dependências, 0 ciclos/violações/imports quebrados.
 - Worker de análise: `start` → 1 ciclo → `finalizado`.
 - Git local: branch `master`, commit `base do container`.
-- `node --test` dentro do container → 59/59 testes passando.
+- `node --test` dentro do container → 71/71 testes passando.
 - Processo executado como usuário `myn` (UID 10001), não root.
 - Healthcheck respondeu `200` em `/api/saude`.
 - Assets do WORK e painel atual presentes: `site/assistente.mjs`, `site/dados-atuais.mjs` e `docs/RELATORIO_UNICO.html`.

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const raiz = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const origem = path.join(raiz, 'site', 'extensao');
 const destino = path.join(origem, 'myn-recicla-extensao.zip');
-const arquivos = ['manifest.json', 'background.js', 'content-script.js', 'rotas.js', 'painel.html', 'painel.css', 'painel.js', 'icons/icon16.png', 'icons/icon32.png', 'icons/icon48.png', 'icons/icon128.png'];
+const arquivos = ['manifest.json', 'background.js', 'content-script.js', 'rotas.js', 'saude.mjs', 'painel.html', 'painel.css', 'painel.js', 'icons/icon16.png', 'icons/icon32.png', 'icons/icon48.png', 'icons/icon128.png'];
 
 const tabela = new Uint32Array(256);
 for (let n = 0; n < 256; n++) {

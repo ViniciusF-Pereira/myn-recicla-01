@@ -54,4 +54,6 @@ export function versao() { return presenca?.versao || null; }
 export function diagnostico() { return [...depura]; }
 export function abrirVM() { return enviar('abrir_vm', {}, 5000); }
 export function listarRotas() { return enviar('listar_rotas', {}, 3000); }
+export function diagnosticarRota(rotaId, timeoutMs = 35000) { return enviar('diagnosticar_rota', { rotaId }, timeoutMs); }
 export function executarRota(rotaId, texto, timeoutMs = 100000) { return enviar('executar_rota', { rotaId, texto }, timeoutMs); }
+export function capturarManual(rotaId, timeoutMs = 35000) { return enviar('capturar_manual', { rotaId }, timeoutMs); }

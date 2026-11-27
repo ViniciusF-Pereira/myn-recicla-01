@@ -120,7 +120,9 @@ try {
   if (relatorio.cliente.ponte === true) {
     relatorio.cliente.local = await cdp.avaliar(`(async()=>{const ev=[];for await(const e of window.myn.cliente.conversar({texto:'quem é você?',sessao:'teste-extensao',effort:'low'}))ev.push(e);return {via:ev.at(-1)?.via,texto:ev.map(e=>e.token||'').join(''),eventos:ev.length}})()`);
     relatorio.cliente.permissaoNegada = await cdp.avaliar(`import('/web/core/extensao.mjs').then(async m=>{try{const r=await m.executarRota('chatgpt-web','Responda apenas OK em português.');return {resultado:r}}catch(e){return {erro:String(e.message)}}})`);
+    relatorio.cliente.diagnosticoLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.diagnosticarRota('myn-teste-local'))`);
     relatorio.cliente.rotaLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.executarRota('myn-teste-local','teste de automação'))`);
+    relatorio.cliente.manualLocal = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.capturarManual('myn-teste-local'))`);
   }
 
   try {
@@ -148,7 +150,7 @@ try {
   await esperar(() => cp.avaliar("document.querySelectorAll('#rotas .rota').length===5"), 30000);
   await esperar(() => cp.avaliar("document.getElementById('vm').src.includes('/playground.html')"), 30000);
   await new Promise((r) => setTimeout(r, 2500));
-  relatorio.extensao.painel = await cp.avaliar("({rotas:document.querySelectorAll('#rotas .rota').length,iframe:document.getElementById('vm').src,status:document.getElementById('status').textContent})");
+  relatorio.extensao.painel = await cp.avaliar("({rotas:document.querySelectorAll('#rotas .rota').length,manuais:document.querySelectorAll('#rotas button.manual').length,iframe:document.getElementById('vm').src,status:document.getElementById('status').textContent})");
   relatorio.extensao.painelPing = await cp.avaliar("chrome.runtime.sendMessage({tipo:'ping',origemPagina:'http://127.0.0.1:5188'})").catch((e) => String(e.message));
   relatorio.extensao.sidePanelAberto = await cp.avaliar(`chrome.tabs.query({url:'http://127.0.0.1:5188/*'}).then(async(ts)=>{const t=ts.find(x=>x.url.includes('/playground.html'));if(!t)return false;await chrome.sidePanel.open({tabId:t.id});return true})`).catch((e) => String(e.message));
   await cp.foto(path.join(prints, 'extensao-painel.png'), 440, 920);
@@ -161,7 +163,18 @@ try {
   await new Promise((r) => setTimeout(r, 1200));
   await rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 }).catch(() => {});
 }
+const aceites = [
+  relatorio.cliente.ponte === true,
+  relatorio.cliente.vmAberta === true,
+  relatorio.cliente.vmPronta === true,
+  relatorio.extensao.sidePanelAberto === true,
+  relatorio.cliente.diagnosticoLocal?.layout?.composer === true,
+  relatorio.cliente.rotaLocal?.ok === true,
+  relatorio.cliente.manualLocal?.ok === true,
+  relatorio.cliente.pollinations?.via === 'pollinations-text-api',
+];
+relatorio.aceites = { total: aceites.length, aprovados: aceites.filter(Boolean).length };
 await mkdir(path.join(RAIZ, 'outputs'), { recursive: true });
 await writeFile(path.join(RAIZ, 'outputs', 'extensao-teste.json'), JSON.stringify(relatorio, null, 2));
 console.log(JSON.stringify(relatorio, null, 2));
-if (relatorio.erros.length || relatorio.cliente.ponte !== true || !relatorio.cliente.vmAberta) process.exitCode = 1;
+if (relatorio.erros.length || aceites.some((ok) => !ok)) process.exitCode = 1;

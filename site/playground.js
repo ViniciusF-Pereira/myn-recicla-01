@@ -160,7 +160,7 @@ async function enviar(pesquisa=false){
   const rotaApiCliente=/^(pollinations-text-api|webgpu-local)$/.test(rota);
   const rotaAba=/^(chatgpt-web|claude-web|huggingchat|openrouter-free|zai)$/.test(rota);
   const modoCliente=MODO_EXTENSAO||extensaoOk||rotaApiCliente||(location.hostname==='mynrecicla.com'&&(!rotaAba||extensaoOk));
-  const fluxo=modoCliente&&window.myn?.cliente?window.myn.cliente.conversar({texto:mensagem,sessao:MYN_SESSION,rota,effort}):eventosServidor(url);
+  const fluxo=modoCliente&&window.myn?.cliente?window.myn.cliente.conversar({texto:mensagem,sessao:MYN_SESSION,projeto:$('memProjeto').value.trim(),escopo:$('memEscopo').value,rota,effort}):eventosServidor(url);
   let texto='',iniciado=false,via='',streamEl=null,metaHtml='';
   for await(const ev of fluxo){
     if(ev.inicio){
@@ -321,6 +321,17 @@ $('btnModelos').onclick=async()=>{
  }catch(e){espera.className='msg err';espera.textContent='Erro: '+e.message}
 };
 
+const pm=$('painelMemoria');
+function baixarJson(nome,obj){const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=nome;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function contextoMemoriaUI(){return {sessao:MYN_SESSION,projeto:$('memProjeto').value.trim(),escopo:$('memEscopo').value}}
+async function carregarMemoriaUI(){try{await esperarMyn();const c=contextoMemoriaUI(),[ctx,stats,rstats]=await Promise.all([window.myn.memoria.contexto({...c,limite:12}),window.myn.memoria.estatisticas(c),window.myn.rag.estatisticas()]);$('memCap').textContent=stats.registros+' registros';$('memSaida').textContent=ctx.length?ctx.map(r=>'['+r.papel+'] '+r.texto).join('\n\n'):'memória vazia';$('ragInfo').textContent=rstats.documentos+' documentos · '+rstats.neural+' com embedding neural · '+rstats.caracteres+' caracteres'}catch(e){$('memSaida').textContent='Erro: '+e.message}}
+$('btnMemoria').onclick=()=>{pm.classList.toggle('on');if(pm.classList.contains('on'))carregarMemoriaUI()};$('fecharMemoria').onclick=()=>pm.classList.remove('on');$('memCarregar').onclick=carregarMemoriaUI;
+$('memBuscarBtn').onclick=async()=>{try{const q=$('memBusca').value.trim();if(!q)return carregarMemoriaUI();const r=await window.myn.memoria.buscar(q,{...contextoMemoriaUI(),limite:10});$('memSaida').textContent=r.length?r.map(x=>'['+x.score.toFixed(2)+'] '+x.texto).join('\n\n'):'nenhum resultado'}catch(e){$('memSaida').textContent='Erro: '+e.message}};
+$('memExportar').onclick=async()=>{try{baixarJson('myn-memoria.json',await window.myn.memoria.exportar(contextoMemoriaUI()))}catch(e){$('memSaida').textContent='Erro: '+e.message}};
+$('ragExportar').onclick=async()=>{try{baixarJson('myn-rag.json',await window.myn.rag.exportar())}catch(e){$('memSaida').textContent='Erro: '+e.message}};
+$('ragEmbeddings').onclick=async()=>{if(!confirm('Gerar embeddings locais via WebGPU? O download do modelo pode ser grande.'))return;try{const n=await window.myn.rag.gerarEmbeddings();$('ragInfo').textContent=n+' documentos com embedding neural';await carregarMemoriaUI()}catch(e){$('memSaida').textContent='Erro: '+e.message}};
+$('memImportar').onclick=()=>$('memArquivo').click();$('memArquivo').onchange=async e=>{const f=e.target.files[0];if(!f)return;try{const j=JSON.parse(await f.text());if(j._myn==='myn-rag')await window.myn.rag.importar(j);else await window.myn.memoria.importar(j,contextoMemoriaUI());await carregarMemoriaUI()}catch(er){$('memSaida').textContent='Erro: '+er.message}finally{e.target.value=''}};
+$('memLimpar').onclick=async()=>{if(!confirm('Limpar a memória deste escopo?'))return;try{await window.myn.memoria.limpar(contextoMemoriaUI());await carregarMemoriaUI()}catch(e){$('memSaida').textContent='Erro: '+e.message}};
 const pv=$('painelVM'), pag=$('painelAgentes');
 $('btnVM').onclick=()=>{pv.classList.toggle('on');if(pv.classList.contains('on'))carregarVM()};
 if(PARAMS.get('vm')==='1'){pv.classList.add('on');carregarVM()}

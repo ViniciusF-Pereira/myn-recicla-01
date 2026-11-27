@@ -24,7 +24,7 @@ async function semear() {
       { id: 'saude', titulo: 'Saúde das rotas', texto: (saude.rotas || []).map((r) => r.id + ' score ' + r.score + ' ' + r.circuito).join('\n') },
       { id: 'myn', titulo: 'Myn Recicla', texto: 'Myn Recicla/01: agente web-only sobre rotas gratuitas de navegador e WebGPU. Sem chave, sem serviço pago, sem execução local.' },
     ];
-    await ragStore.indexar(docs);
+    await ragStore.indexar(docs, { substituir: false });
   } catch { /* RAG segue vazio até a API voltar */ }
 }
 
@@ -48,6 +48,8 @@ window.myn = {
   sessao: { carregar: sessao.carregar, salvar: sessao.salvar, markdown: sessao.markdown },
   midia: { capacidade: midia.capacidade, gerarImagem: midia.gerarImagem, narrar: midia.narrar, gravarNarracao: midia.gravarNarracao, gerarVideo: midia.gerarVideo, gerarGif: midia.gerarGif, extrairArquivo: midia.extrairArquivo, baixar: midia.baixar },
   cliente: { conversar: cliente.conversar, extensaoDisponivel: cliente.extensaoDisponivel, abrirVM: cliente.abrirVMExtensao, selecionarRotas: cliente.selecionarRotas },
+  memoria: cliente.memoria,
+  rag: { ...ragStore, ...cliente.rag },
   pronto: (async () => { await semear(); await goal.retomar(); window.myn.vm.padrao = await new VMWeb('myn-vm-padrao').iniciar(); })(),
 };
 document.documentElement.dataset.myn = 'pronto';

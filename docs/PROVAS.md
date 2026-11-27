@@ -8,4 +8,7 @@
 - docs/prints/extensao-home.png
 - docs/prints/extensao-playground.png
 - docs/prints/extensao-painel.png
+- docs/prints/memoria-rag.png
+- docs/prints/api-comercial.png
+- docs/API_COMERCIAL.md
 

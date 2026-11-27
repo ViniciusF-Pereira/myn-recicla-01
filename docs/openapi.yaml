@@ -1,0 +1,74 @@
+openapi: 3.1.0
+info:
+  title: Myn Recicla/01 API
+  version: 1.0.0
+  description: API de agente com memória, RAG, planejamento, esforço e rotas gratuitas.
+servers:
+  - url: http://127.0.0.1:5188
+security:
+  - bearerAuth: []
+paths:
+  /v1/agent:
+    post:
+      summary: Executa o agente
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                message: { type: string, maxLength: 12000 }
+                session: { type: string, default: default }
+                route: { type: string, default: auto }
+                effort: { type: string, enum: [low, medium, high], default: medium }
+                planejar: { type: boolean, default: false }
+      responses:
+        '200':
+          description: Resposta do agente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  resposta: { type: string }
+                  via: { type: string }
+                  effort: { type: string }
+                  tentativas: { type: integer }
+                  uso:
+                    type: object
+                    properties:
+                      usado: { type: integer }
+                      limite: { type: integer }
+                      restante: { type: integer }
+        '401': { description: Chave ausente, inválida ou revogada }
+        '403': { description: Effort não permitido no plano }
+        '429': { description: Cota diária ou rate limit excedido }
+  /v1/usage:
+    get:
+      summary: Consulta consumo da chave
+      parameters:
+        - in: query
+          name: limite
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        '200':
+          description: Uso e eventos recentes
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  usado: { type: integer }
+                  limite: { type: integer }
+                  restante: { type: integer }
+                  rpm: { type: integer }
+                  eventos: { type: array, items: { type: object } }
+        '401': { description: Chave inválida }
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: myn_sk_
