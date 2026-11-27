@@ -54,8 +54,9 @@ export async function buscar(pergunta, k = 4) {
   const pontos = idx.docs.map((d) => {
     let score = 0;
     for (const [t, tf] of Object.entries(q)) {
+      if (!d.tf[t]) continue;
       const idf = Math.log(1 + idx.n / (1 + (idx.df.get(t) || 0)));
-      score += tf * (1 + Math.log(d.tf[t] || 0)) * idf;
+      score += tf * (1 + Math.log(d.tf[t])) * idf;
     }
     return { ...d, score };
   }).filter((d) => d.score > 0).sort((a, b) => b.score - a.score).slice(0, k);
