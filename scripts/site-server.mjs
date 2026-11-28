@@ -16,7 +16,7 @@ import { extrairDocumento, gerarImagem, gerarAudio, gerarVideo, gerarGif, gerarA
 import { buscarFilmes } from '../src/filmes.mjs';
 import { carregarPlugins, listaPublica, executarPlugin, extrairComando } from '../src/plugins.mjs';
 import { respostaRapida } from '../src/stream.mjs';
-import { contextoPara } from '../src/rag.mjs';
+import { contextoPara, indexar } from '../src/rag.mjs';
 
 import { registrar as registrarSaude, relatorio as relatorioSaude, escolherRotas } from '../src/saude.mjs';
 import { orquestrar, classificarTarefa } from '../src/orquestrar-modelos.mjs';
@@ -68,6 +68,7 @@ const gateway = criarGateway({ ...config.gateway, recuperar: recuperarGateway })
 const trava = criarTrava();
 // Política do produto: sem Google/Gemini, inclusive no catálogo público.
 const plugins = (await carregarPlugins()).filter((p) => !/google|gemini/i.test([p.id, p.nome, p.url, p.categoria].join(' ')));
+await indexar().catch(() => { /* RAG será construído sob demanda */ });
 const PORTA = Number(process.env.PORT || 5188);
 const HOST = process.env.MYN_HOST || '127.0.0.1';
 const IDENTIDADE = 'Você é o Myn Recicla/01, um produto open-source de engenharia de software browser-only que transforma abas de chat gratuitas em rotas de agente. Tem Playground, workers de análise/melhoria, MCP, RAG local e descoberta de modelos livres. NÃO é um assistente de viagem, itinerário, trânsito ou transporte. Responda em português, seja útil e honesto, e nunca invente essa função de rotas de deslocamento. Não diga que é ChatGPT, Claude ou outro produto.';
@@ -485,7 +486,7 @@ const servidor = http.createServer(async (req, res) => {
     const configEffort = ESFORCOS[effort];
     if (!mensagem) {
       res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache' });
-      res.write('data: ' + JSON.stringify({ erro: 'mensagem vazia' }) + '\n\n'); res.end(); return;
+      res.write('data: ' + JSON.stringify({ type: 'error', erro: 'mensagem vazia' }) + '\n\n'); res.end(); return;
     }
     const pluginSelecionado = rotaId !== 'auto' ? plugins.find((p) => p.id === rotaId) : null;
     if (pluginSelecionado?.confirmacao && !/^confirmar\s*:/i.test(mensagem)) {
@@ -494,6 +495,8 @@ const servidor = http.createServer(async (req, res) => {
       return;
     }
     res.writeHead(200, { 'content-type': 'text/event-stream; charset=utf-8', 'cache-control': 'no-cache', 'connection': 'keep-alive', 'x-accel-buffering': 'no' });
+    const emitir = (evento) => { if (!res.writableEnded && !res.destroyed && !req.destroyed) res.write('data: ' + JSON.stringify(evento) + '\n\n'); };
+    emitir({ type: 'response.created', rota: rotaId, effort, t: Date.now() });
     let anexos = [];
     try { anexos = JSON.parse(String(url.searchParams.get('anexos') || '[]')).slice(0, 6); } catch { anexos = []; }
     anexos = anexos.map((x) => ({ nome: String(x?.nome || 'imagem').slice(0, 80), url: String(x?.url || ''), texto: String(x?.texto || '').slice(0, 500) }));
@@ -507,39 +510,48 @@ const servidor = http.createServer(async (req, res) => {
     let fontes = [];
     let ferramentas = [];
     if (pesquisa) {
+      emitir({ type: 'tool.start', tool: 'rag_local', status: 'running' });
+      emitir({ type: 'tool.start', tool: 'catalogo_plugins', status: 'running' });
+      let statusRag = 'completed';
       try {
         const ctx = await contextoPara(mensagem, configEffort.rag);
         fontes = (ctx.fontes || []).slice(0, 5);
         const termos = mensagem.toLowerCase().split(/\W+/).filter((w) => w.length > 3);
-        ferramentas = plugins.filter((p) => termos.some((t) => (p.nome + ' ' + p.categoria + ' ' + p.capacidades.join(' ')).toLowerCase().includes(t)))
+        ferramentas = plugins.filter((p) => termos.some((t) => (p.nome + ' ' + p.categoria + ' ' + (p.capacidades || []).join(' ')).toLowerCase().includes(t)))
           .slice(0, 5).map((p) => p.nome + ' (' + p.categoria + ')');
-      } catch { /* segue sem contexto */ }
-      try {
-        imagemPesquisa = await Promise.race([
-          gerarImagem('editorial illustration of ' + mensagem.slice(0, 160) + ', clean line art, mustard and blue'),
-          new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 12000)),
-        ]);
-      } catch { imagemPesquisa = null; }
+      } catch { statusRag = 'skipped'; }
+      emitir({ type: 'tool.end', tool: 'rag_local', status: statusRag, fontes });
+      emitir({ type: 'tool.end', tool: 'catalogo_plugins', status: 'completed', ferramentas });
+      if (/\b(imagem|foto|desenho|ilustra)/i.test(mensagem)) {
+        emitir({ type: 'tool.start', tool: 'imagem_pesquisa', status: 'running' });
+        try {
+          imagemPesquisa = await Promise.race([
+            gerarImagem('editorial illustration of ' + mensagem.slice(0, 160) + ', clean line art, mustard and blue'),
+            new Promise((_, rj) => setTimeout(() => rj(new Error('timeout')), 12000)),
+          ]);
+        } catch { imagemPesquisa = null; }
+        emitir({ type: 'tool.end', tool: 'imagem_pesquisa', status: imagemPesquisa ? 'completed' : 'skipped' });
+      }
     }
     const plugin = pluginSelecionado;
     const imagens = [...imagensAnexadas, ...(imagemPesquisa ? [{ url: imagemPesquisa.url, nome: imagemPesquisa.nome, fonte: imagemPesquisa.fonte }] : [])];
-    res.write('data: ' + JSON.stringify({ inicio: true, fontes, ferramentas, rota: rotaId, imagens, effort,
-      via: plugin ? 'plugin:' + plugin.id : 'auto', capacidades: classificarTarefa(mensagem) }) + '\n\n');
+    emitir({ type: 'response.in_progress', inicio: true, fontes, ferramentas, rota: rotaId, imagens, effort,
+      via: plugin ? 'plugin:' + plugin.id : 'auto', capacidades: classificarTarefa(mensagem) });
     try {
       if (plugin) {
         const entradaPlugin = (plugin.confirmacao ? mensagem.replace(/^confirmar\s*:/i, '').trim() : mensagem) + contextoAnexos;
-        const d = await executarPlugin({ plugin, entrada: entradaPlugin, gateway, trava, log: (x) => console.log('[stream-plugin]', JSON.stringify(x)) });
+        const d = await executarPlugin({ plugin, entrada: entradaPlugin, gateway, trava, log: (x) => { console.log('[stream-plugin]', JSON.stringify(x)); emitir({ type: 'tool.progress', tool: plugin.id, etapa: x.etapa || 'executando' }); } });
         registrarSaude(plugin.id, { ok: d.ok, ms: d.ms, erro: d.erro || (d.ok ? '' : 'sem_resposta') });
         const texto = d.ok ? d.resposta : ('Falha na rota ' + plugin.nome + ': ' + (d.erro || d.resposta));
-        for (let i = 0; i < texto.length; i += 24) res.write('data: ' + JSON.stringify({ token: texto.slice(i, i + 24), via: 'plugin:' + plugin.id }) + '\n\n');
-        res.write('data: ' + JSON.stringify({ done: true, via: 'plugin:' + plugin.id, texto, sucesso: d.ok }) + '\n\n');
+        for (let i = 0; i < texto.length; i += 24) emitir({ type: 'response.output_text.delta', token: texto.slice(i, i + 24), via: 'plugin:' + plugin.id });
+        emitir({ type: 'response.completed', done: true, via: 'plugin:' + plugin.id, texto, sucesso: d.ok });
       } else {
         for await (const ev of executarAgenteStream({ mensagem: mensagem + contextoAnexos, sessao, canal: 'chat-stream', rota: 'auto', effort, plugins, gateway, trava })) {
-          if (!ev.inicio) res.write('data: ' + JSON.stringify(ev) + '\n\n');
+          if (!ev.inicio) emitir({ ...ev, type: ev.type || (ev.token ? 'response.output_text.delta' : ev.done ? 'response.completed' : 'response.event') });
         }
       }
     } catch (erro) {
-      res.write('data: ' + JSON.stringify({ erro: String(erro.message).slice(0, 160) }) + '\n\n');
+      emitir({ type: 'error', erro: String(erro.message).slice(0, 160) });
     }
     res.end();
     return;

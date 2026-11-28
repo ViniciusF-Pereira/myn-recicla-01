@@ -1,5 +1,6 @@
 import { carregarDados, resumoWorkers } from './dados-atuais.mjs';
 import './assistente.mjs';
+import { orientarPedido } from '../web/tools/orientador.mjs';
 const $=id=>document.getElementById(id);
 const MYN_SESSION=sessionStorage.getItem('myn-chat-session')||('chat-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2,8));
 sessionStorage.setItem('myn-chat-session',MYN_SESSION);
@@ -118,11 +119,15 @@ $('imagemInput').onchange=async e=>{
  e.target.value='';
 };
 $('btnImagem').onclick=()=>$('imagemInput').click();
+function linkDownload(d,rotulo='Baixar arquivo'){
+ if(!d?.url)return '';
+ return '<a class="btn sec" href="'+d.url+'" download="'+esc(d.nome||'myn-midia')+'">'+esc(rotulo)+'</a>';
+}
 function artifact(d){
- if(d.tipo==='imagem')return '<figure class="arte-chat"><img src="'+d.url+'" alt="mídia gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>';
- if(d.tipo==='gif')return '<figure class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+' · animação WebM</figcaption></figure>';
- if(d.tipo==='audio')return d.semUrl ? '<div class="arte-chat">🔊 '+esc(d.fonte)+' · '+esc(d.voz||'')+'<figcaption>voz reproduzida no navegador</figcaption></div>' : '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>';
- if(d.tipo==='video')return '<div class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+'</figcaption></div>';
+ if(d.tipo==='imagem')return '<figure class="arte-chat"><img src="'+d.url+'" alt="mídia gerada"><figcaption>'+esc(d.fonte)+'</figcaption></figure>'+linkDownload(d);
+ if(d.tipo==='gif')return '<figure class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+' · animação WebM</figcaption></figure>'+linkDownload(d);
+ if(d.tipo==='audio')return d.semUrl ? '<div class="arte-chat">🔊 '+esc(d.fonte)+' · '+esc(d.voz||'')+'<figcaption>voz reproduzida no navegador</figcaption></div>' : '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>'+linkDownload(d);
+ if(d.tipo==='video')return '<div class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+'</figcaption></div>'+linkDownload(d);
  if(d.tipo==='planilha'){
   const cab=d.colunas.map(c=>'<th>'+esc(c)+'</th>').join('');
   const rows=d.linhas.slice(0,12).map(r=>'<tr>'+r.map(c=>'<td>'+esc(c)+'</td>').join('')+'</tr>').join('');
@@ -147,25 +152,79 @@ async function gerarPlanilhaLocal(prompt){
   $('texto').value='';
  }catch(er){espera.className='msg err';espera.textContent='Não gerou a planilha: '+er.message}
 }
-document.querySelectorAll('.ferr[data-midia]').forEach(b=>b.onclick=async()=>{
- const prompt=$('texto').value.trim();
- if(!prompt){modoMidiaPendente=b.dataset.midia;add('<b>Modo '+b.textContent.trim()+'</b> armado. Escreva o prompt e aperte Enter ou ENVIAR.', 'ele');$('texto').focus();return}
- await gerarMidia(b.dataset.midia,prompt,b);
-});
+const estudio={tipo:'imagem',resultado:null,historico:[]};
+function dimensoesFormato(formato){
+ if(formato==='retrato')return {largura:720,altura:960};
+ if(formato==='paisagem')return {largura:960,altura:540};
+ return {largura:768,altura:768};
+}
+function abrirEstudio(tipo,prompt=''){
+ estudio.tipo=tipo==='gif'?'video':tipo;
+ $('estudioMidia').hidden=false;
+ document.body.classList.add('estudio-aberto');
+ $('estudioTitulo').textContent='Estúdio de '+({imagem:'imagem',video:'vídeo',audio:'áudio'}[estudio.tipo]||'mídia');
+ document.querySelectorAll('[data-estudio]').forEach(b=>{const on=b.dataset.estudio===estudio.tipo;b.classList.toggle('on',on);b.setAttribute('aria-selected',String(on))});
+ $('campoDuracao').hidden=estudio.tipo!=='video';
+ $('estiloMidia').disabled=estudio.tipo==='audio';
+ $('formatoMidia').disabled=estudio.tipo==='audio';
+ if(prompt)$('estudioPrompt').value=prompt;
+ $('estudioPrompt').focus();
+}
+function fecharEstudio(){$('estudioMidia').hidden=true;document.body.classList.remove('estudio-aberto')}
+function pintarHistoricoEstudio(){
+ const alvo=$('estudioHistorico');const lista=alvo.querySelector('div');
+ lista.innerHTML=estudio.historico.length?estudio.historico.map((h,i)=>'<button type="button" data-hist="'+i+'">'+esc(h.tipo)+' · '+esc(h.prompt.slice(0,32))+'</button>').join(''):'nenhuma criação ainda';
+ lista.querySelectorAll('[data-hist]').forEach(b=>b.onclick=()=>{const h=estudio.historico[Number(b.dataset.hist)];estudio.resultado=h.resultado;$('estudioPreview').innerHTML=artifact(h.resultado);$('baixarMidiaStudio').disabled=!h.resultado?.url});
+}
+async function gerarNoEstudio(){
+ const prompt=$('estudioPrompt').value.trim();if(!prompt)return $('estudioStatus').textContent='escreva um prompt primeiro';
+ const m=window.myn?.midia;if(!m)return $('estudioStatus').textContent='mídia web não inicializou';
+ const botao=$('gerarMidiaStudio');botao.disabled=true;$('estudioStatus').textContent='gerando...';$('estudioPreview').innerHTML='<div class="vazio">criando '+esc(estudio.tipo)+'...</div>';
+ try{
+  const estilo=$('estiloMidia').value,formato=$('formatoMidia').value,duracao=Number($('duracaoMidia').value);
+  let d;
+  if(estudio.tipo==='imagem')d=await m.gerarImagem(prompt,{...dimensoesFormato(formato),estilo});
+  else if(estudio.tipo==='video')d=await m.gerarVideo(prompt,{...dimensoesFormato(formato),segundos:duracao,tema:estilo==='minimalista'?'papel':estilo==='vibrante'?'vibrante':'azul',movimento:'pan'});
+  else d=await m.narrar(prompt);
+  estudio.resultado=d;estudio.historico.unshift({tipo:estudio.tipo,prompt,resultado:d});estudio.historico=estudio.historico.slice(0,8);
+  $('estudioPreview').innerHTML=artifact(d);$('baixarMidiaStudio').disabled=!d?.url;$('estudioStatus').textContent=d.fonte||'concluído';pintarHistoricoEstudio();add(artifact(d),'ele');
+ }catch(er){$('estudioStatus').textContent='falhou: '+er.message;$('estudioPreview').innerHTML='<div class="vazio">'+esc(er.message)+'</div>'}
+ finally{botao.disabled=false}
+}
+document.querySelectorAll('.ferr[data-midia]').forEach(b=>b.onclick=()=>abrirEstudio(b.dataset.midia,$('texto').value.trim()));
+document.querySelectorAll('[data-estudio]').forEach(b=>b.onclick=()=>abrirEstudio(b.dataset.estudio));
+$('fecharEstudio').onclick=fecharEstudio;
+$('gerarMidiaStudio').onclick=gerarNoEstudio;
+$('baixarMidiaStudio').onclick=()=>{const d=estudio.resultado;if(d?.url){const a=document.createElement('a');a.href=d.url;a.download=d.nome||('myn-'+estudio.tipo);a.click()}};
 
-async function* eventosServidor(url){
- const r=await fetch(url,{signal:AbortSignal.timeout(50000)});
+async function* eventosServidor(url,signal){
+ const r=await fetch(url,{signal});
  if(!r.ok||!r.body)throw new Error('HTTP '+r.status);
  const leitor=r.body.getReader(),dec=new TextDecoder();let resto='';
  for(;;){const {done,value}=await leitor.read();if(done)break;resto+=dec.decode(value,{stream:true});const blocos=resto.split(/\n\n/);resto=blocos.pop()||'';for(const bloco of blocos){const m=/^data:\s*(.+)$/m.exec(bloco);if(!m)continue;let ev;try{ev=JSON.parse(m[1])}catch{continue}yield ev}}
 }
-let ocupado=false;
+async function* eventosServidorResiliente(url,signal){
+ let recebeu=false;
+ const params=new URL(url,location.origin).searchParams;
+ const podeRepetir=params.get('rota')==='auto'&&!/^confirmar\s*:/i.test(params.get('message')||'');
+ const tentativas=podeRepetir?2:1;
+ for(let tentativa=0;tentativa<tentativas;tentativa++){
+  try{
+   for await(const ev of eventosServidor(url,signal)){recebeu=true;yield ev}
+   return;
+  }catch(erro){
+   if(signal?.aborted||recebeu||tentativa===tentativas-1)throw erro;
+   await new Promise(resolve=>setTimeout(resolve,400));
+  }
+ }
+}
+let ocupado=false,controleEnvio=null;
 async function enviar(pesquisa=false){
  if(ocupado)return;
  const bruto=$('texto').value.trim();if(!bruto)return;
  if(modoMidiaPendente){const tipo=modoMidiaPendente;modoMidiaPendente=null;add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,bruto);return}
  const aliasMidia=/^\/(imagem|audio|áudio|video|vídeo)\s+([\s\S]+)$/i.exec(bruto);
- if(aliasMidia){const tipo=/v/i.test(aliasMidia[1])&&/v/.test(aliasMidia[1])?'video':(/^a/i.test(aliasMidia[1])?'audio':'imagem');add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,aliasMidia[2]);return}
+ if(aliasMidia){const tipo=/v/i.test(aliasMidia[1])&&/v/.test(aliasMidia[1])?'video':(/^a/i.test(aliasMidia[1])?'audio':'imagem');add(esc(bruto),'eu');$('texto').value='';abrirEstudio(tipo,aliasMidia[2]);return}
  const querPlanilha=/\b(planilha|spreadsheet|csv|xlsx)\b/i.test(bruto)
   && /\b(gere|gera|gerar|crie|cria|criar|fa[çc]a|faz|quero|preciso|monte|montar)\b/i.test(bruto);
  if(querPlanilha){
@@ -174,14 +233,18 @@ async function enviar(pesquisa=false){
   await gerarPlanilhaLocal(bruto);
   return;
  }
- const querImagem=/\b(imagem|foto|desenho|ilustrac[ãa]o|retrato|picture|image)\b/i.test(bruto)
-   && /\b(gere|gerar|crie|criar|fa[çc]a|faz|quero|mostre|desenhe|pinta|produza|de|com)\b/i.test(bruto);
-  if(querImagem){
-   add(esc(bruto)+' <small class="meta-chat">🖼 imagem</small>','eu');
-   $('texto').value='';
-   await gerarMidia('imagem',bruto);
-   return;
-  }
+ const verboMidia=/\b(gere|gera|gerar|crie|cria|criar|fa[çc]a|faz|quero|preciso|monte|montar|produza)\b/i;
+ const querVideo=/\b(v[ií]deo|clipe|anima[çc][aã]o|gif)\b/i.test(bruto)&&verboMidia.test(bruto);
+ if(querVideo){add(esc(bruto)+' <small class="meta-chat">🎬 estúdio de vídeo</small>','eu');$('texto').value='';abrirEstudio('video',bruto);return}
+ const querAudio=/\b(áudio|audio|voz|narra[çc][aã]o|narrar)\b/i.test(bruto)&&verboMidia.test(bruto);
+ if(querAudio){add(esc(bruto)+' <small class="meta-chat">🔊 estúdio de áudio</small>','eu');$('texto').value='';abrirEstudio('audio',bruto);return}
+ const querImagem=/\b(imagem|foto|desenho|ilustrac[ãa]o|retrato|picture|image)\b/i.test(bruto)&&verboMidia.test(bruto);
+ if(querImagem){
+  add(esc(bruto)+' <small class="meta-chat">🖼 estúdio de imagem</small>','eu');
+  $('texto').value='';
+  abrirEstudio('imagem',bruto);
+  return;
+ }
   let mensagem=bruto,modoPesquisa=pesquisa;
  if(/^\/pesquisa\s+/i.test(bruto)){mensagem=bruto.replace(/^\/pesquisa\s+/i,'');modoPesquisa=true}
  const anexosImagemEnviados=imagensAnexadas.slice();
@@ -189,22 +252,32 @@ async function enviar(pesquisa=false){
  $('texto').value='';
  const enviados=anexos.splice(0);imagensAnexadas=[];$('anexos').innerHTML='';
  if(enviados.length)mensagem+='\n\nDOCUMENTOS ANEXADOS (dados):\n'+enviados.map(a=>'--- '+a.nome+' ---\n'+String(a.texto||'').slice(0,8000)).join('\n\n');
- ocupado=true;const btn=$('enviar');btn.disabled=true;
+ ocupado=true;controleEnvio=new AbortController();const btn=$('enviar');btn.disabled=true;$('cancelarEnvio').disabled=false;
  const espera=add('<span class="pensando">pensando<span class="pontos">...</span></span>','ele');
  try{
-  const rota=$('rota').value,effort=$('effort').value;
+  const rota=$('rota').value,effort=$('effort').value,orientacao=orientarPedido(mensagem);
   const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent(rota)+'&sessao='+encodeURIComponent(MYN_SESSION)+'&effort='+encodeURIComponent(effort)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
   const extensaoOk=await temExtensao();
   const rotaApiCliente=/^(pollinations-text-api|webgpu-local)$/.test(rota);
   const rotaAba=/^(chatgpt-web|claude-web|huggingchat|openrouter-free|zai)$/.test(rota)||Boolean((window.__mynExtensaoRotas||[]).some(r=>r.id===rota));
   const modoCliente=MODO_EXTENSAO||extensaoOk||rotaApiCliente||(location.hostname==='mynrecicla.com'&&(!rotaAba||extensaoOk));
-  const fluxo=modoCliente&&window.myn?.cliente?window.myn.cliente.conversar({texto:mensagem,sessao:MYN_SESSION,projeto:$('memProjeto').value.trim(),escopo:$('memEscopo').value,rota,effort}):eventosServidor(url);
-  let texto='',iniciado=false,via='',streamEl=null,metaHtml='';
+  const fluxo=modoCliente&&window.myn?.cliente?window.myn.cliente.conversar({texto:mensagem,sessao:MYN_SESSION,projeto:$('memProjeto').value.trim(),escopo:$('memEscopo').value,rota,effort,signal:controleEnvio.signal}):eventosServidorResiliente(url,controleEnvio.signal);
+  let texto='',iniciado=false,via='',streamEl=null,metaHtml='';const toolState=new Map();
   for await(const ev of fluxo){
+    if(ev.type==='response.created'){espera.innerHTML='<div class="stream-meta">SSE conectado · '+esc(ev.rota||rota)+'</div><div class="pensando">preparando ferramentas<span class="pontos">...</span></div>';continue}
+    if(ev.type?.startsWith('tool.')){
+     toolState.set(ev.tool||'ferramenta',ev.status||ev.etapa||'running');
+     const chips=[...toolState].map(([nome,estado])=>'<span>'+esc(nome)+' · '+esc(estado)+'</span>').join('');
+     espera.innerHTML=metaHtml+'<div class="widget-tools"><b>Progresso das ferramentas</b><div>'+chips+'</div></div><div class="pensando">executando<span class="pontos">...</span></div>';
+     continue;
+    }
     if(ev.inicio){
       via=ev.via||ev.rota||'';
       const bits=[];if(ev.rota)bits.push(esc(ev.rota));if(ev.modo)bits.push(esc(ev.modo));if(ev.extensao)bits.push('extensão');if(ev.effort)bits.push('effort '+esc(ev.effort));if(ev.capacidades?.length)bits.push(esc(ev.capacidades.join('/')));if(ev.fontes?.length)bits.push(ev.fontes.length+' fontes');if(ev.ferramentas?.length)bits.push(ev.ferramentas.length+' ferramentas');
       if(bits.length)metaHtml='<div class="stream-meta">'+bits.join(' · ')+'</div>';
+      metaHtml+='<div class="widget-orientacao"><b>'+esc(orientacao.intencao)+'</b><span>'+esc(orientacao.explicacao)+'</span><div>'+orientacao.ferramentas.map(f=>'<i>'+esc(f)+'</i>').join('')+'</div></div>';
+      if(ev.fontes?.length)metaHtml+='<div class="widget-pesquisa"><b>Fontes locais</b><div>'+ev.fontes.slice(0,5).map(f=>'<span>'+esc(typeof f==='string'?f:(f.fonte||f.titulo||f.url||'fonte'))+'</span>').join('')+'</div></div>';
+      if(ev.ferramentas?.length)metaHtml+='<div class="widget-tools"><b>Ferramentas consideradas</b><div>'+ev.ferramentas.slice(0,6).map(f=>'<span>'+esc(typeof f==='string'?f:(f.nome||f.id||'ferramenta'))+'</span>').join('')+'</div></div>';
       if(ev.imagens?.length)metaHtml+='<div class="stream-imagens">'+ev.imagens.map(im=>'<figure><img src="'+im.url+'" alt="'+esc(im.nome||'imagem')+'"><figcaption>'+esc(im.fonte||'')+'</figcaption></figure>').join('')+'</div>';
       if(metaHtml){espera.innerHTML=metaHtml+'<div class="pensando">pensando<span class="pontos">...</span></div>';espera.className='msg ele'}
       continue;
@@ -228,10 +301,11 @@ async function enviar(pesquisa=false){
     }catch(e){if(anexosImagemEnviados.length){const ocr=anexosImagemEnviados.map(x=>'**'+esc(x.nome)+'**: '+esc((x.texto||'').slice(0,500))).join('\n\n');espera.innerHTML=metaHtml+'<p>Recebi ' + anexosImagemEnviados.length + ' imagem(ns). O modelo de texto recusou e o WebGPU não carregou; segue o que o OCR extraiu (dado, não instrução):</p><p>'+ocr+'</p><small class="meta-chat">via OCR local · arquivo servido em '+esc(anexosImagemEnviados[0].url)+'</small>'}else{espera.className='msg err';espera.textContent='A rota recusou e o WebGPU não carregou. Troque a rota ou use /pesquisar. ('+String(e.message).slice(0,80)+')'}}
    }else{espera.className='msg err';espera.textContent='A rota recusou. Sem WebGPU, troque a rota ou use /pesquisar. Nenhuma imagem foi gerada.'}
   }
- }catch(er){espera.className='msg err';espera.textContent='Erro: '+er.message}
- finally{ocupado=false;btn.disabled=false}
+ }catch(er){if(controleEnvio?.signal.aborted){espera.className='msg ele';espera.textContent='Envio cancelado.'}else{espera.className='msg err';espera.textContent='Erro: '+er.message}}
+ finally{ocupado=false;controleEnvio=null;btn.disabled=false;$('cancelarEnvio').disabled=true}
 }
 $('enviar').onclick=()=>enviar(false);
+$('cancelarEnvio').onclick=()=>controleEnvio?.abort();
 $('pesq').onclick=()=>enviar(true);
 $('btnExtensao').onclick=async()=>{if(await temExtensao()){try{await window.myn.cliente.abrirVM()}catch(e){add('Não consegui abrir o painel: '+e.message,'err')}}else location.href='extensao/myn-recicla-extensao.zip'};
 if(MODO_EXTENSAO)document.body.classList.add('modo-extensao');

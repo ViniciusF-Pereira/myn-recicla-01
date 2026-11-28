@@ -8,52 +8,167 @@
 </head>
 <body>
   <header class="topo">
-    <div class="marca"><span class="selo">♻</span><div><b>Myn Recicla/01</b><small>VM Web + rotas de abas</small></div></div>
-    <span class="status" id="status">conectando...</span>
+    <div class="marca">
+      <img class="logo" src="icons/icon128.png" alt="" width="40" height="40">
+      <div class="marca-texto">
+        <h1>Myn Recicla/01</h1>
+        <small>VM Web + rotas de abas</small>
+      </div>
+    </div>
+    <span class="status" id="status" role="status" aria-live="polite">conectando...</span>
   </header>
 
-  <div class="acoes">
-    <input id="siteBase" aria-label="Endereço do Myn" value="https://mynrecicla.com" spellcheck="false">
-    <button id="abrirVm">ABRIR VM</button>
-    <button id="usarLocal" title="Usar o servidor local">local</button>
+  <div class="acoes" role="group" aria-label="Conexão com o Myn">
+    <label class="campo" for="siteBase">
+      <span>Endereço do Myn</span>
+      <input id="siteBase" value="https://mynrecicla.com" spellcheck="false" autocomplete="url">
+    </label>
+    <div class="acoes-botoes">
+      <button type="button" id="abrirVm">Abrir VM</button>
+      <button type="button" class="sec" id="usarLocal" title="Usar o servidor local">Usar local</button>
+    </div>
   </div>
 
-  <section class="permissoes">
-    <div class="titulo"><b>Acessos opcionais</b><small>autorize apenas o site que quiser usar</small></div>
-    <div id="rotas"></div>
-    <div class="manual" id="manual" hidden><b>Modo manual</b><small id="manualInfo"></small><div><button type="button" class="sec" id="capturar">Capturar resposta</button><button type="button" class="sec" id="diagnosticar">Diagnosticar</button></div><pre id="respostaManual"></pre></div>
-  </section>
+  <div class="tabs" role="tablist" aria-label="Ferramentas do painel">
+    <button type="button" class="aba on" id="aba-rotas" data-aba="rotas" role="tab" aria-selected="true" aria-controls="painel-rotas" tabindex="0">Rotas</button>
+    <button type="button" class="aba" id="aba-chats" data-aba="chats" role="tab" aria-selected="false" aria-controls="painel-chats" tabindex="-1">Chats</button>
+    <button type="button" class="aba" id="aba-lojas" data-aba="lojas" role="tab" aria-selected="false" aria-controls="painel-lojas" tabindex="-1">Lojas</button>
+  </div>
 
-  <section class="descoberta">
-    <div class="titulo"><b>WORK · caçador de chats</b><small>mapeia o DOM sem enviar mensagens</small></div>
-    <div class="descoberta-acao">
-      <input id="descobertaUrl" aria-label="URL do chat" placeholder="https://..." spellcheck="false">
-      <button type="button" id="rastrear">RASTREAR</button>
-      <button type="button" class="sec" id="rastrearAtual">ABA ATUAL</button>
-    </div>
-    <details class="catalogo">
-      <summary>Catálogo de chats verificados</summary>
-      <input id="chatBusca" aria-label="Filtrar catálogo" placeholder="filtrar provedor...">
-      <div id="chats"></div>
-    </details>
-    <div class="relatorio" id="relatorioDescoberta" hidden>
-      <b id="descobertaTitulo"></b><small id="descobertaInfo"></small>
-      <label>Composer<select id="candidatoCompositor"></select></label>
-      <label>Envio<select id="candidatoEnvio"></select></label>
-      <label>Resposta<select id="candidatoResposta"></select></label>
-      <div><button type="button" id="ativarDescoberta">ATIVAR ADAPTADOR</button><button type="button" class="sec" id="limparDescoberta">limpar</button></div>
-      <pre id="descobertaDetalhe"></pre>
-    </div>
-  </section>
+  <main class="conteudo">
+    <section class="painel-aba permissoes" id="painel-rotas" role="tabpanel" aria-labelledby="aba-rotas" tabindex="0">
+      <div class="section-heading">
+        <span class="section-number" aria-hidden="true">01</span>
+        <div>
+          <h2>Acessos opcionais</h2>
+          <p>Autorize apenas o site que quiser usar.</p>
+        </div>
+      </div>
 
-  <section class="lojas">
-    <div class="titulo"><b>WORK · mapeador de lojas</b><small>busca, produtos e navegação local</small></div>
-    <div class="descoberta-acao"><input id="lojaUrl" aria-label="URL da loja" placeholder="https://loja..." spellcheck="false"><button type="button" id="mapearLoja">MAPEAR</button><button type="button" class="sec" id="mapearLojaAtual">ABA ATUAL</button></div>
-    <div class="loja-linha"><select id="lojaSelect" aria-label="Lojas mapeadas"><option value="">nenhuma loja mapeada</option></select><input id="lojaTermo" aria-label="Pedido de compra" placeholder="ex.: fone até 200 reais"><button type="button" id="pesquisarLoja">PESQUISAR</button><button type="button" class="sec" id="observarLoja">VER AGORA</button></div>
-    <div class="loja-linha"><input id="lojaPrompt" aria-label="Prompt para o chat da loja" placeholder="mensagem de teste para o chat"><button type="button" class="sec" id="abrirChatLoja">ABRIR CHAT</button><button type="button" id="enviarChatLoja">ENVIAR CHAT</button></div>
-    <pre id="lojaSaida">mapeie uma loja para descobrir a busca e os produtos.</pre>
-    <details class="eventos-loja"><summary>Visto / entrado recentemente</summary><pre id="lojaEventos">nenhum evento registrado.</pre></details>
-  </section>
+      <div id="rotas" class="rotas-lista" aria-live="polite"></div>
+
+      <div class="manual" id="manual" hidden>
+        <div class="manual-cabecalho">
+          <b>Modo manual</b>
+          <small id="manualInfo"></small>
+        </div>
+        <div class="grupo-botoes">
+          <button type="button" class="sec" id="capturar">Capturar resposta</button>
+          <button type="button" class="sec" id="diagnosticar">Diagnosticar</button>
+        </div>
+        <details class="detalhes">
+          <summary>Resposta e diagnóstico</summary>
+          <pre id="respostaManual" aria-live="polite"></pre>
+        </details>
+      </div>
+    </section>
+
+    <section class="painel-aba descoberta" id="painel-chats" role="tabpanel" aria-labelledby="aba-chats" tabindex="0" hidden>
+      <div class="section-heading">
+        <span class="section-number" aria-hidden="true">02</span>
+        <div>
+          <h2>Caçador de chats</h2>
+          <p>WORK · mapeia o DOM sem enviar mensagens.</p>
+        </div>
+      </div>
+
+      <div class="descoberta-acao">
+        <label class="campo" for="descobertaUrl">
+          <span>URL do chat</span>
+          <input id="descobertaUrl" placeholder="https://..." spellcheck="false" autocomplete="url">
+        </label>
+        <div class="grupo-botoes">
+          <button type="button" id="rastrear">Rastrear</button>
+          <button type="button" class="sec" id="rastrearAtual">Aba atual</button>
+        </div>
+      </div>
+
+      <details class="catalogo detalhes">
+        <summary>Catálogo de chats verificados</summary>
+        <label class="campo campo-filtro" for="chatBusca">
+          <span>Filtrar provedor</span>
+          <input id="chatBusca" placeholder="filtrar provedor..." autocomplete="off">
+        </label>
+        <div id="chats"></div>
+      </details>
+
+      <div class="relatorio" id="relatorioDescoberta" hidden>
+        <div class="relatorio-cabecalho">
+          <b id="descobertaTitulo"></b>
+          <small id="descobertaInfo"></small>
+        </div>
+        <div class="campos-candidatos">
+          <label class="campo" for="candidatoCompositor"><span>Composer</span><select id="candidatoCompositor"></select></label>
+          <label class="campo" for="candidatoEnvio"><span>Envio</span><select id="candidatoEnvio"></select></label>
+          <label class="campo" for="candidatoResposta"><span>Resposta</span><select id="candidatoResposta"></select></label>
+        </div>
+        <div class="grupo-botoes">
+          <button type="button" id="ativarDescoberta">Ativar adaptador</button>
+          <button type="button" class="sec" id="limparDescoberta">Limpar</button>
+        </div>
+        <details class="detalhes">
+          <summary>Detalhes técnicos</summary>
+          <pre id="descobertaDetalhe"></pre>
+        </details>
+      </div>
+    </section>
+
+    <section class="painel-aba lojas" id="painel-lojas" role="tabpanel" aria-labelledby="aba-lojas" tabindex="0" hidden>
+      <div class="section-heading">
+        <span class="section-number" aria-hidden="true">03</span>
+        <div>
+          <h2>Mapeador de lojas</h2>
+          <p>WORK · busca, produtos e navegação local.</p>
+        </div>
+      </div>
+
+      <div class="descoberta-acao">
+        <label class="campo" for="lojaUrl">
+          <span>URL da loja</span>
+          <input id="lojaUrl" placeholder="https://loja..." spellcheck="false" autocomplete="url">
+        </label>
+        <div class="grupo-botoes">
+          <button type="button" id="mapearLoja">Mapear</button>
+          <button type="button" class="sec" id="mapearLojaAtual">Aba atual</button>
+        </div>
+      </div>
+
+      <div class="loja-linha">
+        <label class="campo" for="lojaSelect">
+          <span>Loja mapeada</span>
+          <select id="lojaSelect"><option value="">nenhuma loja mapeada</option></select>
+        </label>
+        <label class="campo" for="lojaTermo">
+          <span>O que você procura?</span>
+          <input id="lojaTermo" placeholder="ex.: fone até 200 reais" autocomplete="off">
+        </label>
+        <div class="grupo-botoes loja-acoes">
+          <button type="button" id="pesquisarLoja">Pesquisar</button>
+          <button type="button" class="sec" id="observarLoja">Ver agora</button>
+        </div>
+      </div>
+
+      <div class="loja-linha">
+        <label class="campo loja-prompt" for="lojaPrompt">
+          <span>Mensagem para o chat</span>
+          <input id="lojaPrompt" placeholder="mensagem de teste para o chat" autocomplete="off">
+        </label>
+        <div class="grupo-botoes loja-acoes">
+          <button type="button" class="sec" id="abrirChatLoja">Abrir chat</button>
+          <button type="button" id="enviarChatLoja">Enviar chat</button>
+        </div>
+      </div>
+
+      <details class="detalhes resultado-loja">
+        <summary>Resultado do mapeamento</summary>
+        <pre id="lojaSaida">mapeie uma loja para descobrir a busca e os produtos.</pre>
+      </details>
+      <details class="detalhes eventos-loja">
+        <summary>Visto / entrado recentemente</summary>
+        <pre id="lojaEventos">nenhum evento registrado.</pre>
+      </details>
+    </section>
+  </main>
 
   <iframe id="vm" title="VM Web do Myn Recicla/01" src="about:blank"></iframe>
 

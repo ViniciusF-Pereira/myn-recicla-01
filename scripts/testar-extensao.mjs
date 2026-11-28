@@ -55,7 +55,14 @@ class CDP {
   }
   enviar(metodo, params = {}) {
     const id = ++this.id;
-    return new Promise((resolve, reject) => { this.pendentes.set(id, { resolve, reject }); this.ws.send(JSON.stringify({ id, method: metodo, params })); });
+    return new Promise((resolve, reject) => {
+      const timer = setTimeout(() => { this.pendentes.delete(id); reject(new Error('timeout CDP: ' + metodo)); }, 45000);
+      this.pendentes.set(id, {
+        resolve: (valor) => { clearTimeout(timer); resolve(valor); },
+        reject: (erro) => { clearTimeout(timer); reject(erro); },
+      });
+      this.ws.send(JSON.stringify({ id, method: metodo, params }));
+    });
   }
   async avaliar(expressao) {
     const r = await this.enviar('Runtime.evaluate', { expression: expressao, awaitPromise: true, returnByValue: true, userGesture: true });
@@ -76,7 +83,18 @@ async function alvo(url, porta) {
   return r.json();
 }
 
-const relatorio = { base: BASE, chrome: CHROME, extensao: {}, cliente: {}, prints: [], erros: [] };
+const relatorio = { base: BASE, chrome: CHROME, extensao: {}, cliente: {}, prints: [], avisos: [], erros: [] };
+const etapa = (nome) => console.log('[teste] ' + nome);
+async function fotoSegura(cdp, arquivo, largura, altura) {
+  try {
+    await cdp.foto(arquivo, largura, altura);
+    relatorio.prints.push(path.relative(RAIZ, arquivo).split(path.sep).join('/'));
+    return true;
+  } catch (erro) {
+    relatorio.avisos.push('print ' + path.basename(arquivo) + ': ' + erro.message);
+    return false;
+  }
+}
 let chrome, cdp;
 try {
   const site = await fetch(BASE + '/').then((r) => r.status);
@@ -119,10 +137,10 @@ try {
   cdp = await CDP.conectar(pagina.webSocketDebuggerUrl);
   await cdp.enviar('Page.enable'); await cdp.enviar('Runtime.enable');
   await esperar(() => cdp.avaliar('Boolean(window.myn?.cliente)'), 30000);
-  await esperar(() => cdp.avaliar("document.documentElement.dataset.mynExtensao==='1.3.0'"), 30000);
+  await esperar(() => cdp.avaliar(`document.documentElement.dataset.mynExtensao===${JSON.stringify(minha.version)}`), 30000);
   relatorio.cliente.injecao = await cdp.avaliar("({dataset:document.documentElement.dataset.mynExtensao||null,scripts:[...document.scripts].map(s=>s.src)})");
   relatorio.cliente.mensagens = await cdp.avaliar(`(async()=>{const logs=[];const fn=e=>logs.push({canal:e.data?.canal,tipo:e.data?.tipo,ok:e.data?.ok,origem:e.origin,mesmaJanela:e.source===window});window.addEventListener('message',fn);window.postMessage({canal:'myn-recicla-extensao',id:'debug-ponte',tipo:'ping'},location.origin);await new Promise(r=>setTimeout(r,1500));window.removeEventListener('message',fn);return logs})()`);
-  relatorio.cliente.ponte = await cdp.avaliar('window.myn.cliente.extensaoDisponivel()').catch((e) => String(e.message));
+  relatorio.cliente.ponte = await esperar(() => cdp.avaliar('window.myn.cliente.extensaoDisponivel()'), 15000);
   relatorio.cliente.diagnostico = await cdp.avaliar("import('/web/core/extensao.mjs').then(m=>m.diagnostico())");
   relatorio.cliente.versao = await cdp.avaliar("import('/web/core/extensao.mjs').then(m=>m.versao())").catch((e) => String(e.message));
   relatorio.cliente.rotas = await cdp.avaliar("import('/web/core/extensao.mjs').then(m=>m.listarRotas())").catch((e) => String(e.message));
@@ -163,39 +181,42 @@ try {
   const ch = await CDP.conectar(home.webSocketDebuggerUrl);
   await ch.enviar('Page.enable');
   await esperar(() => ch.avaliar("document.getElementById('dataAtualizacao')?.textContent!=='—' && !document.getElementById('materialRotas')?.textContent.includes('carregando')"), 30000);
-  await ch.foto(path.join(prints, 'extensao-home.png'));
-  relatorio.prints.push('docs/prints/extensao-home.png'); ch.fechar();
+  await fotoSegura(ch, path.join(prints, 'extensao-home.png'), 1440, 1000); ch.fechar();
 
   await cdp.enviar('Page.navigate', { url: BASE + '/playground.html?extensao=1&vm=1' });
   await esperar(() => cdp.avaliar('Boolean(window.myn?.cliente)'), 30000);
   await esperar(() => cdp.avaliar("document.getElementById('vmSaida').textContent==='vm pronta...'"), 30000);
   await esperar(() => cdp.avaliar("document.getElementById('msgRotas') && !document.getElementById('msgRotas').textContent.includes('carregando')"), 30000);
-  await cdp.foto(path.join(prints, 'extensao-playground.png'));
-  relatorio.prints.push('docs/prints/extensao-playground.png');
+  await fotoSegura(cdp, path.join(prints, 'extensao-playground.png'), 1440, 1000);
 
+  etapa('abrindo painel');
   const painel = await alvo('chrome-extension://' + idExt + '/painel.html?base=' + encodeURIComponent(BASE), porta);
   const cp = await CDP.conectar(painel.webSocketDebuggerUrl);
   await cp.enviar('Page.enable');
   await esperar(() => cp.avaliar("document.querySelectorAll('#rotas .rota').length>=5"), 30000);
   await esperar(() => cp.avaliar("document.getElementById('vm').src.includes('/playground.html')"), 30000);
   await esperar(() => cp.avaliar("document.querySelectorAll('#chats .chat-item').length>=20"), 30000);
-  await cp.avaliar(`(()=>{const u=document.getElementById('descobertaUrl');u.value='${BASE}/extensao/teste.html';document.getElementById('rastrear').click();return true})()`);
+  etapa('rastreando chat');
+  await cp.avaliar(`(()=>{document.getElementById('aba-chats').click();const u=document.getElementById('descobertaUrl');u.value='${BASE}/extensao/teste.html';document.getElementById('rastrear').click();return true})()`);
   await esperar(() => cp.avaliar("document.getElementById('relatorioDescoberta').hidden===false"), 30000);
   relatorio.extensao.ativacaoDireta = await cp.avaliar(`(async()=>{const d=await chrome.storage.local.get('myn-descobertas-v1');const r=d['myn-descobertas-v1'].at(-1);const t=Date.now();const out=await chrome.runtime.sendMessage({tipo:'ativar_descoberta',origemPagina:'${BASE}',descobertaId:r.id,seletores:{compositor:document.getElementById('candidatoCompositor').value,envio:document.getElementById('candidatoEnvio').value,resposta:document.getElementById('candidatoResposta').value}});return {ms:Date.now()-t,ok:out.ok,id:out.adaptador?.id,erro:out.erro}})()`);
   await new Promise((r) => setTimeout(r, 2500));
   relatorio.extensao.painel = await cp.avaliar("({rotas:document.querySelectorAll('#rotas .rota').length,manuais:document.querySelectorAll('#rotas button.manual').length,chats:document.querySelectorAll('#chats .chat-item').length,descoberta:!document.getElementById('relatorioDescoberta').hidden,iframe:document.getElementById('vm').src,status:document.getElementById('status').textContent})");
   relatorio.extensao.painelPing = await cp.avaliar("chrome.runtime.sendMessage({tipo:'ping',origemPagina:'http://127.0.0.1:5188'})").catch((e) => String(e.message));
   relatorio.extensao.sidePanelAberto = await cp.avaliar(`chrome.tabs.query({url:'http://127.0.0.1:5188/*'}).then(async(ts)=>{const t=ts.find(x=>x.url.includes('/playground.html'));if(!t)return false;await chrome.sidePanel.open({tabId:t.id});return true})`).catch((e) => String(e.message));
+  etapa('capturando catálogo de provedores');
   await cp.avaliar("(()=>{document.querySelector('.catalogo').open=true;document.querySelector('.catalogo').scrollIntoView({block:'start'});return true})()");
-  await cp.foto(path.join(prints, 'catalogo-provedores.png'), 1920, 1080);
-  relatorio.prints.push('docs/prints/catalogo-provedores.png');
+  await fotoSegura(cp, path.join(prints, 'catalogo-provedores.png'), 1920, 1080);
+  etapa('capturando painel');
   await cp.avaliar("(()=>{window.scrollTo(0,0);return true})()");
-  await cp.foto(path.join(prints, 'extensao-painel.png'), 440, 920);
-  relatorio.prints.push('docs/prints/extensao-painel.png');
-  await cp.foto(path.join(prints, 'extensao-descoberta.png'), 440, 1100);
-  relatorio.prints.push('docs/prints/extensao-descoberta.png');
-  await cp.avaliar(`chrome.storage.local.set({'myn-adaptadores-descobertos-v1':[{id:'descoberto-externo-teste',nome:'Externo temporário',url:'https://exemplo.com/',origem:'https://exemplo.com',versao:1,campos:['textarea'],envio:['button'],respostas:['pre'],descoberta:true,acesso:'activeTab'}]});location.reload()`);
+  await fotoSegura(cp, path.join(prints, 'extensao-painel.png'), 440, 920);
+  etapa('capturando descoberta');
+  await fotoSegura(cp, path.join(prints, 'extensao-descoberta.png'), 440, 1100);
+  etapa('recarregando acesso temporário');
+  await cp.avaliar(`chrome.storage.local.set({'myn-adaptadores-descobertos-v1':[{id:'descoberto-externo-teste',nome:'Externo temporário',url:'https://exemplo.com/',origem:'https://exemplo.com',versao:1,campos:['textarea'],envio:['button'],respostas:['pre'],descoberta:true,acesso:'activeTab'}]})`);
+  await cp.enviar('Page.reload', { ignoreCache: true });
   relatorio.extensao.acessoTemporario = await esperar(() => cp.avaliar(`(()=>{const r=[...document.querySelectorAll('#rotas .rota')].find(x=>x.querySelector('b')?.textContent==='Externo temporário');if(!r)return false;const b=r.querySelector('button');return b.textContent==='activeTab'&&b.disabled})()`), 30000);
+  etapa('validando seletor de rotas');
   const paginaRotas = await alvo(BASE + '/playground.html?extensao=1&vm=1', porta);
   const cr = await CDP.conectar(paginaRotas.webSocketDebuggerUrl);
   await cr.enviar('Page.enable'); await cr.enviar('Runtime.enable');
@@ -218,34 +239,40 @@ try {
   await new Promise((r) => setTimeout(r, 1200));
   await rm(dir, { recursive: true, force: true, maxRetries: 5, retryDelay: 300 }).catch(() => {});
 }
-const aceites = [
-  relatorio.cliente.ponte === true,
-  relatorio.cliente.vmAberta === true,
-  relatorio.cliente.vmPronta === true,
-  relatorio.extensao.sidePanelAberto === true,
-  relatorio.cliente.diagnosticoLocal?.layout?.composer === true,
-  relatorio.cliente.rotaLocal?.ok === true,
-  relatorio.cliente.manualLocal?.ok === true,
-  relatorio.cliente.pollinations?.via === 'pollinations-text-api',
-  relatorio.cliente.descobertaLocal?.sugestao?.confianca >= .55,
-  relatorio.cliente.adaptadorLocal?.ok === true,
-  relatorio.cliente.rotaDescoberta?.ok === true,
-  relatorio.cliente.workCatalogo === true,
-  relatorio.extensao.ativacaoDireta?.ok === true,
-  relatorio.extensao.painel?.descoberta === true,
-  relatorio.extensao.acessoTemporario === true,
-  relatorio.cliente.rotaDescobertaNoSeletor === true,
-  relatorio.cliente.lojaMapeada?.confianca >= .5,
-  relatorio.cliente.pesquisaLoja?.pedido?.termo === 'fone',
-  relatorio.cliente.pesquisaLoja?.matches?.some((p) => /Fone Bluetooth/.test(p.titulo)),
-  relatorio.cliente.observacaoLoja?.produtos?.length > 0,
-  relatorio.cliente.eventosLoja?.eventos?.length > 0,
-  relatorio.cliente.chatLoja?.chat?.campos?.campo === '#chatTexto',
-  relatorio.cliente.envioChatSemConfirmacao?.ok === false && relatorio.cliente.envioChatSemConfirmacao?.codigo === 'confirmacao_necessaria',
-  relatorio.cliente.respostaChatLoja?.texto?.includes('recebi seu pedido'),
-  relatorio.extensao.painelPing?.rotas?.length === new Set(relatorio.extensao.painelPing?.rotas || []).size,
+const criterios = [
+  ['ponte site-extensão', relatorio.cliente.ponte === true],
+  ['VM aberta', relatorio.cliente.vmAberta === true],
+  ['VM pronta', relatorio.cliente.vmPronta === true],
+  ['side panel aberto', relatorio.extensao.sidePanelAberto === true],
+  ['composer local diagnosticado', relatorio.cliente.diagnosticoLocal?.layout?.composer === true],
+  ['execução da rota local', relatorio.cliente.rotaLocal?.ok === true],
+  ['captura manual local', relatorio.cliente.manualLocal?.ok === true],
+  ['rota Pollinations', relatorio.cliente.pollinations?.via === 'pollinations-text-api'],
+  ['descoberta com confiança mínima', relatorio.cliente.descobertaLocal?.sugestao?.confianca >= .55],
+  ['adaptador descoberto ativado', relatorio.cliente.adaptadorLocal?.ok === true],
+  ['execução do adaptador descoberto', relatorio.cliente.rotaDescoberta?.ok === true],
+  ['catálogo de chats no WORK', relatorio.cliente.workCatalogo === true],
+  ['ativação direta no painel', relatorio.extensao.ativacaoDireta?.ok === true],
+  ['relatório de descoberta no painel', relatorio.extensao.painel?.descoberta === true],
+  ['acesso temporário activeTab', relatorio.extensao.acessoTemporario === true],
+  ['rota descoberta no seletor', relatorio.cliente.rotaDescobertaNoSeletor === true],
+  ['loja mapeada com confiança mínima', relatorio.cliente.lojaMapeada?.confianca >= .5],
+  ['termo da busca interpretado', relatorio.cliente.pesquisaLoja?.pedido?.termo === 'fone'],
+  ['produto correspondente encontrado', relatorio.cliente.pesquisaLoja?.matches?.some((p) => /Fone Bluetooth/.test(p.titulo))],
+  ['produtos observados na loja', relatorio.cliente.observacaoLoja?.produtos?.length > 0],
+  ['eventos da loja registrados', relatorio.cliente.eventosLoja?.eventos?.length > 0],
+  ['campo do chat mapeado', relatorio.cliente.chatLoja?.chat?.campos?.campo === '#chatTexto'],
+  ['envio externo bloqueado sem confirmação', relatorio.cliente.envioChatSemConfirmacao?.ok === false && relatorio.cliente.envioChatSemConfirmacao?.codigo === 'confirmacao_necessaria'],
+  ['resposta do chat após confirmação', relatorio.cliente.respostaChatLoja?.texto?.includes('recebi seu pedido')],
+  ['rotas do painel sem duplicatas', relatorio.extensao.painelPing?.rotas?.length === new Set(relatorio.extensao.painelPing?.rotas || []).size],
 ];
-relatorio.aceites = { total: aceites.length, aprovados: aceites.filter(Boolean).length };
+const aceites = criterios.map(([, ok]) => ok);
+relatorio.aceites = {
+  total: aceites.length,
+  aprovados: aceites.filter(Boolean).length,
+  itens: criterios.map(([nome, ok]) => ({ nome, ok })),
+  falhas: criterios.filter(([, ok]) => !ok).map(([nome]) => nome),
+};
 await mkdir(path.join(RAIZ, 'outputs'), { recursive: true });
 await writeFile(path.join(RAIZ, 'outputs', 'extensao-teste.json'), JSON.stringify(relatorio, null, 2));
 console.log(JSON.stringify(relatorio, null, 2));

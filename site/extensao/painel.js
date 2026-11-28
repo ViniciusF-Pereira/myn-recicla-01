@@ -5,6 +5,38 @@ import { LOJAS_CONHECIDAS } from './catalogo-lojas.js';
 const $ = (id) => document.getElementById(id);
 const status = $('status');
 const lista = $('rotas');
+const botoesAbas = Array.from(document.querySelectorAll('.tabs [role="tab"][data-aba]'));
+
+function selecionarAba(nome, moverFoco = false) {
+  let alvo = null;
+  for (const botao of botoesAbas) {
+    const ativa = botao.dataset.aba === nome;
+    botao.classList.toggle('on', ativa);
+    botao.setAttribute('aria-selected', String(ativa));
+    botao.tabIndex = ativa ? 0 : -1;
+    const painel = document.getElementById(botao.getAttribute('aria-controls'));
+    if (painel) painel.hidden = !ativa;
+    if (ativa) alvo = botao;
+  }
+  if (moverFoco) alvo?.focus();
+}
+
+botoesAbas.forEach((botao, indice) => {
+  botao.addEventListener('click', () => selecionarAba(botao.dataset.aba));
+  botao.addEventListener('keydown', (evento) => {
+    let destino = null;
+    if (evento.key === 'ArrowRight') destino = (indice + 1) % botoesAbas.length;
+    if (evento.key === 'ArrowLeft') destino = (indice - 1 + botoesAbas.length) % botoesAbas.length;
+    if (evento.key === 'Home') destino = 0;
+    if (evento.key === 'End') destino = botoesAbas.length - 1;
+    if (destino === null) return;
+    evento.preventDefault();
+    selecionarAba(botoesAbas[destino].dataset.aba, true);
+  });
+});
+
+selecionarAba('rotas');
+
 let rotaManual = null;
 let descobertaAtual = null;
 let operacaoDescoberta = 0;

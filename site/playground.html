@@ -3,9 +3,12 @@
 <title>Myn — Recicla/01 · Playground</title>
 <meta name="description" content="Chat com streaming, plugins, mídia e histórico. Rotas free, sem chave.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400;1,6..72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500-italic.ttf') format('truetype');font-weight:500;font-style:italic;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url('assets/fonts/ibm-plex-mono.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
 :root{
  --azul:#1f6fe0;--azul2:#0d4fa5;--azucl:#e8f1ff;--papel:#f4efe3;--papel2:#ece5d4;--card:#ffffff;
  --tinta:#1b2430;--mut:#6b7684;--mostarda:#d79a2f;--mostardacl:#f4dfa8;--linha:#c9d2de;--verde:#2e7d5b;
@@ -257,9 +260,35 @@ body>header,main,footer{position:relative;z-index:1}
 .extensao-banner a{margin-left:auto;font:600 .62rem var(--mono);text-transform:uppercase;color:var(--azul2)}
 body.modo-extensao header{display:none}body.modo-extensao .wrap{max-width:none;padding:0 10px}body.modo-extensao #playground{padding-top:10px}body.modo-extensao .pg-voltar{display:none}
 </style>
+<style>
+:root{--ink:#14212b;--paper:#f3eddf;--paper2:#e7dfcf;--blue:#1f6fe0;--navy:#0d2a4a;--yellow:#e6a52e;--red:#e9654f;--teal:#0d8f87;--white:#fffdf7;--muted:#56616a;--line:#c8c1b2}
+body{background:var(--paper);color:var(--ink);font:16px/1.6 var(--sans);background-image:linear-gradient(rgba(20,33,43,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(20,33,43,.035) 1px,transparent 1px);background-size:24px 24px}
+header{background:var(--ink);border-bottom:2px solid var(--yellow)}
+.logo{border:0;background:transparent;box-shadow:none;color:var(--white)}.logo .stampa{background:transparent}.logo .stampa img{width:100%;height:100%}.logo b em{color:#9fc7ff}
+.pg-section{max-width:1280px;margin:auto;padding-top:28px!important}.pg-voltar{margin-bottom:18px}.extensao-banner{border:1px solid var(--ink);border-left:6px solid var(--teal);box-shadow:4px 4px 0 var(--paper2);background:var(--white);border-radius:3px}
+.st{margin-bottom:10px}.st h2{font-size:clamp(2.6rem,4.6vw,4.6rem);letter-spacing:-.045em}.st .num{color:var(--red)}.st .nota{color:var(--navy);font-family:var(--mono);font-style:normal;text-transform:uppercase;letter-spacing:.08em}
+.chat-shell{border:2px solid var(--ink);border-radius:4px;box-shadow:10px 11px 0 var(--yellow);overflow:hidden;background:var(--white)}
+.chat-top{background:var(--ink);color:var(--white);border-bottom:2px solid var(--yellow);padding:14px 18px}.chat-id b{font-size:1rem}.chat-id small{color:#b9c8d1}.ponto{background:var(--yellow);box-shadow:0 0 0 4px rgba(230,165,46,.16)}
+.chat-controles select{background:var(--white);color:var(--ink);border:1px solid var(--ink);border-radius:3px;min-height:38px;font:600 .68rem var(--mono)}.chat-controles .icobtn{background:rgba(255,255,255,.1);border-color:#617180;color:var(--white);width:38px;height:38px}
+.chat-cap{background:var(--paper);border-bottom:1px solid var(--ink);padding:9px 16px;gap:8px;flex-wrap:nowrap;overflow-x:auto}.chat-cap span{border:1px solid var(--line);background:var(--white);border-radius:2px;padding:5px 8px;white-space:nowrap;color:var(--muted);font:600 .58rem var(--mono);text-transform:uppercase}.chat-cap .ico{color:var(--blue)}
+.msgs{height:520px;padding:28px 30px;background:var(--white);background-image:repeating-linear-gradient(180deg,transparent 0 35px,rgba(20,33,43,.035) 35px 36px);gap:18px}.msg{max-width:86%;border:1px solid var(--ink);border-radius:3px;box-shadow:4px 4px 0 var(--paper2);font:400 1rem/1.65 var(--sans);padding:15px 17px}.msg.eu{background:var(--blue);color:var(--white);border-color:var(--navy);box-shadow:4px 4px 0 var(--navy)}.msg.ele{background:var(--white)}.msg.err{background:#fff0ec;border-color:var(--red);color:#8a2f1c;box-shadow:4px 4px 0 #f3c1b5}.meta-chat{font:500 .62rem var(--mono);color:var(--muted)}.stream-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}.stream-meta span{background:var(--paper);border:1px solid var(--line);padding:3px 6px;font:600 .56rem var(--mono);text-transform:uppercase}.widget-pesquisa,.widget-tools{margin:10px 0;padding:10px 12px;border:1px solid var(--ink);background:var(--white);box-shadow:3px 3px 0 var(--paper2)}.widget-pesquisa b,.widget-tools b{display:block;margin-bottom:6px;color:var(--navy);font:600 .58rem var(--mono);text-transform:uppercase;letter-spacing:.08em}.widget-pesquisa>div,.widget-tools>div{display:flex;gap:5px;flex-wrap:wrap}.widget-pesquisa span,.widget-tools span{padding:4px 7px;border:1px solid var(--line);background:var(--paper);font:500 .56rem var(--mono);color:var(--muted)}.widget-tools{background:var(--yellow-soft,#fbf0d8)}.widget-orientacao{display:grid;gap:5px;margin:10px 0;padding:10px 12px;border-left:5px solid var(--blue);background:var(--azucl,#eaf2fc)}.widget-orientacao b{font:600 .58rem var(--mono);text-transform:uppercase;color:var(--navy)}.widget-orientacao span{font-size:.78rem;color:var(--muted)}.widget-orientacao>div{display:flex;gap:5px;flex-wrap:wrap}.widget-orientacao i{font:500 .54rem var(--mono);border:1px solid var(--line);background:var(--white);padding:3px 6px;color:var(--blue)}
+.composer{background:var(--paper);border-top:2px solid var(--ink);padding:14px 16px 16px}.ferramentas{gap:7px}.ferr{min-height:34px;border:1px solid var(--ink);background:var(--white);color:var(--ink);border-radius:3px;box-shadow:2px 2px 0 var(--paper2);font:600 .62rem var(--mono);padding:7px 10px}.ferr:hover{background:var(--yellow);color:var(--ink);border-color:var(--ink);box-shadow:3px 3px 0 var(--ink);transform:translate(-1px,-1px)}.ferr .ico{color:var(--blue)}
+.mais-ferramentas{margin-top:9px}.mais-ferramentas summary{cursor:pointer;font:600 .6rem var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--navy);width:max-content}.mais-ferramentas[open] summary{margin-bottom:9px}.mais-ferramentas .ferramentas{padding-top:8px;border-top:1px dashed var(--line)}
+.linha-input{gap:9px;margin-top:12px}.linha-input textarea{min-height:54px;border:1px solid var(--ink);border-bottom:3px solid var(--blue);border-radius:3px;background:var(--white);font:400 1rem var(--sans);padding:13px 14px;box-shadow:none}.linha-input textarea:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,111,224,.12)}.linha-input .btn{min-height:54px;box-shadow:4px 4px 0 var(--navy)}.linha-input .icobtn{width:48px;height:48px;border-color:var(--ink);background:var(--white);color:var(--ink);box-shadow:3px 3px 0 var(--paper2)}#cancelarEnvio{color:var(--red)}#cancelarEnvio:disabled{opacity:.4}
+.estudio-midia{margin:14px 0 2px;border:2px solid var(--ink);border-radius:4px;background:var(--white);box-shadow:7px 8px 0 var(--yellow);overflow:hidden}.estudio-midia[hidden]{display:none}.estudio-topo{display:flex;align-items:center;gap:12px;padding:13px 16px;background:var(--navy);color:var(--white);border-bottom:2px solid var(--yellow)}.estudio-topo b{display:block;font:600 .82rem var(--sans)}.estudio-topo small{display:block;color:#b9c8d1;font:500 .6rem var(--mono)}.estudio-topo .icobtn{margin-left:auto;background:transparent;border-color:#617180;color:var(--white)}
+.estudio-tabs{display:flex;gap:0;border-bottom:1px solid var(--ink);background:var(--paper)}.estudio-tabs button{flex:1;min-height:42px;border:0;border-right:1px solid var(--ink);background:transparent;color:var(--muted);font:600 .66rem var(--mono);text-transform:uppercase;cursor:pointer}.estudio-tabs button:last-child{border-right:0}.estudio-tabs button.on{background:var(--yellow);color:var(--ink)}
+.estudio-campos{padding:16px;display:grid;gap:13px}.estudio-campos label{display:grid;gap:5px;font:600 .58rem var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}.estudio-campos textarea,.estudio-campos select{width:100%;border:1px solid var(--ink);border-radius:3px;background:var(--paper);color:var(--ink);padding:10px 11px;font:400 .88rem var(--sans);outline:none}.estudio-campos textarea{min-height:92px;resize:vertical}.estudio-campos textarea:focus,.estudio-campos select:focus{border-color:var(--blue);box-shadow:0 0 0 3px rgba(31,111,224,.12)}.estudo-linha{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.estudio-acoes{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.estudio-acoes .btn{min-height:42px;box-shadow:3px 3px 0 var(--navy)}.estudio-acoes .btn.sec{box-shadow:3px 3px 0 var(--line)}#estudioStatus{margin-left:auto;color:var(--muted);font:500 .6rem var(--mono)}
+.estudio-preview{min-height:220px;border-top:1px solid var(--ink);background:var(--paper2);display:grid;place-items:center;padding:18px;text-align:center}.estudio-preview img,.estudio-preview video{max-width:100%;max-height:420px;border:2px solid var(--ink);box-shadow:7px 7px 0 var(--navy);display:block}.estudio-preview audio{width:min(520px,100%)}.estudio-preview .vazio{color:var(--muted);font:500 .72rem var(--mono)}.estudio-historico{padding:12px 16px;border-top:1px solid var(--ink);background:var(--white)}.estudio-historico>small{display:block;margin-bottom:7px;color:var(--muted);font:600 .56rem var(--mono);text-transform:uppercase;letter-spacing:.08em)}.estudio-historico>div{display:flex;gap:6px;overflow-x:auto}.estudio-historico button{flex:0 0 auto;border:1px solid var(--line);background:var(--paper);border-radius:3px;padding:6px 8px;font:500 .58rem var(--mono);cursor:pointer}.estudio-historico button:hover{border-color:var(--blue);background:var(--azucl)}
+.arte-chat .btn{display:inline-flex;margin-top:8px;min-height:38px;padding:7px 11px;font-size:.58rem}.tabela-wrap{margin-top:14px}
+body.modo-extensao .chat-shell{box-shadow:6px 7px 0 var(--yellow)}body.modo-extensao .msgs{height:min(62vh,620px)}body.modo-extensao .pg-section{padding-top:8px!important}
+@media(max-width:860px){.msgs{height:480px;padding:22px 18px}.msg{max-width:94%}.chat-top{flex-wrap:wrap}.chat-controles{width:100%;margin-left:0}.chat-controles select{flex:1;max-width:none}.estudo-linha{grid-template-columns:1fr 1fr}#campoDuracao{grid-column:1/-1}.st .nota{display:none}}
+@media(max-width:560px){.pg-section{padding-top:18px!important}.st h2{font-size:2.7rem}.chat-shell{box-shadow:6px 7px 0 var(--yellow)}.chat-top{padding:12px}.chat-cap{padding:8px 10px}.msgs{height:52vh;min-height:360px;padding:18px 12px}.msg{font-size:.92rem;padding:12px 13px}.composer{padding:11px}.ferr{min-height:38px}.linha-input{flex-wrap:wrap}.linha-input textarea{order:-1;flex-basis:100%;min-height:58px}.linha-input .btn{flex:1}.linha-input .icobtn{width:44px;height:44px}.estudio-campos{padding:12px}.estudo-linha{grid-template-columns:1fr}.estudio-acoes .btn{flex:1}#estudioStatus{flex-basis:100%;margin-left:0}.estudio-preview{min-height:180px;padding:12px}.extensao-banner a{margin-left:0}}
+@media(max-width:560px){body.estudio-aberto .wa-root{display:none!important}}
+@media(prefers-reduced-motion:reduce){.ferr,.btn,.msg{transition:none!important}}
+</style>
 </head><body>
 <canvas id="mynsFundo" class="myns-fundo" aria-hidden="true"></canvas>
-<header><div class="wrap head"><a class="logo" href="index.html"><span class="stampa"><svg class="ico"><use href="#i-recycle"/></svg></span><b>Myn <em>Recicla/01</em></b></a><nav><a href="index.html">voltar ao site</a></nav><span class="selo">♻ browser only</span></div></header>
+<header><div class="wrap head"><a class="logo" href="index.html"><span class="stampa"><img src="favicon.svg" alt="Símbolo do Myn"></span><b>Myn <em>Recicla/01</em></b></a><nav><a href="index.html">voltar ao site</a></nav><span class="selo">♻ browser only</span></div></header>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
  <symbol id="i-recycle" viewBox="0 0 24 24"><path d="M12 3.2l2.6 4.5-2.1.1M9.4 3.2 6.8 7.7l2.1.1M20 11.4l-4.4 1.6.6-2M4 11.4l4.4 1.6-.6-2M7 20h3.4l1.6-2.8 1.6 2.8H17M7.6 14.2 4 11.4l2.4-4.6M16.4 14.2 20 11.4l-2.4-4.6"/></symbol>
  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M13.5 2 5 13h6l-1 9 9-12h-6z"/></symbol>
@@ -295,16 +324,46 @@ body.modo-extensao header{display:none}body.modo-extensao .wrap{max-width:none;p
   <div class="chat-cap"><span><svg class="ico"><use href="#i-file"/></svg> documentos</span><span>▦ tabelas</span><span>▤ planilha CSV</span><span>▤ arquivos</span><span><svg class="ico"><use href="#i-leaf"/></svg> imagem</span><span><svg class="ico"><use href="#i-sound"/></svg> voz</span><span><svg class="ico"><use href="#i-video"/></svg> vídeo</span></div>
   <div class="msgs" id="msgs"><div class="msg ele">Oi. Sou o <strong>Myn-01</strong>, feito de abas recicladas. ♻<br><br>Leio documentos, monto tabelas, crio arquivos e gero imagem, narração e clipe — tudo free, sem chave. No chat, use <code>/plugin mensagem</code> para chamar uma das <span id="msgRotas">carregando...</span> rotas.</div></div>
   <div class="anexos" id="anexos"></div>
-  <div class="composer">
-   <div class="ferramentas"><button class="ferr" id="btnMemoria" title="Memória e RAG locais"><svg class="ico"><use href="#i-history"/></svg> memória</button><button class="ferr" id="btnExtensao" title="Baixar ou abrir a extensão"><svg class="ico"><use href="#i-gear"/></svg> extensão</button><button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button><button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button><button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button><button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button><button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button><button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button><button class="ferr" data-midia="gif"><svg class="ico"><use href="#i-leaf"/></svg> gif</button><button class="ferr" data-midia="animacao"><svg class="ico"><use href="#i-video"/></svg> anima</button><button class="ferr" id="btnFilmes"><svg class="ico"><use href="#i-search"/></svg> filmes</button><button class="ferr" id="btnModelos"><svg class="ico"><use href="#i-gear"/></svg> modelos</button><button class="ferr" id="btnVM" title="VM web com HD e cache"><svg class="ico"><use href="#i-gear"/></svg> VM</button><button class="ferr" id="btnAgentes" title="Agentes avaliadores"><svg class="ico"><use href="#i-eye"/></svg> agentes</button><button class="ferr" id="btnWorker" title="Worker autônomo"><svg class="ico"><use href="#i-loop"/></svg> worker</button><button class="ferr" id="btnAgenteLocal" title="Token e rota local de agente"><svg class="ico"><use href="#i-api"/></svg> agente local</button></div>
-   <div class="linha-input">
-    <input type="file" id="imagemInput" accept="image/*" multiple hidden><input type="file" id="arquivoInput" multiple hidden>
-    <button class="icobtn" id="anexar" title="Anexar documento" aria-label="Anexar documento"><svg class="ico"><use href="#i-file"/></svg></button>
-    <textarea id="texto" rows="1" placeholder="Escreva... Enter envia, Shift+Enter quebra linha" aria-label="Mensagem"></textarea>
-    <button class="btn" id="enviar"><svg class="ico"><use href="#i-arrow"/></svg> ENVIAR</button>
+     <div class="composer">
+    <div class="ferramentas ferramentas-principais">
+     <button class="ferr" id="btnMemoria" title="Memória e RAG locais"><svg class="ico"><use href="#i-history"/></svg> memória</button>
+     <button class="ferr" id="btnExtensao" title="Baixar ou abrir a extensão"><svg class="ico"><use href="#i-gear"/></svg> extensão</button>
+     <button class="ferr" data-midia="imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem</button>
+     <button class="ferr" data-midia="audio"><svg class="ico"><use href="#i-sound"/></svg> áudio</button>
+     <button class="ferr" data-midia="video"><svg class="ico"><use href="#i-video"/></svg> vídeo</button>
+     <button class="ferr" id="pesq" title="Pesquisar fontes e ferramentas"><svg class="ico"><use href="#i-search"/></svg> pesquisar</button>
+     <button class="ferr" id="btnPlugins" title="Escolher plugin"><svg class="ico"><use href="#i-gear"/></svg> plugins</button>
+    </div>
+    <details class="mais-ferramentas"><summary>Mais ferramentas</summary><div class="ferramentas">
+     <button class="ferr" id="btnImagem" title="Anexar imagem"><svg class="ico"><use href="#i-leaf"/></svg> imagem+</button>
+     <button class="ferr" data-midia="gif"><svg class="ico"><use href="#i-leaf"/></svg> animação</button>
+     <button class="ferr" id="btnFilmes"><svg class="ico"><use href="#i-search"/></svg> filmes</button>
+     <button class="ferr" id="btnModelos"><svg class="ico"><use href="#i-gear"/></svg> modelos</button>
+     <button class="ferr" id="btnVM" title="VM web com HD e cache"><svg class="ico"><use href="#i-gear"/></svg> VM</button>
+     <button class="ferr" id="btnAgentes" title="Agentes avaliadores"><svg class="ico"><use href="#i-eye"/></svg> agentes</button>
+     <button class="ferr" id="btnWorker" title="Worker autônomo"><svg class="ico"><use href="#i-loop"/></svg> worker</button>
+     <button class="ferr" id="btnAgenteLocal" title="Token e rota local de agente"><svg class="ico"><use href="#i-api"/></svg> agente local</button>
+    </div></details>
+    <section class="estudio-midia" id="estudioMidia" hidden aria-label="Estúdio de mídia">
+     <header class="estudio-topo"><div><b id="estudioTitulo">Estúdio de imagem</b><small>crie, ajuste e baixe sem sair do chat</small></div><button type="button" class="icobtn" id="fecharEstudio" aria-label="Fechar estúdio">✕</button></header>
+     <div class="estudio-tabs" role="tablist"><button type="button" class="on" data-estudio="imagem" role="tab" aria-selected="true">Imagem</button><button type="button" data-estudio="video" role="tab" aria-selected="false">Vídeo</button><button type="button" data-estudio="audio" role="tab" aria-selected="false">Áudio</button></div>
+     <div class="estudio-campos"><label class="campo-prompt">Prompt<textarea id="estudioPrompt" rows="3" placeholder="Descreva a cena, o estilo e o que deve aparecer..."></textarea></label>
+      <div class="estudo-linha"><label>Estilo<select id="estiloMidia"><option value="editorial">Editorial</option><option value="minimalista">Minimalista</option><option value="vibrante">Vibrante</option><option value="retro">Retrô</option><option value="foto">Fotorrealista</option></select></label><label>Formato<select id="formatoMidia"><option value="quadrado">Quadrado</option><option value="retrato">Retrato</option><option value="paisagem">Paisagem</option></select></label><label id="campoDuracao">Duração<select id="duracaoMidia"><option value="3">3 s</option><option value="6" selected>6 s</option><option value="10">10 s</option></select></label></div>
+      <div class="estudio-acoes"><button type="button" class="btn" id="gerarMidiaStudio">GERAR</button><button type="button" class="btn sec" id="baixarMidiaStudio" disabled>BAIXAR</button><span id="estudioStatus">pronto para criar</span></div>
+     </div>
+     <div class="estudio-preview" id="estudioPreview"><div class="vazio">O resultado aparece aqui.</div></div>
+     <div class="estudio-historico" id="estudioHistorico"><small>Histórico desta sessão</small><div>nenhuma criação ainda</div></div>
+    </section>
+    <div class="linha-input">
+     <input type="file" id="imagemInput" accept="image/*" multiple hidden><input type="file" id="arquivoInput" multiple hidden>
+     <button class="icobtn" id="anexar" title="Anexar documento" aria-label="Anexar documento"><svg class="ico"><use href="#i-file"/></svg></button>
+     <textarea id="texto" rows="1" placeholder="Escreva... Enter envia, Shift+Enter quebra linha" aria-label="Mensagem"></textarea>
+     <button class="btn" id="enviar"><svg class="ico"><use href="#i-arrow"/></svg> ENVIAR</button>
+     <button type="button" class="icobtn" id="cancelarEnvio" title="Cancelar envio" aria-label="Cancelar envio" disabled>■</button>
+    </div>
+    <div class="painel-plugins" id="painelPlugins"><div class="pp-topo">🔌 <span id="pluginsCount">plugins disponíveis</span> <button id="fecharPlugins">✕</button></div><div id="listaPlugins"><div class="passo-linha">carregando...</div></div></div>
    </div>
-   <div class="painel-plugins" id="painelPlugins"><div class="pp-topo">🔌 <span id="pluginsCount">plugins disponíveis</span> <button id="fecharPlugins">✕</button></div><div id="listaPlugins"><div class="passo-linha">carregando...</div></div></div>
-  </div>
+
  </div>
  <div class="aviso"><b>limites</b> — mídia padrão no navegador: Pollinations/Canvas, SpeechSynthesis, Canvas + MediaRecorder, Tesseract.js e pdf.js. Vídeo/animação saem em WebM; gravar voz exige permissão. Plugins de mensageria pedem confirmação antes de enviar.</div>
 </div></section>
@@ -357,7 +416,7 @@ body.modo-extensao header{display:none}body.modo-extensao .wrap{max-width:none;p
 <div class="fundo" id="fundo"></div>
 
 <script src="assets/mini-myns.js"></script>
-<script type="module" src="playground.js?v=30"></script>
-<script type="module" src="app.mjs?v=6"></script>
+<script type="module" src="playground.js?v=34"></script>
+<script type="module" src="app.mjs?v=8"></script>
 
 </body></html>

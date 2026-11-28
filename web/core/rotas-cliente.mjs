@@ -49,7 +49,7 @@ export function selecionarRotas({ rota = 'auto', preferida = '', extensaoDisponi
 
 function respostaLocal(texto) {
   const t = String(texto || '').toLowerCase();
-  if (/quem é você|quem e voce|o que é o myn|o que e o myn|como você funciona|como voce funciona|como o myn funciona/.test(t)) {
+  if (/quem é você|quem e voce|o que é o myn|o que e o myn|explique.{0,40}myn|como você funciona|como voce funciona|como o myn funciona/.test(t)) {
     return 'Sou o Myn Recicla/01, um agente browser-only que transforma abas e serviços gratuitos em rotas utilizáveis. Posso conversar por API direta, usar abas autorizadas pela extensão e cair no WebGPU quando necessário. Sem chave, sem assinatura e sem Google/Gemini.';
   }
   if (/effort|esforço|esforco/.test(t) && /low|medium|high|nível|nivel/.test(t)) {

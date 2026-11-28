@@ -48,6 +48,11 @@ async function preparar({ mensagem, sessao = 'local', canal = 'api', planejar: p
     rag = deps.contextoRag ? await deps.contextoRag(mensagem, config.rag) : await contextoPara(mensagem, config.rag);
     passos.push('RAG local: ' + (rag.fontes?.length || 0) + ' fontes');
   }
+  if (rag?.texto && !deps.responder && !deps.streamResponder && /\b(myn|extensao|projeto|rotas|plugins|workers?|memoria|rag)\b/i.test(mensagem)) {
+    const respostaLocalRag = 'Encontrei contexto local em ' + (rag.fontes?.length ? rag.fontes.join(', ') : 'documentos do projeto') + '.\n\n' + rag.texto.slice(0, config.rag);
+    passos.push('resposta direta do RAG local');
+    return { local: respostaLocalRag, sessaoLimpa, canal, passos, fontes: rag.fontes || [], capacidades, effort: nivel, config };
+  }
 
   const prompt = [
     IDENTIDADE_NUCLEO,
@@ -65,8 +70,9 @@ export async function executarAgente(input = {}, deps = {}) {
   const { plugins = [], gateway, trava } = input;
   const ctx = await preparar(input, deps);
   if (ctx.local) {
-    await registrarMemoria({ sessao: ctx.sessaoLimpa, canal: ctx.canal, papel: 'assistente', texto: ctx.local, meta: { via: 'conhecimento-local' } });
-    return { resposta: ctx.local, via: 'conhecimento-local', sessao: ctx.sessaoLimpa, passos: ctx.passos, fontes: [], capacidades: ctx.capacidades, effort: ctx.effort };
+    const via = ctx.fontes.length ? 'rag-local' : 'conhecimento-local';
+    await registrarMemoria({ sessao: ctx.sessaoLimpa, canal: ctx.canal, papel: 'assistente', texto: ctx.local, meta: { via } });
+    return { resposta: ctx.local, via, sessao: ctx.sessaoLimpa, passos: ctx.passos, fontes: ctx.fontes, capacidades: ctx.capacidades, effort: ctx.effort };
   }
   let resultado;
   try {
@@ -92,10 +98,11 @@ export async function* executarAgenteStream(input = {}, deps = {}) {
   const { plugins = [], gateway, trava } = input;
   const ctx = await preparar(input, deps);
   if (ctx.local) {
-    yield { inicio: true, via: 'conhecimento-local', passos: ctx.passos, fontes: [], capacidades: ctx.capacidades, effort: ctx.effort };
-    for (let i = 0; i < ctx.local.length; i += 48) yield { token: ctx.local.slice(i, i + 48), via: 'conhecimento-local' };
-    await registrarMemoria({ sessao: ctx.sessaoLimpa, canal: ctx.canal, papel: 'assistente', texto: ctx.local, meta: { via: 'conhecimento-local' } });
-    yield { done: true, via: 'conhecimento-local', texto: ctx.local, passos: ctx.passos, sucesso: true, effort: ctx.effort };
+    const via = ctx.fontes.length ? 'rag-local' : 'conhecimento-local';
+    yield { inicio: true, via, passos: ctx.passos, fontes: ctx.fontes, capacidades: ctx.capacidades, effort: ctx.effort };
+    for (let i = 0; i < ctx.local.length; i += 48) yield { token: ctx.local.slice(i, i + 48), via };
+    await registrarMemoria({ sessao: ctx.sessaoLimpa, canal: ctx.canal, papel: 'assistente', texto: ctx.local, meta: { via } });
+    yield { done: true, via, texto: ctx.local, passos: ctx.passos, sucesso: true, effort: ctx.effort };
     return;
   }
   yield { inicio: true, passos: ctx.passos, fontes: ctx.fontes, capacidades: ctx.capacidades, effort: ctx.effort };

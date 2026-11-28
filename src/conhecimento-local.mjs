@@ -23,7 +23,7 @@ export async function respostaLocal(pergunta) {
   if (!p) return null;
   const n = await numeros();
 
-  if (/quem (é|e) (você|voce|o myn)|sobre o myn|o que (é|e) o myn|resumo.{0,30}myn|myn recicla/i.test(p)) {
+  if (/quem (é|e) (você|voce|o myn)|sobre o myn|o que (é|e) o myn|explique.{0,40}myn|resumo.{0,30}myn|myn recicla/i.test(p)) {
     return 'Sou o **Myn Recicla/01**, um produto open-source browser-only que transforma abas de chat gratuitas em rotas de agente. Tenho Playground, workers de análise e melhoria, MCP, descoberta de modelos livres, RAG local e funcionamento sem chaves de API.';
   }
   if (/documenta|docs|manual|guia|onde (leio|acho)|ajuda|como (você|voce|myn) (funciona|usa)|o que (você|voce|myn) (sabe|faz)/i.test(p)) {

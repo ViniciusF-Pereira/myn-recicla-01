@@ -1,0 +1,35 @@
+{
+  "schema": "MspUsageNote.v1",
+  "document_kind": "technical_usage_not_tax_invoice",
+  "project_id": "myn-Recicla-01",
+  "task_id": "work-cacador-chats-1.3.1",
+  "session_id": "ses_dfb7e44bbffepzBlwFy3j0hcSl",
+  "status": "completed",
+  "started_at": "2026-11-28T03:29:06Z",
+  "finished_at": "2026-11-28T05:38:09Z",
+  "letter_sha256": "b3d928283df699be813d175a4ba490b187997bd78542727c6a4dd1fc38fe2745",
+  "receipts": [
+    {
+      "path": "receipts/validacao-local.md",
+      "sha256": "936514ae4d9edfab40e4fb26080654abe9113eaa45b3efb280ab1000d996ba4b"
+    }
+  ],
+  "events": [
+    {
+      "id": "sha256:936514ae4d9edfab40e4fb26080654abe9113eaa45b3efb280ab1000d996ba4b",
+      "route": "local:node-test+edge-acceptance+python-offline+browser-qa+benchmark",
+      "status": "passed",
+      "receipt": "receipts/validacao-local.md"
+    }
+  ],
+  "metrics": {
+    "calls": { "value": 0, "unit": "chamadas MSP", "source": "nenhuma chamada MSP nesta tarefa", "state": "measured" },
+    "failed_attempts": { "value": 0, "unit": "tentativas MSP falhas", "source": "nenhuma chamada MSP nesta tarefa", "state": "measured" },
+    "input_tokens": { "value": null, "unit": "tokens", "source": "contador de tokens do harness não exposto", "state": "unknown" },
+    "output_tokens": { "value": null, "unit": "tokens", "source": "contador de tokens do harness não exposto", "state": "unknown" },
+    "total_tokens": { "value": null, "unit": "tokens", "source": "contador de tokens do harness não exposto", "state": "unknown" },
+    "cost": { "value": null, "unit": "USD", "source": "sem recibo de custo MSP", "state": "unknown" }
+  },
+  "savings": null,
+  "notes": "Os 89 testes Node, 25 aceites da extensão, 24 testes Python, QA de navegador e benchmark são validação local do produto, não chamadas MSP. O benchmark é baseline do Myn, sem comparação direta paga com o ChatGPT. A coleta de novas URLs não foi retomada; o acervo permanece em 1.189.191 URLs. O render do vídeo promocional continua aguardando aprovação."
+}

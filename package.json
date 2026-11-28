@@ -11,7 +11,9 @@
     "smoke": "node scripts/smoke.mjs",
     "tarefa": "node scripts/tarefa-longa.mjs",
     "orquestrar": "node scripts/orquestrar.mjs",
-    "extensao": "node scripts/gerar-icones-extensao.mjs && node scripts/empacotar-extensao.mjs"
+    "extensao": "node scripts/gerar-icones-extensao.mjs && node scripts/empacotar-extensao.mjs",
+    "test:extensao": "node scripts/testar-extensao.mjs",
+    "benchmark": "node scripts/benchmark-agente.mjs"
   },
   "engines": { "node": ">=20" }
 }

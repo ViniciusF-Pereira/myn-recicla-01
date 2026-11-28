@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
+import { montarPromptImagem } from '../web/midia/navegador.mjs';
 
 test('mídia web não depende de Node ou binários locais', async () => {
   const codigo = await readFile('web/midia/navegador.mjs', 'utf8');
@@ -10,6 +11,11 @@ test('mídia web não depende de Node ou binários locais', async () => {
   assert.match(codigo, /Canvas/);
 });
 
+test('estúdio aplica estilo e expõe controles de criação', () => {
+  assert.match(montarPromptImagem('uma cidade de papel', 'editorial'), /editorial collage/);
+  assert.match(montarPromptImagem('uma cidade de papel', 'foto'), /photorealistic/);
+});
+
 test('interface usa a camada de mídia do navegador', async () => {
   const app = await readFile('site/app.mjs', 'utf8');
   const play = await readFile('site/playground.js', 'utf8');
@@ -17,6 +23,9 @@ test('interface usa a camada de mídia do navegador', async () => {
   assert.match(app, /midia:/);
   assert.match(play, /window\.myn\?\.midia/);
   assert.match(html, /id="effort"/);
+  assert.match(html, /id="estudioMidia"/);
+  assert.match(html, /id="estiloMidia"/);
+  assert.match(html, /id="duracaoMidia"/);
   assert.match(play, /&effort=/);
   const server = await readFile('scripts/site-server.mjs', 'utf8');
   assert.match(server, /rota: id = 'auto'/);

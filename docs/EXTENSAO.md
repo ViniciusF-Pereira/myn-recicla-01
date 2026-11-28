@@ -43,7 +43,7 @@ Cada rota possui versão própria e listas alternativas de composer, envio e res
 
 ## WORK caçador de chats
 
-A versão `1.3.0` inclui um catálogo de **32 chats** e um motor local de descoberta. Ele lê o DOM de uma página autorizada, pontua candidatos de composer, envio e resposta, e mostra os seletores antes de criar um adaptador.
+A versão `1.3.1` inclui um catálogo de **32 chats**, painel com abas Rotas/Chats/Lojas e um motor local de descoberta. Ele lê o DOM de uma página autorizada, pontua candidatos de composer, envio e resposta, e mostra os seletores antes de criar um adaptador.
 
 Use no WORK:
 
@@ -162,7 +162,8 @@ Relatório detalhado em `outputs/extensao-teste.json`.
 ## Resultado executado
 
 - Chromium: Microsoft Edge `158.0.4370.45`;
-- extensão `1.3.0`: `ENABLED`, sem erros de manifesto ou runtime;
+- extensão `1.3.1`: `ENABLED`, sem erros de manifesto ou runtime;
+- painel redesenhado com abas Rotas/Chats/Lojas, logo real e detalhes técnicos recolhidos;
 - adaptadores internos: versão 2;
 - ponte site ↔ extensão: `true`;
 - painel lateral aberto: `true`;
@@ -179,7 +180,7 @@ Relatório detalhado em `outputs/extensao-teste.json`.
 - envio sem confirmação: bloqueado com `codigo=confirmacao_necessaria`;
 - Pollinations no navegador: `OK`;
 - aceite da extensão: **25/25**;
-- suíte Node: **85/85**.
+- suíte Node: **89/89**.
 
 ## Produção
 

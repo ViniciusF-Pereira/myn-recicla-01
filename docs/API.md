@@ -18,6 +18,19 @@
 - `GET/POST /api/avaliacao`
 - `GET /api/arquitetura`
 
+### SSE de chat
+
+`GET /api/chat/stream` envia objetos JSON em eventos `data:`:
+
+- `response.created` — conexão e rota criadas;
+- `tool.start`, `tool.progress` e `tool.end` — execução de ferramentas, quando houver;
+- `response.in_progress` — `inicio: true`, fontes, ferramentas, imagens e capacidades;
+- `response.output_text.delta` — fragmento de texto em `token`;
+- `response.completed` — `done: true`, texto final e sucesso;
+- `error` — falha em `erro`.
+
+Os campos legados `inicio`, `token` e `done` continuam presentes. O cliente cancela por `AbortController`. A reconexão antes do primeiro evento é permitida somente na rota `auto`; rotas explícitas e comandos `confirmar:` não são repetidos automaticamente.
+
 ## Mídia e arquivos
 
 - `POST /api/midia` — legado de integração; a interface usa `web/midia/navegador.mjs`.

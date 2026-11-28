@@ -23,23 +23,26 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 
 Baixe a extensão, instale no Chrome/Edge e clique no ícone para abrir a VM Web no painel lateral. As rotas de aba usam a sessão do próprio navegador, com permissão opcional por site.
 
-- Download: [`v1.3.0 · myn-recicla-extensao.zip`](https://github.com/ViniciusF-Pereira/myn-Recicla-01/releases/download/v1.3.0/myn-recicla-extensao.zip)
-- Guia completo: [`docs/EXTENSAO.md`](docs/EXTENSAO.md) · [`docs/LOJAS_CHAT.md`](docs/LOJAS_CHAT.md) · [`docs/VARREDURA_WEB.md`](docs/VARREDURA_WEB.md)
+- Download: [`v1.3.1 · myn-recicla-extensao.zip`](https://github.com/ViniciusF-Pereira/myn-Recicla-01/releases/download/v1.3.1/myn-recicla-extensao.zip)
+- Notas da versão: [`docs/RELEASE_1.3.1.md`](docs/RELEASE_1.3.1.md)
+- Guia completo: [`docs/EXTENSAO.md`](docs/EXTENSAO.md) · [`docs/PLAYGROUND.md`](docs/PLAYGROUND.md) · [`docs/LOJAS_CHAT.md`](docs/LOJAS_CHAT.md) · [`docs/VARREDURA_WEB.md`](docs/VARREDURA_WEB.md) · [`docs/BENCHMARK_AGENTE.md`](docs/BENCHMARK_AGENTE.md)
 - WORK caçador: catálogo de 32 chats, mapeamento do DOM, adaptadores descobertos e mapeador de lojas
 - Rotas internas: ChatGPT Web, Claude Web, HuggingChat, OpenRouter :free e Z.ai/GLM
 - Sem `<all_urls>`, sem contorno de login/CAPTCHA/paywall
 
 ```powershell
 npm run extensao
-node scripts/testar-extensao.mjs
+npm run test:extensao
+# com o servidor local ativo:
+npm run benchmark
 ```
 
 ## O que é
 
 - **Catálogo dinâmico de plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade. Google/Gemini foram removidos do catálogo público.
 - **Descoberta de modelos livres** via Pollinations, OpenRouter e HuggingFace (endpoints públicos, sem chave), com filtro de preço e modalidade.
-- **Chat com streaming SSE** (primeiro token em ~15 ms), pesquisa com RAG + catálogo, anexos, tabelas markdown e arquivos.
-- **Mídia browser-only**: imagem (Pollinations/Canvas), voz (SpeechSynthesis), vídeo/animação (Canvas + MediaRecorder), OCR (Tesseract.js), PDF (pdf.js) e planilhas CSV locais.
+- **Chat com streaming SSE** (mediana local de 21 ms para o primeiro token no benchmark), pesquisa com RAG + catálogo, anexos, tabelas markdown e arquivos.
+- **Mídia browser-only**: Estúdio com prompt, estilo, formato, duração, preview, download e histórico; imagem (Pollinations/Canvas), voz (SpeechSynthesis), vídeo/animação (Canvas + MediaRecorder), OCR (Tesseract.js), PDF (pdf.js) e planilhas CSV locais.
 - **Myn-01 Auto**: escolhe rotas por capacidade e saúde, roda em paralelo e escolhe a melhor resposta.
 - **Scoreboard**: score = 0,45·sucesso + 0,35·velocidade + 0,2·recência, com circuit breaker de 3 estados.
 - **MCP** JSON-RPC com 15 ferramentas para agentes externos.
@@ -141,7 +144,7 @@ Validação executada em [`docs/DOCKER_VALIDACAO.md`](docs/DOCKER_VALIDACAO.md):
 node scripts/avaliar.mjs     # 15 baterias → docs/AVALIACAO.md
 node scripts/mapear.mjs      # grava input/output/print de cada provider
 ```
-Última bateria: **15/15 OK**. Evidência atual da 1.3: **85/85 testes Node**, **25/25 aceites Chromium/Edge**, **24/24 testes offline da varredura** e `npm run check` do vídeo aprovado. Detalhes em [`docs/AVALIACAO.md`](docs/AVALIACAO.md), evolução em [`docs/EVOLUCAO.md`](docs/EVOLUCAO.md), modelos por rota em [`docs/AGENTES_E_MODELOS.md`](docs/AGENTES_E_MODELOS.md) e arquitetura em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
+Última bateria: **15/15 OK**. Evidência atual da 1.3: **89/89 testes Node**, **25/25 aceites Chromium/Edge**, **24/24 testes offline da varredura** e `npm run check` do vídeo aprovado. Detalhes em [`docs/AVALIACAO.md`](docs/AVALIACAO.md), evolução em [`docs/EVOLUCAO.md`](docs/EVOLUCAO.md), modelos por rota em [`docs/AGENTES_E_MODELOS.md`](docs/AGENTES_E_MODELOS.md) e arquitetura em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 **Direção web-only:** [`docs/PLANEJAMENTO.md`](docs/PLANEJAMENTO.md) — evoluir o Myn para agente open-source tipo OpenCode/Claude Code/Codex usando **somente rotas free de navegador + WebGPU**, sem binário/local PC. Fase 0 item 3 já entregue: `/api/orquestrar?rapido=true` nunca escolhe rotas `*-local`.
 

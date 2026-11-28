@@ -62,3 +62,15 @@ test('preferências persistem por sessão', async () => {
     assert.deepEqual(await memoria.preferencias('s3'), { voz: 'pt-BR' });
   });
 });
+
+test('resposta direta do RAG preserva rota e fontes', async () => {
+  await comNucleo(async (nucleo) => {
+    const r = await nucleo.executarAgente(
+      { mensagem: 'Pesquise fontes sobre a extensão do Myn.', sessao: 'rag-direto', effort: 'low' },
+      { contextoRag: async () => ({ texto: 'A extensão usa permissões por site.', fontes: ['docs/EXTENSAO.md'] }) },
+    );
+    assert.equal(r.via, 'rag-local');
+    assert.match(r.resposta, /Encontrei contexto local/);
+    assert.ok(r.fontes.length > 0);
+  });
+});
