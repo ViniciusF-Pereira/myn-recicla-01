@@ -10,7 +10,7 @@ Meta histórica solicitada: **9.000.000 sites** (`--meta`, padrão `9000000`). D
 - Classificação: chat sem login, gerador sem login, loja/atendimento, login, paywall, bloqueado, rate-limit, indisponível e sem sinal.
 - Saída: `outputs/varredura-web-resumo.json` e `dados/varredura-web/varredura.sqlite3`.
 
-## Evidência histórica
+## Evidência e histórico
 
 - Coleta inicial: 9.833 URLs.
 - Primeiro lote: 9.000 tentativas em 358 s.
@@ -21,6 +21,9 @@ Meta histórica solicitada: **9.000.000 sites** (`--meta`, padrão `9000000`). D
 - Open Page Rank processou 880.000 domínios antes da parada; total final do acervo: **1.189.191 URLs únicas**.
 - Snapshot em 28/11/2026 02:31 UTC: **116.503 sites testados**, **1.072.688 na fila**, **41.092 erros de rede** e **75.411 respostas HTTP classificadas**.
 - Lote de 500.000 testes iniciado com 128 workers e timeout de 6 s.
+- Novo lote de 5.000 por vez, 96 workers e limite de 2 por origem foi encerrado pelo timeout do harness após **159.500 novas tentativas** e **13.425,5 s**. Não houve nova coleta.
+- Último snapshot emitido: **273.503 tentativas**, **178.316 respostas HTTP classificadas**, **95.187 erros de rede** e **915.688 URLs na fila**. Progresso de **3,04%**; a meta de 9.000.000 não foi atingida.
+- Classes nesse snapshot: 57.171 sem sinal; 37.469 login; 31.219 bloqueados; 17.542 loja/atendimento; 14.336 paywall; 8.825 geradores sem login; 6.288 chats sem login; 5.096 indisponíveis; 370 rate-limit.
 - Último total concluído antes desse lote: **29.003 tentativas**, sendo **24.749 respostas HTTP classificadas** e **4.254 erros de rede**.
 - O lote antigo foi interrompido após **76.500 novas tentativas**; total acumulado documentado: **105.503 tentativas**.
 - Novo teste em lotes de 5.000 iniciado com 96 workers globais e limite de 2 por origem.

@@ -48,7 +48,7 @@ npm run benchmark
 - **MCP** JSON-RPC com 15 ferramentas para agentes externos.
 - **Memória/RAG local:** escopos sessão/projeto/global, busca híbrida, resumo persistido e exportação/importação em JSON.
 - **Extensão confiável:** adaptadores versionados, saúde por rota, diagnóstico de layout, modo manual, WORK caçador de chats e mapeador de lojas com busca por pedido/orçamento.
-- **Varredura web retomável:** GitHub, Tranco, Open Page Rank (10 milhões) e Common Crawl; teste concorrente com limite por origem, proteção SSRF e classificação de chats, geradores, lojas, login, paywall e bloqueios. Acervo atual: **1.189.191 URLs**; coleta parada por decisão do operador e testes continuando na fila existente.
+- **Varredura web retomável:** GitHub, Tranco, Open Page Rank (10 milhões) e Common Crawl; teste concorrente com limite por origem, proteção SSRF e classificação de chats, geradores, lojas, login, paywall e bloqueios. Acervo atual: **1.189.191 URLs**; **273.503 tentativas** e **915.688 na fila** em 28/11/2026. Coleta parada por decisão do operador; somente a fila existente pode ser testada.
 - **Goal autônomo**: `/plan` → `/loop` → `/goal` com agendador usando a própria API.
 - **WEBdocker.NODEJS**: container com Chromium headless — as rotas rodam no aparelho de quem executa.
 
