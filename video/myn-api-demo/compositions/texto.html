@@ -1,0 +1,36 @@
+<template>
+<style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500.ttf') format('truetype');font-weight:500}
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500-italic.ttf') format('truetype');font-weight:500;font-style:italic}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600}
+#root{position:absolute;inset:0;overflow:hidden;background:#fffdf7;font-family:Plex,sans-serif;color:#14212b}
+.ground{position:absolute;inset:0;background:#fffdf7}
+.meta{position:absolute;left:7%;top:8%;font:600 28px Plex,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#1f6fe0}
+.quote{position:absolute;left:9%;right:9%;top:21%;bottom:19%;font:500 78px/1.08 Newsreader,serif;letter-spacing:-.035em;display:flex;align-items:center;z-index:2}
+.quote em{color:#1f6fe0;font-weight:500}.ink-mark{position:relative;white-space:nowrap;isolation:isolate}.ink-underline{position:absolute;left:-4px;right:-4px;bottom:2px;height:18px;background:#e6a52e;z-index:-1;transform:scaleX(0);transform-origin:left center}
+.quote-mark{position:absolute;left:4%;top:7%;font:500 330px/1 Newsreader,serif;color:#bf8926;opacity:.7}
+.highlight{position:absolute;left:8%;bottom:15%;z-index:5;font:600 28px Plex,sans-serif;letter-spacing:.06em;text-transform:uppercase;color:#0b6f69}
+.flood{position:absolute;inset:0;z-index:20;background:#1f6fe0;transform-origin:center bottom}
+</style>
+<div id="root" data-composition-id="texto" data-duration="5">
+  <div class="ground clip" data-start="0" data-duration="5" data-track-index="0"></div>
+  <div class="quote-mark clip" data-start="0.1" data-duration="4.9" data-track-index="1">“</div>
+  <div class="meta clip" data-start="0.1" data-duration="4.9" data-track-index="2"><div class="anim">RESPOSTA REAL · /v1/agent</div></div>
+  <div class="quote clip" data-start="0.2" data-duration="4.8" data-track-index="4"><div class="anim">“Sou o <strong>Myn Recicla/01</strong>. Transformo abas gratuitas em rotas de agente — <em class="ink-mark">sem chaves de API.<i class="ink-underline"></i></em>”</div></div>
+  <div class="highlight clip" data-start="0.6" data-duration="4.4" data-track-index="5"><div class="anim">via: conhecimento-local · uso registrado</div></div>
+  <div class="flood clip" data-start="4.64" data-duration="0.36" data-track-index="10" data-layout-allow-overflow></div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('.quote-mark',{opacity:0,scale:.8,rotation:-8},{opacity:.7,scale:1,rotation:0,duration:.55,ease:'power3.out'},.1);
+tl.fromTo('.meta .anim',{opacity:0,y:18},{opacity:1,y:0,duration:.4,ease:'power3.out'},.1);
+tl.fromTo('.quote .anim',{opacity:0,y:34},{opacity:1,y:0,duration:.7,ease:'power3.out'},.2);
+tl.fromTo('.ink-underline',{scaleX:0},{scaleX:1,duration:.55,ease:'expo.out'},.9);
+tl.fromTo('.highlight .anim',{opacity:0},{opacity:1,duration:.4,ease:'power2.out'},.6);
+tl.to('.highlight .anim',{x:14,duration:.22,ease:'power2.out'},3.25);
+tl.to('.highlight .anim',{x:0,duration:.22,ease:'power2.inOut'},3.47);
+tl.fromTo('.flood',{scaleY:0},{scaleY:1,duration:.32,ease:'power3.in'},4.64);
+window.__timelines=window.__timelines||{};window.__timelines.texto=tl;
+</script>
+</template>

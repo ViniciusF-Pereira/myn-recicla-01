@@ -1,0 +1,21 @@
+{
+  "capturedAt": "2026-11-27T22:38:37.563Z",
+  "api": {
+    "endpoint": "/v1/agent",
+    "status": 200,
+    "session": "demo-video"
+  },
+  "image": {
+    "fonte": "Desenho local por palavra-chave · free, sem chave · sem rede",
+    "prompt": "Abstract folded paper clouds, blue geometric circles, cream paper texture, editorial technology collage, no humans, no faces, no eyes, no text, no logos, wide 16:9"
+  },
+  "audio": {
+    "fonte": "edge-tts · free, sem chave · ~1500 caracteres",
+    "voz": "pt-BR-FranciscaNeural"
+  },
+  "narration": {
+    "fonte": "edge-tts · free, sem chave · ~1500 caracteres",
+    "voz": "pt-BR-FranciscaNeural"
+  },
+  "secretStored": false
+}

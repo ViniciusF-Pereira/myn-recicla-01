@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Myn Recicla/01 — VM Web",
-  "version": "1.2.0",
+  "version": "1.3.0",
   "description": "Abre a VM Web do Myn e conecta rotas de abas gratuitas ao seu navegador, com permissão por site.",
   "permissions": ["storage", "tabs", "scripting", "sidePanel", "activeTab"],
   "host_permissions": [
@@ -31,7 +31,28 @@
     "https://www.ecosia.org/*",
     "https://www.phind.com/*",
     "https://writesonic.com/*",
-    "https://hix.ai/*"
+    "https://hix.ai/*",
+    "https://playground.ai.cloudflare.com/*",
+    "https://chat.webllm.ai/*",
+    "https://plai.chat/*",
+    "https://uncensoredllm.ai/*",
+    "https://rewind.ai/*",
+    "https://ngini.com/*",
+    "https://uncensored.chat/*",
+    "https://playground.allenai.org/*",
+    "https://nofiltergpt.com/*",
+    "https://www.americanas.com.br/*",
+    "https://www.magazineluiza.com.br/*",
+    "https://www.casasbahia.com.br/*",
+    "https://www.lojasrenner.com.br/*",
+    "https://www.mercadolivre.com.br/*",
+    "https://www.shopee.com.br/*",
+    "https://www.amazon.com.br/*",
+    "https://www.submarino.com.br/*",
+    "https://www.extra.com.br/*",
+    "https://www.pontofrio.com.br/*",
+    "https://www.centauro.com.br/*",
+    "https://www.netshoes.com.br/*"
   ],
   "background": {
     "service_worker": "background.js",

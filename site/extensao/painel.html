@@ -46,6 +46,15 @@
     </div>
   </section>
 
+  <section class="lojas">
+    <div class="titulo"><b>WORK · mapeador de lojas</b><small>busca, produtos e navegação local</small></div>
+    <div class="descoberta-acao"><input id="lojaUrl" aria-label="URL da loja" placeholder="https://loja..." spellcheck="false"><button type="button" id="mapearLoja">MAPEAR</button><button type="button" class="sec" id="mapearLojaAtual">ABA ATUAL</button></div>
+    <div class="loja-linha"><select id="lojaSelect" aria-label="Lojas mapeadas"><option value="">nenhuma loja mapeada</option></select><input id="lojaTermo" aria-label="Pedido de compra" placeholder="ex.: fone até 200 reais"><button type="button" id="pesquisarLoja">PESQUISAR</button><button type="button" class="sec" id="observarLoja">VER AGORA</button></div>
+    <div class="loja-linha"><input id="lojaPrompt" aria-label="Prompt para o chat da loja" placeholder="mensagem de teste para o chat"><button type="button" class="sec" id="abrirChatLoja">ABRIR CHAT</button><button type="button" id="enviarChatLoja">ENVIAR CHAT</button></div>
+    <pre id="lojaSaida">mapeie uma loja para descobrir a busca e os produtos.</pre>
+    <details class="eventos-loja"><summary>Visto / entrado recentemente</summary><pre id="lojaEventos">nenhum evento registrado.</pre></details>
+  </section>
+
   <iframe id="vm" title="VM Web do Myn Recicla/01" src="about:blank"></iframe>
 
   <footer>O Myn não contorna login, CAPTCHA ou paywall. A automação é experimental e respeita a disponibilidade de cada site.</footer>

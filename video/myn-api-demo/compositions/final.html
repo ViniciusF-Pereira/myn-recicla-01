@@ -1,0 +1,24 @@
+<template>
+<style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500.ttf') format('truetype');font-weight:500}
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500-italic.ttf') format('truetype');font-weight:500;font-style:italic}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600}
+#root{position:absolute;inset:0;overflow:hidden;background:#f3eddf;font-family:Plex,sans-serif;color:#14212b}
+.ground{position:absolute;inset:0;background:#f3eddf}
+.lockup{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}.mark{width:142px;height:142px;margin-bottom:16px;filter:drop-shadow(7px 8px 0 #e6a52e)}.wordmark{font:600 40px Plex,sans-serif;letter-spacing:-.04em}.wordmark em{font:italic 500 44px Newsreader,serif;color:#1f6fe0}.claim{font:500 104px/.9 Newsreader,serif;letter-spacing:-.05em;margin:26px 0 28px}.claim em{color:#1f6fe0;font-weight:500}.cta{display:inline-flex;align-items:center;gap:22px;background:#1f6fe0;color:#fff;border:2px solid #0d2a4a;box-shadow:8px 8px 0 #0d2a4a;padding:18px 32px;font:600 28px Plex,sans-serif;letter-spacing:.06em;text-transform:uppercase}.url{margin-top:15px;font:600 28px Plex,sans-serif;letter-spacing:.06em;color:#0d2a4a}.proof-row{display:flex;gap:12px;margin-top:22px}.proof-row span{padding:7px 11px;border:1px solid #14212b;background:#fffdf7;font:600 28px Plex,sans-serif;text-transform:uppercase;letter-spacing:.05em}.micro{font:500 28px Plex,sans-serif;color:#66727a;margin-top:16px;letter-spacing:.04em}
+</style>
+<div id="root" data-composition-id="final" data-duration="5">
+  <div class="ground clip" data-start="0" data-duration="5" data-track-index="0"></div>
+  <div class="lockup clip" data-start="0" data-duration="5" data-track-index="1"><div class="anim"><img class="mark" src="assets/images/myn-logo.svg" alt="Símbolo real do Myn"><div class="wordmark">Myn <em>Recicla/01</em></div><h1 class="claim">Sua aba<br>vira <em>agente.</em></h1><div class="cta">Abrir Playground <span>↗</span></div><div class="url">mynrecicla.com</div></div></div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('.mark',{opacity:1,scale:.82,rotation:-6},{opacity:1,scale:1,rotation:0,duration:.65,ease:'back.out(1.5)'},0);
+tl.fromTo('.wordmark',{opacity:0,y:20},{opacity:1,y:0,duration:.45,ease:'power3.out'},.28);
+tl.fromTo('.claim',{opacity:0,y:35},{opacity:1,y:0,duration:.6,ease:'power3.out'},.34);
+tl.fromTo('.cta',{opacity:0,scale:.85},{opacity:1,scale:1,duration:.45,ease:'back.out(1.5)'},.62);
+tl.fromTo('.url',{opacity:0},{opacity:1,duration:.35,ease:'power2.out'},.82);
+window.__timelines=window.__timelines||{};window.__timelines.final=tl;
+</script>
+</template>

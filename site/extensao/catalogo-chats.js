@@ -23,6 +23,15 @@ export const CATALOGO_CHATS = [
   { id: 'phind-web', nome: 'Phind', url: 'https://www.phind.com/', origem: 'https://www.phind.com', categoria: 'código', verificacao: 'protegido-403' },
   { id: 'writesonic-web', nome: 'Writesonic Chat', url: 'https://writesonic.com/chat', origem: 'https://writesonic.com', categoria: 'assistente', verificacao: 'http-200' },
   { id: 'hix-web', nome: 'HIX Chat', url: 'https://hix.ai/', origem: 'https://hix.ai', categoria: 'multi-modelo', verificacao: 'http-200' },
+  { id: 'cloudflare-playground', nome: 'Cloudflare AI Playground', url: 'https://playground.ai.cloudflare.com/', origem: 'https://playground.ai.cloudflare.com', categoria: 'multi-modelo', verificacao: 'sem-login-200' },
+  { id: 'webllm-chat', nome: 'WebLLM Chat', url: 'https://chat.webllm.ai/', origem: 'https://chat.webllm.ai', categoria: 'local-webgpu', verificacao: 'sem-login-200' },
+  { id: 'plai-chat', nome: 'PLAI.chat', url: 'https://plai.chat/no-login-ai-chat/', origem: 'https://plai.chat', categoria: 'assistente', verificacao: 'sem-login-200' },
+  { id: 'uncensoredllm', nome: 'UncensoredLLM', url: 'https://uncensoredllm.ai/playground', origem: 'https://uncensoredllm.ai', categoria: 'multi-modelo', verificacao: 'sem-login-200' },
+  { id: 'rewind-chat', nome: 'Rewind.ai Chat', url: 'https://rewind.ai/free-ai-chatbot/', origem: 'https://rewind.ai', categoria: 'assistente', verificacao: 'sem-login-200' },
+  { id: 'ngini-chat', nome: 'Ngini', url: 'https://ngini.com/en-us/free-chatgpt-alternative-no-account', origem: 'https://ngini.com', categoria: 'multi-modal', verificacao: 'sem-login-200' },
+  { id: 'uncensored-chat', nome: 'Uncensored.chat', url: 'https://uncensored.chat/free-ai-chat', origem: 'https://uncensored.chat', categoria: 'assistente', verificacao: 'sem-login-200' },
+  { id: 'ai2-playground', nome: 'Ai2 Playground', url: 'https://playground.allenai.org/', origem: 'https://playground.allenai.org', categoria: 'multi-modelo', verificacao: 'provavel-200' },
+  { id: 'nofiltergpt', nome: 'NoFilterGPT', url: 'https://nofiltergpt.com/chat/', origem: 'https://nofiltergpt.com', categoria: 'assistente', verificacao: 'provavel-200' },
 ];
 
 export function chatPorReferencia(valor) {

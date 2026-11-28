@@ -1,0 +1,28 @@
+<template>
+<style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500.ttf') format('truetype');font-weight:500}
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500-italic.ttf') format('truetype');font-weight:500;font-style:italic}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600}
+#root{position:absolute;inset:0;overflow:hidden;background:#0d2a4a;color:#fffdf7;font-family:Plex,sans-serif}
+.ground{position:absolute;inset:0;background:#0d2a4a}
+.copy{position:absolute;left:7%;top:13%;width:38%;bottom:13%;display:flex;flex-direction:column;justify-content:center}.copy .eyebrow{font:600 28px Plex,sans-serif;letter-spacing:.15em;text-transform:uppercase;color:#9fc7ff}.copy h1{font:500 104px/.95 Newsreader,serif;letter-spacing:-.045em;margin:22px 0}.copy h1 em{color:#e6a52e;font-weight:500}.copy p{font:400 29px/1.45 Plex,sans-serif;color:#d9e6f1;max-width:560px}
+.player{position:absolute;left:48%;right:6%;top:24%;bottom:24%;border:2px solid rgba(255,255,255,.45);background:rgba(255,255,255,.05);padding:44px;display:flex;flex-direction:column;justify-content:center;gap:34px}.player-top{display:flex;align-items:center;gap:22px}.play-wrap{position:relative;width:86px;height:86px}.play{position:absolute;inset:0;border-radius:50%;background:#e6a52e;display:grid;place-items:center}.play:after{content:"";width:0;height:0;border-left:26px solid #14212b;border-top:17px solid transparent;border-bottom:17px solid transparent;margin-left:8px}.ring{position:absolute;inset:-10px;border:2px solid rgba(230,165,46,.55);border-radius:50%;transform:scale(.8);opacity:0}.player-top b{font:600 28px Plex,sans-serif;letter-spacing:.08em;text-transform:uppercase}.player-top small{display:block;color:#9fc7ff;font:500 28px Plex,sans-serif;margin-top:7px}.wave{width:100%;height:220px;overflow:visible}.wave path{fill:none;stroke:#9fc7ff;stroke-width:8;stroke-linecap:round;stroke-linejoin:round}.wave circle{fill:#e6a52e;stroke:#14212b;stroke-width:4}.time{font:500 28px Plex,sans-serif;color:#d9e6f1;display:flex;justify-content:space-between}
+</style>
+<div id="root" data-composition-id="voz" data-duration="5">
+  <div class="ground clip" data-start="0" data-duration="5" data-track-index="0"></div>
+  <div class="copy clip" data-start="0.1" data-duration="4.9" data-track-index="1"><div class="anim"><span class="eyebrow">prova real · edge-tts</span><h1>A mesma<br><em>voz.</em></h1><p>O agente não só escreve. Ele entrega a narração pronta para usar.</p></div></div>
+  <div class="player clip" data-start="0.25" data-duration="4.75" data-track-index="2"><div class="anim"><div class="player-top"><div class="play-wrap"><i class="ring"></i><div class="play"></div></div><div><b>voz gerada</b><small>pt-BR · Francisca Neural</small></div></div><svg class="wave" viewBox="0 0 900 220" preserveAspectRatio="none"><path id="wave-path" d="M0 110 L30 110 L45 72 L60 148 L75 48 L90 172 L105 86 L120 134 L135 110 L165 110 L180 58 L195 162 L210 36 L225 184 L240 78 L255 142 L270 110 L300 110 L315 92 L330 128 L345 110 L375 110 L390 46 L405 174 L420 24 L435 196 L450 70 L465 150 L480 110 L510 110 L525 84 L540 136 L555 110 L585 110 L600 52 L615 168 L630 30 L645 190 L660 74 L675 146 L690 110 L720 110 L735 96 L750 124 L765 110 L795 110 L810 64 L825 156 L840 42 L855 178 L870 88 L885 132 L900 110"/><circle id="playhead" cx="0" cy="110" r="13"/></svg><div class="time"><span>00:00</span><span>00:03.8</span></div></div></div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('.copy .anim',{opacity:0,x:-35},{opacity:1,x:0,duration:.6,ease:'power3.out'},.1);
+tl.fromTo('.player .anim',{opacity:0,y:35},{opacity:1,y:0,duration:.65,ease:'power3.out'},.25);
+const path=document.getElementById('wave-path');const len=path.getTotalLength();path.style.strokeDasharray=len;path.style.strokeDashoffset=len;
+tl.to(path,{strokeDashoffset:0,duration:3.8,ease:'none'},.35);
+tl.fromTo('.play',{scale:.8},{scale:1,duration:.45,ease:'back.out(1.7)'},.3);
+tl.fromTo('.ring',{opacity:.8,scale:.8},{opacity:0,scale:1.65,duration:.8,ease:'power2.out'},.35);
+tl.fromTo('#playhead',{attr:{cx:0}},{attr:{cx:900},duration:3.8,ease:'none'},.35);
+window.__timelines=window.__timelines||{};window.__timelines.voz=tl;
+</script>
+</template>

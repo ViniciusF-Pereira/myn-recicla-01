@@ -8,3 +8,8 @@ outputs-*.json
 .env.*
 token-local.json
 worker-*-eventos.jsonl
+video/myn-api-demo/.hyperframes/
+video/myn-api-demo/.thumbnails/
+video/myn-api-demo/.waveform-cache/
+video/myn-api-demo/.media/
+__pycache__/

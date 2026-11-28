@@ -1,0 +1,41 @@
+<template>
+<style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500.ttf') format('truetype');font-weight:500}
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500-italic.ttf') format('truetype');font-weight:500;font-style:italic}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600}
+#root{position:absolute;inset:0;overflow:hidden;background:#0d2a4a;color:#fffdf7;font-family:Plex,sans-serif}
+.ground{position:absolute;inset:0;background:#0d2a4a}
+.copy{position:absolute;left:7%;top:14%;width:39%;bottom:12%;display:flex;flex-direction:column;justify-content:center}
+.work-row{display:flex;align-items:center;gap:24px;margin-bottom:30px}.work-row img{width:112px;height:112px}.work-row span{font:600 28px Plex,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#9fc7ff}
+h1{font:500 102px/.92 Newsreader,serif;letter-spacing:-.05em;margin:0 0 26px}h1 em{color:#e6a52e;font-weight:500}
+.promise{font:400 30px/1.42 Plex,sans-serif;color:#d9e6f1;max-width:620px}.proof-line{margin-top:32px;padding-top:20px;border-top:2px solid rgba(255,255,255,.22);font:600 28px/1.5 Plex,sans-serif;letter-spacing:.04em;text-transform:uppercase;color:#9fc7ff}
+.route-line{height:6px;width:150px;margin-top:22px;background:#e6a52e;transform-origin:left center}
+.ui-wrap{position:absolute;left:49%;right:-4%;top:9%;bottom:9%;border:3px solid #fffdf7;box-shadow:18px 20px 0 rgba(230,165,46,.9);overflow:hidden;background:#f3eddf}
+.ui-bar{height:58px;background:#fffdf7;border-bottom:2px solid #14212b;display:flex;align-items:center;gap:10px;padding:0 18px}.ui-bar i{width:13px;height:13px;border-radius:50%;background:#e9654f}.ui-bar i:nth-child(2){background:#e6a52e}.ui-bar i:nth-child(3){background:#0d8f87}.ui-bar span{margin-left:12px;font:600 28px Plex,sans-serif;color:#14212b}
+.ui-wrap img{display:block;width:100%;height:calc(100% - 58px);object-fit:cover;object-position:top left}
+.ui-badge{position:absolute;right:22px;bottom:22px;z-index:3;display:flex;align-items:center;gap:14px;padding:13px 17px;background:#e6a52e;color:#14212b;border:2px solid #14212b;box-shadow:6px 6px 0 #14212b;font:600 28px Plex,sans-serif;text-transform:uppercase;letter-spacing:.05em;transform:rotate(-3deg)}
+.ui-badge b{font:500 38px/1 Newsreader,serif}.wipe{position:absolute;inset:0;z-index:30;background:#e6a52e;transform-origin:right center}
+</style>
+<div id="root" data-composition-id="vendedor" data-duration="6">
+  <div class="ground clip" data-start="0" data-duration="6" data-track-index="0"></div>
+  <div class="wipe clip" data-start="0" data-duration="0.36" data-track-index="15" data-layout-allow-overflow></div>
+  <div class="copy clip" data-start="0.1" data-duration="5.9" data-track-index="1"><div class="anim"><div class="work-row"><img src="assets/images/myn-logo.svg" alt="Símbolo real do Myn"><span>WORK · agente vendedor</span></div><h1>Eu sei o<br><em>caminho.</em></h1><p class="promise">Conheço as rotas, os limites e o resultado. Você pede; eu mostro onde o Myn pode chegar.</p><div class="proof-line">API · provedores · mídia · memória</div><div class="route-line"></div></div></div>
+  <div class="ui-wrap clip" data-start="0.25" data-duration="5.75" data-track-index="2" data-layout-allow-overflow><div class="anim"><div class="ui-bar"><i></i><i></i><i></i><span>Myn · Playground real</span></div><img src="assets/images/playground-real.png" alt="Playground real do Myn"><div class="ui-badge"><b>190</b> plugins públicos</div></div></div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('.wipe',{scaleX:1},{scaleX:0,duration:.34,ease:'power3.inOut'},0);
+tl.fromTo('.work-row',{opacity:0,y:18},{opacity:1,y:0,duration:.4,ease:'power3.out'},.12);
+tl.fromTo('h1',{opacity:0,y:38},{opacity:1,y:0,duration:.62,ease:'power4.out'},.2);
+tl.fromTo('.promise',{opacity:0,y:22},{opacity:1,y:0,duration:.48,ease:'power3.out'},.38);
+tl.fromTo('.proof-line',{opacity:0},{opacity:1,duration:.35,ease:'power2.out'},.62);
+tl.fromTo('.route-line',{scaleX:0},{scaleX:1,duration:.55,ease:'expo.out'},.72);
+tl.fromTo('.ui-wrap .anim',{opacity:0,x:90,rotation:2},{opacity:1,x:0,rotation:0,duration:.75,ease:'power3.out'},.25);
+tl.fromTo('.ui-wrap img',{scale:1.08},{scale:1,duration:1.1,ease:'power3.out'},.3);
+tl.fromTo('.ui-badge',{opacity:0,scale:.7,rotation:5},{opacity:1,scale:1,rotation:-3,duration:.5,ease:'back.out(1.5)'},1.05);
+tl.to('.ui-badge',{scale:1.08,duration:.16,ease:'power2.out'},4.55);
+tl.to('.ui-badge',{scale:1,duration:.22,ease:'power2.inOut'},4.71);
+window.__timelines=window.__timelines||{};window.__timelines.vendedor=tl;
+</script>
+</template>

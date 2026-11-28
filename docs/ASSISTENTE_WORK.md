@@ -40,12 +40,21 @@ Google/Gemini não fazem parte do catálogo.
 
 ## Ferramentas locais de descoberta
 
-- `chats_catalogo` — lista os 23 chats conhecidos;
+- `chats_catalogo` — lista os 32 chats conhecidos;
 - `extensao_descobrir` — mapeia um chat autorizado sem enviar mensagens;
 - `extensao_descobrir_aba_atual` — mapeia a aba atual com `activeTab`;
 - `extensao_ativar` — ativa o último adaptador descoberto após pedido explícito.
 
-Comandos úteis: `liste os chats`, `mapear Perplexity`, `mapear esta aba` e `ativar adaptador descoberto`.
+Comandos úteis: `liste os chats`, `mapear Perplexity`, `mapear esta aba`, `ativar adaptador descoberto`, `mapear loja Americanas`, `pesquisar fone até 250 reais na Americanas` e `o que estou vendo na loja`.
+
+## Ferramentas locais de loja
+
+- `loja_mapear` — descobre busca, cards, links e preços.
+- `loja_pesquisar` — interpreta produto, orçamento e ocasião.
+- `loja_observar` — lê os produtos visíveis e a página atual.
+- `loja_eventos` — mostra o histórico local do que foi visto/aberto.
+
+O envio para chatbots humanos não é automático; depende de confirmação e não contorna login.
 
 ## Privacidade
 
@@ -56,7 +65,7 @@ Comandos úteis: `liste os chats`, `mapear Perplexity`, `mapear esta aba` e `ati
 
 ## Validação executada
 
-- `myn_rotas`: 154 plugins, saúde retornada.
+- `myn_rotas`: 190 plugins públicos, saúde retornada.
 - `myn_planejar`: plano gerado via Pollinations.
 - `myn_arquitetura`: 64 módulos, 92 dependências, 0 violações.
 - `myn_desempenho`: medição p50/bytes retornada.
@@ -71,8 +80,9 @@ Comandos úteis: `liste os chats`, `mapear Perplexity`, `mapear esta aba` e `ati
 - Cancelamento: chamada lenta interrompida e estado restaurado.
 - Histórico: mensagens mantidas após recarregar a página.
 - Três abas abertas: chamada MCP respondida em 9 ms, sem esgotar conexões (SSE combinado).
-- `chats_catalogo`: 23 chats retornados no Edge isolado.
+- `chats_catalogo`: 32 chats retornados no Edge isolado.
 - Descoberta local: confiança 87%, adaptador ativado e rota executada.
+- Mapeador de loja: cards `article.card.product`, busca por `fone`, orçamento, chat e eventos locais validados.
 
 ## Atalhos
 

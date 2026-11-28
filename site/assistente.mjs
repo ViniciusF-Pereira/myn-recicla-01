@@ -1,5 +1,6 @@
 /** WORK — assistente virtual flutuante com MCP, voz e interação com a página. */
 import { CATALOGO_CHATS } from './extensao/catalogo-chats.js';
+import { LOJAS_CONHECIDAS } from './extensao/catalogo-lojas.js';
 
 const CSS = `
 .wa-root{position:fixed;right:18px;bottom:18px;z-index:120;font:500 14px/1.45 "IBM Plex Sans",system-ui,sans-serif;color:var(--tinta,#1b2730)}
@@ -39,6 +40,12 @@ const FERRAMENTAS_LOCAIS = [
   { name: 'extensao_descobrir', description: 'Mapeia o DOM de um chat autorizado sem enviar mensagens.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } },
   { name: 'extensao_descobrir_aba_atual', description: 'Mapeia a aba atual autorizada temporariamente.', inputSchema: { type: 'object', properties: {} } },
   { name: 'extensao_ativar', description: 'Ativa o último adaptador descoberto após revisão.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'loja_mapear', description: 'Mapeia busca, produtos e navegação de uma loja autorizada.', inputSchema: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] } },
+  { name: 'loja_pesquisar', description: 'Interpreta um pedido de compra e pesquisa na loja.', inputSchema: { type: 'object', properties: { termo: { type: 'string' }, loja: { type: 'string' } }, required: ['termo'] } },
+  { name: 'loja_observar', description: 'Mostra os produtos visíveis e a página atual da loja.', inputSchema: { type: 'object', properties: { loja: { type: 'string' } } } },
+  { name: 'loja_eventos', description: 'Lista o que foi visto ou aberto nas lojas mapeadas.', inputSchema: { type: 'object', properties: {} } },
+  { name: 'loja_chat_abrir', description: 'Abre e mapeia o chat de atendimento da loja.', inputSchema: { type: 'object', properties: { loja: { type: 'string' } } } },
+  { name: 'loja_chat_enviar', description: 'Envia um prompt de teste ao chat da loja com confirmação.', inputSchema: { type: 'object', properties: { loja: { type: 'string' }, texto: { type: 'string' }, confirmar: { type: 'boolean' } }, required: ['texto'] } },
 ];
 let ferramentas = [...FERRAMENTAS_LOCAIS];
 let ultimaDescoberta = null;
@@ -156,20 +163,31 @@ function formatarDescoberta(r) {
   ].join('\n');
 }
 
+async function resolverLoja(referencia = '', signal) {
+  if (!window.myn?.cliente?.listarLojas) throw new Error('extensão não conectada');
+  const d = await window.myn.cliente.listarLojas(5000, signal);
+  const lojas = d.lojas || [];
+  const termo = String(referencia || '').trim().toLowerCase();
+  if (!termo) return lojas.length === 1 ? lojas[0] : null;
+  let origem = '';
+  try { origem = new URL(referencia).origin.toLowerCase(); } catch { /* referência textual */ }
+  return lojas.find((l) => l.id === termo || l.nome.toLowerCase() === termo || l.origem.toLowerCase() === termo || (origem && l.origem.toLowerCase() === origem)) || null;
+}
+
 async function ferramentaLocal(nome, args = {}, signal) {
   if (nome === 'chats_catalogo') {
     return CATALOGO_CHATS.map((c) => '- ' + c.nome + ' · ' + c.categoria + ' · ' + c.verificacao + ' · ' + c.url).join('\n') + '\n\nPeça “mapear Perplexity”, por exemplo. A autorização é individual.';
   }
   if (nome === 'extensao_descobrir') {
     if (!window.myn?.cliente?.descobrirRota) throw new Error('extensão não conectada; abra o painel lateral');
-    const r = await window.myn.cliente.descobrirRota(args.url, signal);
+    const r = await window.myn.cliente.descobrirRota(args.url, 45000, signal);
     if (r?.ok === false) throw new Error(r.erro || 'não foi possível mapear');
     ultimaDescoberta = r;
     return formatarDescoberta(r);
   }
   if (nome === 'extensao_descobrir_aba_atual') {
     if (!window.myn?.cliente?.descobrirAbaAtual) throw new Error('extensão não conectada; abra o painel lateral');
-    const r = await window.myn.cliente.descobrirAbaAtual(signal);
+    const r = await window.myn.cliente.descobrirAbaAtual(45000, signal);
     if (r?.ok === false) throw new Error(r.erro || 'não foi possível mapear');
     ultimaDescoberta = r;
     return formatarDescoberta(r);
@@ -177,9 +195,48 @@ async function ferramentaLocal(nome, args = {}, signal) {
   if (nome === 'extensao_ativar') {
     if (!ultimaDescoberta?.id) throw new Error('nenhuma descoberta recente; primeiro peça para mapear um chat');
     if (!window.myn?.cliente?.ativarDescoberta) throw new Error('extensão não conectada; abra o painel lateral');
-    const r = await window.myn.cliente.ativarDescoberta(ultimaDescoberta.id, {}, signal);
+    const r = await window.myn.cliente.ativarDescoberta(ultimaDescoberta.id, {}, 10000, signal);
     if (r?.ok === false) throw new Error(r.erro || 'não foi possível ativar');
     return 'Adaptador ativado: ' + r.adaptador.nome + ' (' + r.adaptador.id + '). Nenhuma mensagem foi enviada.';
+  }
+  if (nome === 'loja_mapear') {
+    if (!window.myn?.cliente?.mapearLoja) throw new Error('extensão não conectada');
+    const r = await window.myn.cliente.mapearLoja(args.url, 45000, signal);
+    if (r?.ok === false) throw new Error(r.erro || 'não foi possível mapear');
+    return 'Loja mapeada: ' + r.nome + '\nBusca: ' + r.busca?.campo + '\nProdutos: ' + r.produtos?.cards + '\nConfiança: ' + Math.round(r.confianca * 100) + '%';
+  }
+  if (nome === 'loja_pesquisar') {
+    const loja = await resolverLoja(args.loja, signal);
+    if (!loja) throw new Error('mapeie uma loja primeiro ou informe qual loja usar');
+    const r = await window.myn.cliente.pesquisarLoja(loja.id, args.termo, 45000, signal);
+    if (r?.ok === false) throw new Error(r.erro || 'pesquisa falhou');
+    return 'Pedido: ' + r.pedido.termo + (r.pedido.budget ? ' até R$ ' + r.pedido.budget : '') + '\n' + (r.matches.length ? r.matches.map((p) => '- ' + p.titulo + ' · ' + p.preco).join('\n') : 'nenhum produto dentro do critério.');
+  }
+  if (nome === 'loja_observar') {
+    const loja = await resolverLoja(args.loja, signal);
+    if (!loja) throw new Error('mapeie uma loja primeiro');
+    const r = await window.myn.cliente.observarLoja(loja.id, 35000, signal);
+    if (r?.ok === false) throw new Error(r.erro || 'observação falhou');
+    return r.produtos?.length ? r.produtos.map((p) => '- ' + p.titulo + ' · ' + p.preco).join('\n') : 'nenhum produto visível.';
+  }
+  if (nome === 'loja_eventos') {
+    const r = await window.myn.cliente.listarEventosLoja(5000, signal);
+    if (r?.ok === false) throw new Error(r.erro || 'não foi possível ler eventos');
+    return r.eventos?.length ? r.eventos.slice(-10).map((e) => e.tipo + ' · ' + (e.categoria || e.titulo || e.origem)).join('\n') : 'nenhum evento de loja registrado.';
+  }
+  if (nome === 'loja_chat_abrir') {
+    const loja = await resolverLoja(args.loja, signal);
+    if (!loja) throw new Error('mapeie uma loja primeiro');
+    const r = await window.myn.cliente.abrirChatLoja(loja.id, 35000, signal);
+    if (r?.ok === false) throw new Error(r.erro || 'não foi possível abrir o chat');
+    return 'Chat mapeado: campo ' + r.chat.campos.campo + ' · envio ' + r.chat.campos.envio;
+  }
+  if (nome === 'loja_chat_enviar') {
+    const loja = await resolverLoja(args.loja, signal);
+    if (!loja) throw new Error('mapeie uma loja primeiro');
+    const r = await window.myn.cliente.enviarChatLoja(loja.id, args.texto, args.confirmar === true, 45000, signal);
+    if (r?.ok === false) throw new Error(r.erro || 'não foi possível enviar');
+    return r.texto || 'Mensagem enviada ao chat da loja.';
   }
   return null;
 }
@@ -221,9 +278,40 @@ function referenciaChat(texto) {
   return CATALOGO_CHATS.find((c) => t.includes(c.nome.toLowerCase()) || t.includes(c.id.replace(/-web$/, '')))?.url || '';
 }
 
-function decidir(texto) {
+function referenciaLoja(texto) {
+  const url = String(texto).match(/https?:\/\/[^\s]+/i)?.[0]?.replace(/[),.;]+$/, '');
+  if (url) return url;
+  const t = texto.toLowerCase();
+  return LOJAS_CONHECIDAS.find((l) => t.includes(l.nome.toLowerCase()) || t.includes(l.id))?.url || '';
+}
+
+export function confirmacaoChatLoja(texto) {
+  const t = String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+  if (/nao (?:quero|desejo|preciso|vou|devo|posso)?\s*(?:enviar|mandar)|nao confirm|sem confirmar|cancelar|pare de|melhor nao|nao pode enviar/.test(t)) return false;
+  return /\bconfirmo\b|\bpode enviar\b|\bpode mandar\b|\bautorizo\b|^sim\b|\bsim,?\s*(?:pode )?(?:enviar|mandar)\b/.test(t);
+}
+
+export function extrairTextoChat(texto) {
+  const original = String(texto || '').trim();
+  const citado = original.match(/["“]([^"”]+)["”]/)?.[1];
+  if (citado) return citado.trim().slice(0, 2000);
+  const depoisDoisPontos = original.includes(':') ? original.slice(original.indexOf(':') + 1).trim() : '';
+  let mensagem = depoisDoisPontos || original.replace(/^.*?\b(?:chat|atendimento)\b\s*/i, '');
+  mensagem = mensagem.replace(/\b(?:confirmo|pode enviar|pode mandar|autorizo o envio|sim,?\s*(?:pode )?(?:enviar|mandar))\b.*$/i, '').trim();
+  mensagem = mensagem.replace(/^(?:na|no|da|do|para|pela|pelo)\s+(?:americanas|magazine luiza|magalu|casas bahia|lojas renner|renner|mercado livre|shopee|amazon|submarino|extra|ponto frio|centauro|netshoes)\s*:?\s*/i, '').trim();
+  return mensagem.replace(/[.!?]\s*$/, '').slice(0, 2000);
+}
+
+export function decidir(texto) {
   const t = texto.toLowerCase();
   if (/lista|liste|listar|quais|catalogo|catálogo|mostre|ache|procure|cace|caçar/.test(t) && /chats?|provedores?/.test(t)) return { nome: 'chats_catalogo', args: {} };
+  const contextoLoja = /loja|americanas|magalu|magazine luiza|casas bahia|renner|mercado livre|shopee|amazon|submarino|extra|ponto frio|centauro|netshoes/.test(t);
+  if (contextoLoja && /mapear|mapeie|descobrir|descubra/.test(t)) { const url = referenciaLoja(texto); if (url) return { nome: 'loja_mapear', args: { url } }; }
+  if (contextoLoja && /abrir chat|abrir atendimento|iniciar atendimento/.test(t)) return { nome: 'loja_chat_abrir', args: { loja: referenciaLoja(texto) } };
+  if (contextoLoja && /enviar|mandar|testar prompt|teste de prompt/.test(t) && /chat|atendimento/.test(t)) return { nome: 'loja_chat_enviar', args: { loja: referenciaLoja(texto), texto: extrairTextoChat(texto), confirmar: confirmacaoChatLoja(texto) } };
+  if (contextoLoja && /pesquis|comprar|quero|preciso|achar|encontrar|pedido|prompt|presente|até/.test(t)) return { nome: 'loja_pesquisar', args: { termo: texto, loja: referenciaLoja(texto) } };
+  if (contextoLoja && /o que.*vendo|ver agora|observar|visíveis|visiveis/.test(t)) return { nome: 'loja_observar', args: { loja: referenciaLoja(texto) } };
+  if (contextoLoja && /visto|entrado|eventos|histórico/.test(t)) return { nome: 'loja_eventos', args: {} };
   if (/mapear|mapeie|rastrear|rastreie|descobrir|descubra|nova forma|conectar/.test(t)) {
     if (/aba atual|essa aba|esta aba/.test(t)) return { nome: 'extensao_descobrir_aba_atual', args: {} };
     const url = referenciaChat(texto);
@@ -373,4 +461,4 @@ export function iniciarAssistente() {
   window.WORK = { abrir, fechar, apresentar, cancelar: () => controleAtual?.abort(), ferramentas: () => ferramentas, enviar };
 }
 
-iniciarAssistente();
+if (typeof document !== 'undefined') iniciarAssistente();

@@ -1,5 +1,6 @@
 import { ROTAS } from './rotas.js';
 import { CATALOGO_CHATS } from './catalogo-chats.js';
+import { LOJAS_CONHECIDAS } from './catalogo-lojas.js';
 
 const $ = (id) => document.getElementById(id);
 const status = $('status');
@@ -9,6 +10,7 @@ let descobertaAtual = null;
 let operacaoDescoberta = 0;
 let operacoesUrl = 0;
 let operacoesAtual = 0;
+let envioLojaEmAndamento = false;
 function atualizarBotoesDescoberta() {
   $('rastrear').disabled = operacoesUrl > 0;
   $('rastrearAtual').disabled = operacoesAtual > 0;
@@ -167,6 +169,70 @@ async function rastrearUrl(url) {
   } finally { operacoesUrl--; atualizarBotoesDescoberta(); }
 }
 
+async function carregarLojas() {
+  try {
+    const [d, e] = await Promise.all([mensagem('listar_lojas'), mensagem('listar_eventos_loja')]);
+    const select = $('lojaSelect'); select.innerHTML = '';
+    const vazia = document.createElement('option'); vazia.value = ''; vazia.textContent = 'nenhuma loja mapeada'; select.appendChild(vazia);
+    for (const loja of d.lojas || []) { const o = document.createElement('option'); o.value = loja.id; o.textContent = loja.nome + ' · ' + Math.round(loja.confianca * 100) + '%'; select.appendChild(o); }
+    $('lojaEventos').textContent = (e.eventos || []).slice(-12).reverse().map((ev) => ev.tipo + ' · ' + (ev.termo || ev.titulo || ev.origem) + '\n' + ev.produtos?.slice(0, 4).map((p) => '- ' + p.titulo + ' ' + p.preco).join('\n')).join('\n\n') || 'nenhum evento registrado.';
+  } catch { /* seção continua disponível */ }
+}
+async function autorizarLoja(url) {
+  const origem = new URL(url).origin;
+  const conhecida = LOJAS_CONHECIDAS.find((l) => l.origem === origem);
+  if (!conhecida) throw new Error('use “ABA ATUAL” para mapear uma loja fora do catálogo');
+  if (await chrome.permissions.contains({ origins: [origem + '/*'] })) return;
+  if (!await chrome.permissions.request({ origins: [origem + '/*'] })) throw new Error('permissão negada para ' + origem);
+}
+async function mapearLojaUrl(url) {
+  const d = await mensagem('mapear_loja', { url });
+  if (d.ok === false) throw new Error(d.erro);
+  $('lojaSaida').textContent = JSON.stringify(d, null, 2);
+  estado('loja mapeada · ' + d.nome, 'ok');
+  await carregarLojas();
+}
+$('mapearLoja').onclick = async () => {
+  try { const url = new URL($('lojaUrl').value.trim()).href; await autorizarLoja(url); await mapearLojaUrl(url); }
+  catch (erro) { estado(erro.message, 'erro'); }
+};
+$('mapearLojaAtual').onclick = async () => {
+  try { const d = await mensagem('mapear_loja_atual'); if (d.ok === false) throw new Error(d.erro); $('lojaSaida').textContent = JSON.stringify(d, null, 2); await carregarLojas(); estado('loja atual mapeada', 'ok'); }
+  catch (erro) { estado(erro.message, 'erro'); }
+};
+$('pesquisarLoja').onclick = async () => {
+  const id = $('lojaSelect').value;
+  if (!id) return estado('escolha uma loja mapeada', 'erro');
+  try { const d = await mensagem('pesquisar_loja', { lojaId: id, termo: $('lojaTermo').value }); if (d.ok === false) throw new Error(d.erro); $('lojaSaida').textContent = JSON.stringify({ pedido: d.pedido, matches: d.matches, produtos: d.produtos }, null, 2); await carregarLojas(); estado('pesquisa concluída · ' + d.matches.length + ' resultado(s)', 'ok'); }
+  catch (erro) { estado(erro.message, 'erro'); }
+};
+$('observarLoja').onclick = async () => {
+  const id = $('lojaSelect').value;
+  if (!id) return estado('escolha uma loja mapeada', 'erro');
+  try { const d = await mensagem('observar_loja', { lojaId: id }); if (d.ok === false) throw new Error(d.erro); $('lojaSaida').textContent = JSON.stringify(d, null, 2); await carregarLojas(); estado('página observada', 'ok'); }
+  catch (erro) { estado(erro.message, 'erro'); }
+};
+
+$('abrirChatLoja').onclick = async () => {
+  const id = $('lojaSelect').value;
+  if (!id) return estado('escolha uma loja mapeada', 'erro');
+  try { const d = await mensagem('abrir_chat_loja', { lojaId: id }); if (d.ok === false) throw new Error(d.erro); $('lojaSaida').textContent = JSON.stringify(d.chat, null, 2); await carregarLojas(); estado('chat da loja aberto e mapeado', 'ok'); }
+  catch (erro) { estado(erro.message, 'erro'); }
+};
+$('enviarChatLoja').onclick = async () => {
+  const id = $('lojaSelect').value;
+  const texto = $('lojaPrompt').value.trim();
+  if (!id) return estado('escolha uma loja mapeada', 'erro');
+  if (!texto) return estado('escreva a mensagem de teste', 'erro');
+  if (envioLojaEmAndamento) return;
+  const loja = $('lojaSelect').selectedOptions[0]?.textContent || id;
+  if (!window.confirm('Enviar esta mensagem real para ' + loja + '?\n\n' + texto.slice(0, 500))) return estado('envio cancelado; nenhuma mensagem foi enviada');
+  envioLojaEmAndamento = true; $('enviarChatLoja').disabled = true;
+  try { const d = await mensagem('enviar_chat_loja', { lojaId: id, texto, confirmar: true }); if (d.ok === false) throw new Error(d.erro); $('lojaSaida').textContent = d.texto || 'chat enviado'; await carregarLojas(); estado('resposta nova confirmada no chat', 'ok'); }
+  catch (erro) { estado(erro.message, 'erro'); }
+  finally { envioLojaEmAndamento = false; $('enviarChatLoja').disabled = false; }
+};
+
 $('abrirVm').onclick = abrirVM;
 $('usarLocal').onclick = () => { $('siteBase').value = 'http://127.0.0.1:5188'; abrirVM(); };
 $('siteBase').addEventListener('keydown', (e) => { if (e.key === 'Enter') abrirVM(); });
@@ -225,3 +291,4 @@ $('limparDescoberta').onclick = () => { descobertaAtual = null; $('relatorioDesc
 carregarBase().then(abrirVM).catch((erro) => estado(erro.message, 'erro'));
 pintarRotas().catch((erro) => estado(erro.message, 'erro'));
 pintarChats();
+carregarLojas();

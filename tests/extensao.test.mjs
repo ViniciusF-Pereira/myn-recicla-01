@@ -43,6 +43,8 @@ test('ponte da extensão valida origem e máscara de canais', async () => {
   assert.match(fundo, /descobrir_aba_atual/);
   assert.match(fundo, /cancelar_operacao/);
   assert.match(fundo, /CATALOGO_CHATS/);
+  assert.match(fundo, /LOJAS_CONHECIDAS/);
+  assert.match(fundo, /pesquisar_loja/);
   const rotas = await readFile('site/extensao/rotas.js', 'utf8');
   assert.match(rotas, /myn-teste-local/);
   assert.match(rotas, /oculta: true/);
@@ -55,6 +57,8 @@ test('site oferece download e modo extensão', async () => {
   assert.match(home, /myn-recicla-extensao\.zip/);
   assert.match(play, /id="btnExtensao"/);
   assert.match(js, /window\.myn\.cliente\.conversar/);
+  assert.match(js, /window\.myn\.cliente\.listarRotas/);
+  assert.match(js, /__mynExtensaoRotas/);
   assert.match(js, /MODO_EXTENSAO/);
   assert.match(play, /id="painelMemoria"/);
   assert.match(js, /window\.myn\.memoria\.exportar/);

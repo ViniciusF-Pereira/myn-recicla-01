@@ -5,9 +5,12 @@
 <title>Myn — Recicla/01 · reciclagem de abas</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="description" content="Chat, mídia, agentes e APIs gratuitos reciclados em um só lugar. Sem chave, sem Codex, browser only.">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500;1,6..72,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500-italic.ttf') format('truetype');font-weight:500;font-style:italic;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Sans";src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600;font-style:normal;font-display:swap}
+@font-face{font-family:"IBM Plex Mono";src:url('assets/fonts/ibm-plex-mono.ttf') format('truetype');font-weight:500;font-style:normal;font-display:swap}
 :root{
  --azul:#1f6fe0;--azul2:#0d4fa5;--azucl:#e8f1ff;--papel:#f4efe3;--papel2:#ece5d4;--card:#ffffff;
  --tinta:#1b2430;--mut:#6b7684;--mostarda:#d79a2f;--mostardacl:#f4dfa8;--linha:#c9d2de;--verde:#2e7d5b;
@@ -168,7 +171,7 @@ footer{padding:30px 0 50px;color:var(--mut);font:.72rem var(--mono);display:flex
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.gaveta{transition:none}}
 
 /* camadas vivo + colagens */
-:root{--coral:#ef6f5e;--teal:#12a89d;--lilas:#8a6ad6;--limao:#b7d84b}
+:root{--coral:#e9654f;--teal:#0d8f87;--lilas:#e6a52e;--limao:#0d8f87;--navy:#0d2a4a;--white:#fffdf7;--yellow:#e6a52e}
 .myns-ceu{position:absolute;inset:0;width:100%;height:100%;z-index:2;pointer-events:none}
 .myns-fundo{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.28}
 body>header,main,footer{position:relative;z-index:1}
@@ -244,9 +247,122 @@ body>header,main,footer{position:relative;z-index:1}
 .autor-repo p{font:.74rem var(--sans);color:var(--mut);margin:3px 0}
 .autor-repo small{font:600 .62rem var(--mono);color:var(--mostarda)}
 .autor-assinatura{padding:10px 18px;border-top:1px dashed var(--linha);font:.72rem var(--mono);color:var(--mut);margin:0}
+
+/* ── direção 1.3 · colagem editorial de conversão ───────────────── */
+:root{--papel:#f3eddf;--papel2:#e7dfcf;--tinta:#14212b;--azul:#1f6fe0;--azul2:#0d2a4a;--azucl:#e8f1ff;--mostarda:#e6a52e;--mostardacl:#f4dfa8;--linha:#c8c1b2;--mut:#66727a;--verde:#0d8f87;--card:#fffdf7;--coral:#e9654f;--teal:#0d8f87}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:92px}
+body{background:var(--papel);color:var(--tinta);font:16px/1.6 var(--sans);background-image:linear-gradient(rgba(20,33,43,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(20,33,43,.035) 1px,transparent 1px);background-size:24px 24px}
+::selection{background:var(--mostarda);color:var(--tinta)}
+a{color:inherit}a:hover{text-decoration:none}
+button,input,textarea{font:inherit}
+button,a{-webkit-tap-highlight-color:transparent}
+:focus-visible{outline:3px solid var(--mostarda);outline-offset:4px}
+.scroll-progress{position:fixed;left:0;right:0;top:0;height:4px;z-index:120;background:var(--mostarda);transform:scaleX(0);transform-origin:left;pointer-events:none}
+.release-bar{display:flex;justify-content:center;align-items:center;gap:10px;min-height:34px;padding:7px 18px;background:var(--mostarda);border-bottom:1px solid var(--tinta);font:600 .65rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--tinta)}
+.release-bar b{background:var(--tinta);color:var(--white);padding:3px 7px;border-radius:2px}
+.release-bar a{text-decoration:underline;text-underline-offset:3px}
+header{background:rgba(20,33,43,.97);border-bottom:2px solid var(--mostarda);backdrop-filter:blur(12px)}
+.head{min-height:70px;padding:10px 0}
+.logo{padding:0;border:0;background:transparent;box-shadow:none;color:var(--white);gap:11px}
+.logo .stampa{width:36px;height:36px;background:transparent;border-radius:8px;overflow:hidden}
+.logo .stampa img{width:100%;height:100%;display:block}
+.logo b{font-size:1rem}.logo b em{color:#9fc7ff;font-size:1.05rem}
+nav{gap:2px}nav a{color:#c4d0d8;border-radius:2px;padding:9px 12px}nav a:hover{background:rgba(255,255,255,.08);color:var(--white)}
+.menu{width:42px;height:42px;background:var(--mostarda);color:var(--tinta);border-color:var(--tinta);border-radius:3px;box-shadow:3px 3px 0 rgba(255,255,255,.18)}
+.btn{border-radius:3px;min-height:50px;padding:0 20px;box-shadow:5px 5px 0 var(--azul2);letter-spacing:.07em;transition:transform .18s ease,box-shadow .18s ease,background .18s ease}
+.btn:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--azul2);text-decoration:none}.btn:active{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--azul2)}
+.btn.sec{background:var(--white);color:var(--tinta);border-color:var(--tinta);box-shadow:5px 5px 0 var(--linha)}
+.btn .ico{transition:transform .18s ease}.btn:hover .ico{transform:translateX(3px)}
+.ceu{height:auto;min-height:690px;background-color:var(--azul);background-image:linear-gradient(rgba(13,42,74,.18),rgba(13,42,74,.52)),url('assets/hero-sky.jpg');background-size:cover;background-position:center;isolation:isolate;border-bottom:2px solid var(--tinta)}
+.ceu:after,.ceu:before{display:none}
+.ceu .myns-ceu{z-index:0;opacity:.42;mix-blend-mode:screen}
+.hero-shell{position:relative;z-index:2;display:grid;grid-template-columns:1.02fr .98fr;gap:64px;align-items:center;min-height:690px;padding-top:58px;padding-bottom:70px}
+.hero-copy{color:var(--white);position:relative}
+.hero-kicker{display:inline-flex;align-items:center;gap:9px;padding:7px 10px;border:1px solid rgba(255,255,255,.58);background:rgba(13,42,74,.66);font:600 .65rem var(--mono);letter-spacing:.12em;text-transform:uppercase;box-shadow:3px 3px 0 rgba(20,33,43,.35)}
+.live-dot{width:8px;height:8px;border-radius:50%;background:var(--mostarda);box-shadow:0 0 0 4px rgba(230,165,46,.18)}
+.hero-copy h1{margin:22px 0 20px;font:500 clamp(4.4rem,7.2vw,7.5rem)/.84 var(--serif);letter-spacing:-.065em;text-wrap:balance}
+.hero-copy h1 em{position:relative;color:var(--mostarda);font-weight:500;white-space:nowrap}
+.hero-copy h1 em:after{content:"";position:absolute;left:0;right:0;bottom:-6px;height:8px;background:var(--coral);clip-path:polygon(0 35%,100% 0,96% 100%,3% 78%);transform:rotate(-1deg)}
+.hero-lead{max-width:54ch;margin:0;color:#e2ebf2;font-size:1.08rem;line-height:1.65;text-wrap:pretty}
+.hero-actions{display:flex;gap:14px;flex-wrap:wrap;margin-top:30px}
+.hero-actions .btn:first-child{background:var(--mostarda);color:var(--tinta);border-color:var(--tinta);box-shadow:5px 5px 0 var(--tinta)}
+.hero-actions .btn:first-child:hover{box-shadow:7px 7px 0 var(--tinta)}
+.hero-actions .btn.sec{background:rgba(255,253,247,.96);box-shadow:5px 5px 0 rgba(13,42,74,.7)}
+.hero-micro{display:flex;gap:14px;flex-wrap:wrap;margin-top:20px;font:500 .62rem var(--mono);letter-spacing:.06em;text-transform:uppercase;color:#bfd0dd}
+.hero-micro span{display:inline-flex;align-items:center;gap:6px}.hero-micro span:before{content:"";width:5px;height:5px;background:var(--teal);border-radius:50%}
+.hero-stage{position:relative;min-width:0;padding:24px 20px 34px 8px;--px:0px;--py:0px}
+.stage-grid{position:absolute;inset:-30px -20px -20px -30px;background-image:linear-gradient(rgba(255,255,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.12) 1px,transparent 1px);background-size:32px 32px;mask-image:radial-gradient(circle at center,#000 35%,transparent 74%);pointer-events:none}
+.window-card{position:relative;z-index:2;overflow:hidden;border:3px solid var(--tinta);border-radius:5px;background:var(--white);box-shadow:16px 18px 0 var(--tinta);transform:translate(var(--px),var(--py)) rotate(1.5deg);transition:transform .22s ease}
+.window-top{height:46px;display:flex;align-items:center;gap:8px;padding:0 14px;border-bottom:2px solid var(--tinta);background:var(--papel)}
+.window-top i{width:10px;height:10px;border-radius:50%;background:var(--coral);border:1px solid var(--tinta)}.window-top i:nth-child(2){background:var(--mostarda)}.window-top i:nth-child(3){background:var(--teal)}
+.window-top span{margin-left:8px;font:600 .64rem var(--mono);color:var(--mut);text-transform:uppercase;letter-spacing:.06em}
+.window-card img{display:block;width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top left;background:var(--papel)}
+.window-url{display:flex;align-items:center;gap:8px;padding:10px 14px;border-top:2px solid var(--tinta);background:var(--white);font:500 .62rem var(--mono);color:var(--azul2)}
+.window-url:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--teal)}
+.stage-sticker{position:absolute;z-index:4;padding:11px 14px;border:2px solid var(--tinta);font:600 .66rem var(--mono);letter-spacing:.06em;text-transform:uppercase;box-shadow:5px 5px 0 var(--tinta)}
+.stage-sticker.yellow{right:-8px;top:-4px;background:var(--mostarda);transform:rotate(6deg)}
+.stage-sticker.paper{left:-26px;bottom:2px;background:var(--white);transform:rotate(-5deg);color:var(--azul2)}
+.stage-proof{position:absolute;z-index:5;right:10px;bottom:-26px;display:flex;align-items:center;gap:12px;padding:12px 15px;background:var(--teal);color:var(--white);border:2px solid var(--tinta);box-shadow:5px 5px 0 var(--tinta);transform:rotate(-2deg)}
+.stage-proof b{font:500 2rem/1 var(--serif)}.stage-proof span{font:600 .58rem/1.4 var(--mono);text-transform:uppercase;letter-spacing:.08em}
+.hero-ticker{position:absolute;z-index:3;left:0;right:0;bottom:0;overflow:hidden;border-top:2px solid var(--tinta);background:var(--mostarda)}
+.hero-ticker-track{display:flex;width:max-content;animation:ticker 26s linear infinite}
+.hero-ticker-track span{display:inline-flex;align-items:center;gap:18px;padding:12px 22px;font:600 .66rem var(--mono);letter-spacing:.1em;text-transform:uppercase;white-space:nowrap}
+.hero-ticker-track span:after{content:"✦";color:var(--coral);font-size:.9rem}
+@keyframes ticker{to{transform:translateX(-50%)}}
+.material{position:relative;z-index:2;background:var(--tinta);color:var(--white);border-bottom:1px solid var(--tinta);padding:14px 0}
+.material small{color:#8fa2af;margin-bottom:7px}.logos{color:#cdd8df;font-size:.72rem;gap:20px}.logos span{position:relative}.logos span:not(:last-child):after{content:"/";margin-left:20px;color:var(--mostarda)}
+.apresentacao{position:relative;background:var(--papel);padding:64px 0;text-align:left;border-bottom:2px solid var(--tinta)}
+.proof-section .wrap{display:grid;grid-template-columns:.86fr 1.4fr;gap:56px;align-items:center}
+.sobre{border-color:var(--tinta);background:var(--mostarda);color:var(--tinta);border-radius:2px;box-shadow:3px 3px 0 var(--tinta)}
+.proof-intro h2{margin:22px 0 12px;font:500 clamp(2.5rem,4vw,4.2rem)/.95 var(--serif);letter-spacing:-.045em}.proof-intro h2 em{color:var(--azul);font-weight:500}
+.proof-intro p{margin:0;color:var(--mut);max-width:42ch;font-size:.95rem}
+.proof-grid{display:grid;grid-template-columns:1fr 1fr;border:2px solid var(--tinta);box-shadow:9px 9px 0 var(--azul);background:var(--white)}
+.proof-grid>div{min-height:142px;padding:20px 22px;border-right:1px solid var(--tinta);border-bottom:1px solid var(--tinta);position:relative;overflow:hidden}
+.proof-grid>div:nth-child(2n){border-right:0}.proof-grid>div:nth-last-child(-n+2){border-bottom:0}
+.proof-grid b{display:block;font:500 clamp(2.8rem,4.2vw,4.5rem)/.9 var(--serif);letter-spacing:-.055em;color:var(--azul2)}
+.proof-grid small{display:block;margin-top:10px;font:600 .62rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--mut)}
+.proof-grid>div:after{content:"";position:absolute;width:32px;height:32px;right:-10px;top:-10px;border:7px solid var(--mostarda);transform:rotate(45deg)}
+section{padding:72px 0;border-bottom:1px solid var(--linha);position:relative}
+section:nth-of-type(even){background:rgba(255,253,247,.5)}
+.st{margin-bottom:12px}.st .num{color:var(--coral);font-size:2.3rem}.st h2{font-size:clamp(2.2rem,3.8vw,3.6rem);letter-spacing:-.035em}.nota{color:var(--azul2);font-family:var(--mono);font-style:normal;font-size:.61rem;text-transform:uppercase;letter-spacing:.08em}
+.sub{font-size:1rem;max-width:72ch;margin-bottom:30px}
+.grade{gap:18px}.card{background:var(--white);border:1px solid var(--tinta);border-radius:3px;box-shadow:5px 5px 0 var(--papel2);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;overflow:hidden}
+.card:before{width:16px;height:16px;border-color:var(--coral)}
+.card:hover{transform:translate(-3px,-3px);box-shadow:8px 8px 0 var(--mostarda);border-color:var(--azul)}
+.card h3{font-size:1.25rem}.card p{font-size:.9rem;line-height:1.6}.card a{font-size:.68rem;display:inline-flex;align-items:center;gap:6px}.card a:hover{color:var(--azul)}
+.tag{border-color:var(--linha);border-radius:2px}.tag.m{border-color:var(--teal);color:var(--teal)}
+.tabs{background:var(--tinta);border-radius:3px;padding:5px;gap:3px}.tabs .aba{border-radius:2px;color:#b9c8d1}.tabs .aba.on{background:var(--mostarda);color:var(--tinta);box-shadow:none}
+.lista-limite{max-height:540px;padding-right:10px;scrollbar-color:var(--azul) var(--papel2);scrollbar-width:thin}
+.colagem{border:2px solid var(--tinta);border-radius:3px;box-shadow:12px 13px 0 var(--azul);transform:rotate(1.2deg)}
+.colagem .selo{border:2px solid var(--tinta);box-shadow:5px 5px 0 var(--mostarda);background:var(--white)}
+.colagem figcaption{background:var(--white);font-family:var(--mono);font-size:.66rem;color:var(--azul2);border-top:2px solid var(--tinta)}
+.mini-linha span:nth-child(1){background:var(--azul)}.mini-linha span:nth-child(2){background:var(--coral)}.mini-linha span:nth-child(3){background:var(--mostarda)}.mini-linha span:nth-child(4){background:var(--teal)}.mini-linha span:nth-child(5){background:var(--azul2)}.mini-linha span:nth-child(6){background:var(--papel2)}
+.section-misto{background:var(--azul2)!important;color:var(--white)}.section-misto .st h2{color:var(--white)}.section-misto .st .num,.section-misto .sub{color:#c5d4df}.section-misto .traco{border-color:#52677a}.section-misto .nota{color:var(--mostarda)}
+.section-misto .card{background:var(--papel);color:var(--tinta)}.section-misto .card:hover{box-shadow:8px 8px 0 var(--mostarda)}
+.bancada,.autor-card{border:2px solid var(--tinta);border-radius:3px;box-shadow:10px 11px 0 var(--mostarda)}
+.bc-topo{background:var(--tinta);border-bottom:2px solid var(--mostarda)}.bc-linhas{background:#0b1822}.bc-dot{background:var(--mostarda);box-shadow:0 0 0 4px rgba(230,165,46,.15)}
+.autor-topo{background:var(--azul2);color:var(--white);border-bottom:2px solid var(--tinta)}.autor-bio{color:#c5d4df}.autor-links a{background:transparent;color:var(--white);border-color:#6d8191}.autor-links a:hover{background:var(--mostarda);color:var(--tinta);border-color:var(--mostarda)}
+.aviso{border:1px solid var(--tinta);border-left:7px solid var(--mostarda);background:var(--white);box-shadow:4px 4px 0 var(--papel2);border-radius:2px}
+.conversion-band{background:var(--mostarda)!important;border-bottom:2px solid var(--tinta);padding:54px 0!important;overflow:hidden}
+.conversion-band .wrap{display:grid;grid-template-columns:1fr auto;gap:36px;align-items:center;position:relative;z-index:2}
+.conversion-band h2{margin:0;font:500 clamp(2.8rem,5vw,5.6rem)/.88 var(--serif);letter-spacing:-.055em;max-width:780px}.conversion-band h2 em{color:var(--azul2);font-weight:500}
+.conversion-band p{margin:14px 0 0;font-size:.96rem;max-width:58ch}.conversion-band .btn{white-space:nowrap;background:var(--tinta);color:var(--white);border-color:var(--tinta);box-shadow:6px 6px 0 var(--white)}
+.conversion-band:before{content:"01";position:absolute;right:-20px;bottom:-110px;font:500 30rem/1 var(--serif);color:rgba(20,33,43,.07);pointer-events:none}
+footer{padding:28px 0 50px;color:var(--mut);font-size:.64rem}footer .cc{box-shadow:3px 3px 0 var(--mostarda)}
+.mobile-conversion{display:none}
+.reveal{opacity:0;transform:translateY(26px);transition:opacity .58s cubic-bezier(.2,.75,.25,1),transform .58s cubic-bezier(.2,.75,.25,1)}
+.reveal.in{opacity:1;transform:none}
+.reveal[data-delay="1"]{transition-delay:.08s}.reveal[data-delay="2"]{transition-delay:.16s}.reveal[data-delay="3"]{transition-delay:.24s}
+@media(max-width:1080px){.hero-shell{gap:34px}.hero-copy h1{font-size:clamp(4rem,8.6vw,6.3rem)}.proof-section .wrap{gap:32px}.stage-sticker.paper{left:-10px}.window-card{box-shadow:11px 13px 0 var(--tinta)}}
+@media(max-width:860px){html{scroll-padding-top:76px}.release-bar{font-size:.56rem;text-align:center}.release-bar a{display:none}.head{min-height:62px}.hero-shell{grid-template-columns:1fr;min-height:auto;padding-top:54px;padding-bottom:86px;gap:42px}.ceu{min-height:0}.hero-copy h1{font-size:clamp(4.2rem,16vw,6.8rem);max-width:8ch}.hero-lead{font-size:1rem}.hero-stage{width:min(620px,94%);margin:auto;padding-right:12px}.window-card{transform:rotate(1deg)}.hero-ticker-track span{padding:10px 16px}.proof-section .wrap{grid-template-columns:1fr}.proof-intro{max-width:620px}.proof-grid>div{min-height:126px}.conversion-band .wrap{grid-template-columns:1fr}.conversion-band .btn{justify-self:start}.section-misto .card{box-shadow:5px 5px 0 var(--tinta)}section{padding:56px 0}.apresentacao{padding:54px 0}.st{align-items:flex-start}.st .traco{margin-top:22px}}
+@media(max-width:560px){body{padding-bottom:66px}.wrap{padding:0 18px}.logo b{font-size:.86rem}.logo b em{font-size:.92rem}.logo .stampa{width:32px;height:32px}.hero-shell{padding-top:42px;gap:36px}.hero-kicker{font-size:.55rem}.hero-copy h1{font-size:clamp(3.65rem,18vw,5.4rem);margin-top:18px}.hero-lead{font-size:.94rem}.hero-actions{display:grid;grid-template-columns:1fr;gap:12px;margin-top:24px}.hero-actions .btn{width:100%;box-shadow:4px 4px 0 var(--tinta)}.hero-micro{font-size:.54rem;gap:9px}.hero-stage{padding:16px 4px 26px 0}.window-top{height:38px}.window-top span{font-size:.52rem}.window-url{font-size:.52rem;padding:8px 10px}.stage-sticker{font-size:.52rem;padding:8px 10px}.stage-sticker.yellow{right:-4px}.stage-sticker.paper{left:-6px;bottom:-4px}.stage-proof{right:0;bottom:-28px;padding:9px 11px}.stage-proof b{font-size:1.6rem}.stage-proof span{font-size:.49rem}.proof-grid b{font-size:3rem}.proof-grid>div{padding:16px;min-height:118px}.proof-grid small{font-size:.54rem}.proof-intro h2{font-size:2.9rem}.st h2{font-size:2.2rem}.st .num{font-size:1.8rem}.st .traco{display:none}.sub{font-size:.92rem}.grade{grid-template-columns:1fr}.card{box-shadow:4px 4px 0 var(--papel2)}.mini{grid-template-columns:1fr 1fr}.vitrine{gap:34px}.colagem{box-shadow:8px 9px 0 var(--azul)}.conversion-band h2{font-size:3.3rem}.mobile-conversion{position:fixed;display:grid;grid-template-columns:1fr auto;gap:8px;left:0;right:0;bottom:0;z-index:110;padding:8px 12px calc(8px + env(safe-area-inset-bottom));background:var(--tinta);border-top:2px solid var(--mostarda)}.mobile-conversion .btn{min-height:44px;box-shadow:none;background:var(--mostarda);color:var(--tinta);border-color:var(--mostarda);font-size:.6rem}.mobile-conversion .btn.sec{background:transparent;color:var(--white);border-color:#617180;box-shadow:none}.mobile-conversion .ico{width:15px;height:15px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.hero-ticker-track,.emblema,.cursorzinho,.pontinhos,.bc-dot{animation:none!important}.reveal{opacity:1!important;transform:none!important;transition:none!important}.window-card{transform:rotate(1deg)!important;transition:none!important}.btn,.card{transition:none!important}.myns-ceu,.myns-fundo{display:none}}
 </style>
 </head>
 <body>
+<div class="scroll-progress" id="scrollProgress" aria-hidden="true"></div>
+<a class="release-bar" href="https://github.com/ViniciusF-Pereira/myn-Recicla-01/releases/tag/v1.3.0" target="_blank" rel="noopener"><b>v1.3.0</b><span>32 chats · 190 plugins públicos · API comercial</span><span>ver release ↗</span></a>
 <canvas id="mynsFundo" class="myns-fundo" aria-hidden="true"></canvas>
 
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -268,7 +384,7 @@ body>header,main,footer{position:relative;z-index:1}
  </defs></svg>
 
 <header><div class="wrap head">
- <a class="logo" href="#topo"><span class="stampa"><svg class="ico"><use href="#i-recycle"/></svg></span><b>Myn <em>Recicla/01</em></b></a>
+ <a class="logo" href="#topo"><span class="stampa"><img src="favicon.svg" alt="Símbolo do Myn"></span><b>Myn <em>Recicla/01</em></b></a>
  <nav><a href="#catalogo">catálogo</a><a href="#extras">plugins</a><a href="#como">ciclo</a><a href="api.html">API</a><a href="#sobre">sobre</a></nav>
  <a class="menu" href="playground.html" target="_blank" rel="noopener" aria-label="Abrir playground"><svg class="ico"><use href="#i-bolt"/></svg></a>
 </div></header>
@@ -276,37 +392,51 @@ body>header,main,footer{position:relative;z-index:1}
 <main id="topo">
 <div class="ceu">
  <canvas id="mynsCeu" class="myns-ceu" aria-hidden="true"></canvas>
- <span class="etiqueta a">resíduo digital → insumo de agente</span>
- <div class="rasgo">
-  <svg viewBox="0 0 320 220" role="img" aria-label="Olho do Myn dentro de um rasgo no céu, com ciclo de reciclagem">
-   <g stroke="#1b2430" fill="none" stroke-width="1.4">
-    <circle cx="160" cy="96" r="58" stroke="#d79a2f" stroke-width="2"/>
-    <path d="M64 106q42-46 96-46t96 46q-42 44-96 44t-96-44z" fill="#fff"/>
-    <circle cx="160" cy="106" r="25" stroke="#1b2430" stroke-width="1.6"/>
-    <circle cx="160" cy="106" r="11" fill="#1f6fe0" stroke="#1b2430" stroke-width="1.4"/>
-    <circle cx="154" cy="100" r="3.5" fill="#fff" stroke="none"/>
-    <path d="M110 150q14 18 50 18t50-18" stroke="#d79a2f" stroke-width="2"/>
-    <path d="M112 168q48 26 96 0" stroke="#1b2430" stroke-width="1.2" stroke-dasharray="3 5"/>
-   </g>
-   <g transform="translate(252 26)" style="stroke:#1f6fe0;fill:none;stroke-width:1.6"><svg width="34" height="34" viewBox="0 0 24 24"><use href="#i-recycle"/></svg></g>
-  </svg>
+ <div class="wrap hero-shell">
+  <div class="hero-copy">
+   <span class="hero-kicker"><i class="live-dot"></i> navegador → agente → resultado</span>
+   <h1>Sua aba<br>vira <em>agente.</em></h1>
+   <p class="hero-lead">Chats, imagem, voz, vídeo e API em uma bancada só. O Myn encontra a rota, respeita o limite e mostra o caminho — sem chave para começar.</p>
+   <div class="hero-actions">
+    <a class="btn" href="playground.html" target="_blank" rel="noopener">Abrir Playground <svg class="ico"><use href="#i-arrow"/></svg></a>
+    <a class="btn sec" href="extensao/myn-recicla-extensao.zip" download>Instalar extensão <svg class="ico"><use href="#i-leaf"/></svg></a>
+   </div>
+   <div class="hero-micro"><span>sem assinatura</span><span>sem Google/Gemini</span><span>permissão por site</span></div>
+  </div>
+  <div class="hero-stage" id="heroStage" aria-label="Playground real do Myn em destaque">
+   <div class="stage-grid" aria-hidden="true"></div>
+   <div class="window-card">
+    <div class="window-top"><i></i><i></i><i></i><span>Myn · Playground real</span></div>
+    <img src="docs/prints/extensao-playground.png" alt="Captura real do Playground do Myn com rotas e agentes" fetchpriority="high">
+    <div class="window-url">mynrecicla.com/playground.html</div>
+   </div>
+   <span class="stage-sticker yellow">32 chats mapeáveis</span>
+   <span class="stage-sticker paper">190 plugins públicos</span>
+   <div class="stage-proof"><b>25/25</b><span>aceites da<br>extensão</span></div>
+  </div>
  </div>
- <span class="etiqueta b">fig. 1 — aba descartada, rota reaproveitada</span>
- <span class="sticker coral">100% free</span><span class="sticker teal">sem chave</span><span class="sticker lilas">♻ recicla</span>
- <span class="fita a"></span><span class="fita b"></span>
- <span class="credito">céu gerado com Pollinations · free, sem chave</span>
+ <div class="hero-ticker" aria-hidden="true"><div class="hero-ticker-track">
+  <span>ChatGPT</span><span>Claude</span><span>HuggingChat</span><span>OpenRouter :free</span><span>Pollinations</span><span>Edge TTS</span><span>WebGPU</span><span>API comercial</span><span>Memória local</span><span>RAG no navegador</span>
+  <span>ChatGPT</span><span>Claude</span><span>HuggingChat</span><span>OpenRouter :free</span><span>Pollinations</span><span>Edge TTS</span><span>WebGPU</span><span>API comercial</span><span>Memória local</span><span>RAG no navegador</span>
+ </div></div>
 </div>
 
 <div class="material"><div class="wrap"><small>material reciclado de</small><div class="logos">
  <span id="materialRotas">carregando rotas...</span>
 </div></div></div>
 
-<section class="apresentacao"><div class="wrap">
- <span class="sobre"><svg class="ico"><use href="#i-recycle"/></svg> Myn · Recicla/01</span>
- <h1>IA de graça já existe.<br><em>O Myn recicla.</em></h1>
- <p>Transformamos abas de chat gratuitas em rotas de agente. Sem chave de API, sem assinatura, sem Codex — só navegador, gateway mediado e ferramentas com escopo.</p>
- <p><a class="btn" href="playground.html" target="_blank" rel="noopener"><svg class="ico"><use href="#i-arrow"/></svg> ABRIR PLAYGROUND /01</a></p>
- <div class="chips"><span class="chip m">♻ browser only</span><span class="chip" id="rotasChip">🔌 carregando rotas</span><span class="chip" id="modelosChip">🧠 carregando modelos</span><span class="chip">🎬 imagem · voz · vídeo</span></div>
+<section class="apresentacao proof-section"><div class="wrap">
+ <div class="proof-intro">
+  <span class="sobre"><svg class="ico"><use href="#i-recycle"/></svg> Myn · Recicla/01</span>
+  <h2>Não é promessa.<br>É <em>prova.</em></h2>
+  <p>O catálogo é público, o pacote é instalável e o aceite roda no Chromium. Você abre, testa e decide — sem depositar confiança em uma vitrine bonita.</p>
+ </div>
+ <div class="proof-grid" id="proofGrid">
+  <div><b data-count="32">32</b><small>chats no catálogo da extensão</small></div>
+  <div><b id="proofPlugins" data-count="190">190</b><small>plugins públicos verificados</small></div>
+  <div><b data-count="25" data-suffix="/25">25/25</b><small>aceites Chromium + Edge</small></div>
+  <div><b>0</b><small>chaves para começar</small></div>
+ </div>
 </div></section>
 
 
@@ -390,6 +520,11 @@ body>header,main,footer{position:relative;z-index:1}
  <div class="aviso"><b>VM</b> — dá para rodar tudo em container com Chromium headless, sem abrir navegador no PC. Veja o README do Myn-Portable.</div>
 </div></section>
 
+<section class="conversion-band"><div class="wrap">
+ <div><h2>Uma aba bastava.<br><em>Agora é um agente.</em></h2><p>Abra o Playground, peça um resultado e veja a rota usada. Se quiser levar para o navegador, a extensão espera por você.</p></div>
+ <a class="btn" href="playground.html" target="_blank" rel="noopener">Testar agora <svg class="ico"><use href="#i-arrow"/></svg></a>
+</div></section>
+
 <section id="autor"><div class="wrap">
  <div class="st"><span class="num">06</span><h2>Created By</h2><span class="traco"></span><span class="nota">quem reciclou isso</span></div>
  <div class="autor-card">
@@ -404,6 +539,8 @@ body>header,main,footer{position:relative;z-index:1}
   <p class="autor-assinatura">Myn Recicla/01 · de aba descartada a rota reaproveitada · <span id="autorAtualizado">—</span></p>
  </div>
 </div></section>
+
+<nav class="mobile-conversion" aria-label="Ações rápidas"><a class="btn" href="playground.html" target="_blank" rel="noopener">Abrir Playground <svg class="ico"><use href="#i-arrow"/></svg></a><a class="btn sec" href="extensao/myn-recicla-extensao.zip" download aria-label="Baixar extensão"><svg class="ico"><use href="#i-leaf"/></svg></a></nav>
 
 <footer class="wrap"><span>Myn — Recicla/01 · dados atuais em <span id="dataAtualizacao">—</span></span><span>sem chaves · sem Codex · browser only</span><span class="cc">cc</span></footer>
 </main>
@@ -428,9 +565,9 @@ let dadosAtuais=null;
 async function atualizarDados(){
  try{
   const d=await carregarDados(); dadosAtuais=d;
-  $('rotasChip').textContent='🔌 '+d.totalPlugins+' rotas';
+  const provaPlugins=$('proofPlugins');if(provaPlugins){provaPlugins.textContent=d.totalPlugins;provaPlugins.dataset.count=String(d.totalPlugins)}
   $('rotasMini').textContent=d.totalPlugins+' rotas';
-  $('modelosChip').textContent='🧠 '+d.totalDescobertos+' modelos livres';
+
   $('catalogoCount').textContent=d.totalPlugins+' rotas · '+new Date(d.atualizadoEm).toLocaleTimeString('pt-BR');
   $('materialRotas').textContent=(d.pluginsLista||[]).slice(0,7).map(p=>p.nome).join(' · ');
   $('metricPlugins').textContent=d.totalPlugins;
@@ -580,6 +717,54 @@ bcConectar();
   document.getElementById('autorAtualizado').textContent='perfil atualizado em '+String(p.atualizadoEm||'').slice(0,10);
  }catch(e){document.getElementById('autorBio').textContent='Perfil indisponível: '+e.message}
 })();
+
+/* movimento de conversão: progresso, revelação e prova numérica */
+const reducedMotion=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const progress=$('scrollProgress');
+let progressFrame=0;
+function paintProgress(){
+ progress.style.transform='scaleX('+Math.min(1,window.scrollY/Math.max(1,document.documentElement.scrollHeight-window.innerHeight))+')';
+ progressFrame=0;
+}
+window.addEventListener('scroll',()=>{if(!progressFrame)progressFrame=requestAnimationFrame(paintProgress)},{passive:true});
+paintProgress();
+
+if(!reducedMotion&&'IntersectionObserver' in window){
+ const revealItems=[...document.querySelectorAll('.proof-intro,.proof-grid>div,.st,.sub,.vitrine,.bancada,.grade .card,.autor-card,.conversion-band .wrap')];
+ revealItems.forEach((el,i)=>{el.classList.add('reveal');el.dataset.delay=String(i%4)});
+ const revealObserver=new IntersectionObserver(entries=>{
+  entries.forEach(entry=>{if(entry.isIntersecting){entry.target.classList.add('in');revealObserver.unobserve(entry.target)}});
+ },{threshold:.12,rootMargin:'0px 0px -8% 0px'});
+ revealItems.forEach(el=>revealObserver.observe(el));
+}
+
+function animateCount(el){
+ const target=Number(el.dataset.count||0),suffix=el.dataset.suffix||'';
+ if(reducedMotion||!Number.isFinite(target)){el.textContent=target+suffix;return}
+ const started=performance.now(),duration=900;
+ function frame(now){
+  const p=Math.min(1,(now-started)/duration),eased=1-Math.pow(1-p,3);
+  el.textContent=Math.round(target*eased)+suffix;
+  if(p<1)requestAnimationFrame(frame);else el.textContent=target+suffix;
+ }
+ requestAnimationFrame(frame);
+}
+if('IntersectionObserver' in window){
+ const countObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{
+  if(entry.isIntersecting){animateCount(entry.target);countObserver.unobserve(entry.target)}
+ }),{threshold:.5});
+ document.querySelectorAll('[data-count]').forEach(el=>countObserver.observe(el));
+}else document.querySelectorAll('[data-count]').forEach(animateCount);
+
+const heroStage=$('heroStage');
+if(heroStage&&!reducedMotion&&window.matchMedia('(pointer:fine)').matches){
+ heroStage.addEventListener('pointermove',event=>{
+  const box=heroStage.getBoundingClientRect();
+  heroStage.style.setProperty('--px',((event.clientX-box.left)/box.width-.5)*10+'px');
+  heroStage.style.setProperty('--py',((event.clientY-box.top)/box.height-.5)*8+'px');
+ });
+ heroStage.addEventListener('pointerleave',()=>{heroStage.style.setProperty('--px','0px');heroStage.style.setProperty('--py','0px')});
+}
 
 </script>
 </body>

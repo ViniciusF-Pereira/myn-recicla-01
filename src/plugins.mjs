@@ -7,12 +7,19 @@ import { permitir, executarComRetry, circuitoAberto, registrarResultado } from '
 
 const RAIZ = process.cwd();
 const ARQUIVO = path.join(RAIZ, 'config/plugins.json');
+const ARQUIVO_EXPANDIDO = path.join(RAIZ, 'config/plugins-expandidos-2026.json');
 
 export async function carregarPlugins() {
-  return JSON.parse(await readFile(ARQUIVO, 'utf8')).plugins;
+  const [base, expandido] = await Promise.all([
+    readFile(ARQUIVO, 'utf8').then(JSON.parse),
+    readFile(ARQUIVO_EXPANDIDO, 'utf8').then(JSON.parse).catch((erro) => { console.warn('[plugins] catálogo expandido indisponível:', erro.message); return { plugins: [] }; }),
+  ]);
+  const porId = new Map((base.plugins || []).map((p) => [p.id, p]));
+  for (const plugin of expandido.plugins || []) if (!porId.has(plugin.id)) porId.set(plugin.id, plugin);
+  return [...porId.values()];
 }
 export function listaPublica(plugins) {
-  return plugins.map(({ id, nome, categoria, url, login, chave, acao, capacidades, limite, fonte, confirmacao, status, conta }) =>
+  return plugins.filter((p) => p.conta !== 'google' && !/google|gemini/i.test(String(p.id) + ' ' + String(p.nome) + ' ' + String(p.url))).map(({ id, nome, categoria, url, login, chave, acao, capacidades, limite, fonte, confirmacao, status, conta }) =>
     ({ id, nome, categoria, url, login, chave, acao, capacidades, limite, fonte, conta: conta || null, confirmacao: Boolean(confirmacao), status: status || 'ativo' }));
 }
 export function encontrarPlugin(plugins, id) {

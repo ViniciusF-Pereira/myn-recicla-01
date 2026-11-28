@@ -18,21 +18,37 @@ const ROTAS={
 };
 function tituloRota(id,p){
  if(id==='auto')return ['Myn-01 Auto','escolhe rotas por capacidade e saúde'];
+ const ext=(window.__mynExtensaoRotas||[]).find(r=>r.id===id);
+ if(ext)return [ext.nome,'extensão · '+(ext.descoberta?'adaptador descoberto':'aba autorizada')];
  return [p?.nome||ROTAS[id]?.[0]||id, (p?.categoria||'rota')+' · '+(p?.limite||ROTAS[id]?.[1]||'browser')];
 }
 async function popularRotas(){
  try{
-  const [pl,sa]=await Promise.all([fetch('/api/plugins').then(r=>r.json()),fetch('/api/saude').then(r=>r.json())]);
+  const extensaoOk=await temExtensao();
+  const [pl,sa,ext]=await Promise.all([
+   fetch('/api/plugins').then(r=>r.json()),
+   fetch('/api/saude').then(r=>r.json()),
+   extensaoOk&&window.myn?.cliente?.listarRotas?window.myn.cliente.listarRotas():Promise.resolve(null),
+  ]);
+  window.__mynPlugins=pl.plugins||[];
+  window.__mynExtensaoRotas=ext?.rotas||[];
   const score=new Map((sa.rotas||[]).map(r=>[r.id,r.score]));
   const sel=$('rota');sel.innerHTML='';
   const auto=document.createElement('option');auto.value='auto';auto.textContent='⚡ Myn-01 Auto · todas as rotas';sel.appendChild(auto);
-  const grupos={};for(const p of pl.plugins||[])(grupos[p.categoria]=grupos[p.categoria]||[]).push(p);
+  const grupos={};for(const p of window.__mynPlugins)(grupos[p.categoria]=grupos[p.categoria]||[]).push(p);
+  const existentes=new Set();
   for(const [cat,ps] of Object.entries(grupos)){
    const og=document.createElement('optgroup');og.label=cat;
-   for(const p of ps){const o=document.createElement('option');o.value=p.id;const sc=score.get(p.id);o.textContent=p.nome+(sc!==undefined?' · '+sc:'');og.appendChild(o)}
+   for(const p of ps){const o=document.createElement('option');o.value=p.id;const sc=score.get(p.id);o.textContent=p.nome+(sc!==undefined?' · '+sc:'');og.appendChild(o);existentes.add(p.id)}
    sel.appendChild(og);
   }
-  const p=(pl.plugins||[]).find(x=>x.id===sel.value);
+  const novas=window.__mynExtensaoRotas.filter(r=>!existentes.has(r.id));
+  if(novas.length){
+   const og=document.createElement('optgroup');og.label='Extensão · chats mapeados';
+   for(const r of novas){const o=document.createElement('option');o.value=r.id;o.textContent=r.nome+(r.descoberta?' · descoberto':' · extensão');og.appendChild(o)}
+   sel.appendChild(og);
+  }
+  const p=window.__mynPlugins.find(x=>x.id===sel.value);
   const [t,d]=tituloRota(sel.value,p);$('chatTitulo').textContent=t;$('chatSub').textContent=d;
  }catch(e){$('chatSub').textContent='seletor com rotas padrão · '+(e.message||'')}
 }
@@ -40,7 +56,7 @@ $('rota').addEventListener('change',e=>{
  const p=(window.__mynPlugins||[]).find(x=>x.id===e.target.value);
  const [t,d]=tituloRota(e.target.value,p);$('chatTitulo').textContent=t;$('chatSub').textContent=d;
 });
-popularRotas();
+const rotasCarregadas=popularRotas();
 const esc=s=>String(s??'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
 function inline(t){
  const BK=String.fromCharCode(96);
@@ -158,7 +174,7 @@ async function enviar(pesquisa=false){
   const url='/api/chat/stream?message='+encodeURIComponent(mensagem)+'&pesquisa='+(modoPesquisa?'1':'0')+'&rota='+encodeURIComponent(rota)+'&sessao='+encodeURIComponent(MYN_SESSION)+'&effort='+encodeURIComponent(effort)+'&anexos='+encodeURIComponent(JSON.stringify(anexosImagemEnviados));
   const extensaoOk=await temExtensao();
   const rotaApiCliente=/^(pollinations-text-api|webgpu-local)$/.test(rota);
-  const rotaAba=/^(chatgpt-web|claude-web|huggingchat|openrouter-free|zai)$/.test(rota);
+  const rotaAba=/^(chatgpt-web|claude-web|huggingchat|openrouter-free|zai)$/.test(rota)||Boolean((window.__mynExtensaoRotas||[]).some(r=>r.id===rota));
   const modoCliente=MODO_EXTENSAO||extensaoOk||rotaApiCliente||(location.hostname==='mynrecicla.com'&&(!rotaAba||extensaoOk));
   const fluxo=modoCliente&&window.myn?.cliente?window.myn.cliente.conversar({texto:mensagem,sessao:MYN_SESSION,projeto:$('memProjeto').value.trim(),escopo:$('memEscopo').value,rota,effort}):eventosServidor(url);
   let texto='',iniciado=false,via='',streamEl=null,metaHtml='';
@@ -197,7 +213,7 @@ $('enviar').onclick=()=>enviar(false);
 $('pesq').onclick=()=>enviar(true);
 $('btnExtensao').onclick=async()=>{if(await temExtensao()){try{await window.myn.cliente.abrirVM()}catch(e){add('Não consegui abrir o painel: '+e.message,'err')}}else location.href='extensao/myn-recicla-extensao.zip'};
 if(MODO_EXTENSAO)document.body.classList.add('modo-extensao');
-temExtensao().then(ok=>{const b=$('extensaoBanner');if(!b)return;b.querySelector('span').textContent=ok?'conectada · clique no ícone para abrir a VM':'não detectada · baixe e carregue a extensão';b.style.borderLeftColor=ok?'var(--verde)':'var(--mostarda)';if(ok||MODO_EXTENSAO){const validas=new Set(['auto','pollinations-text-api','webgpu-local','chatgpt-web','claude-web','huggingchat','openrouter-free','zai']);for(const o of $('rota').options)if(!validas.has(o.value))o.disabled=true}});
+rotasCarregadas.then(()=>temExtensao()).then(ok=>{const b=$('extensaoBanner');if(!b)return;b.querySelector('span').textContent=ok?'conectada · clique no ícone para abrir a VM':'não detectada · baixe e carregue a extensão';b.style.borderLeftColor=ok?'var(--verde)':'var(--mostarda)';if(ok||MODO_EXTENSAO){const validas=new Set(['auto','pollinations-text-api','webgpu-local','chatgpt-web','claude-web','huggingchat','openrouter-free','zai',...(window.__mynExtensaoRotas||[]).map(r=>r.id)]);for(const o of $('rota').options)if(!validas.has(o.value))o.disabled=true}});
 $('texto').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();$('enviar').click()}});
 
 function abrirHist(){ $('gaveta').classList.add('aberta');$('fundo').classList.add('on');$('gaveta').setAttribute('aria-hidden','false');carregarHist() }

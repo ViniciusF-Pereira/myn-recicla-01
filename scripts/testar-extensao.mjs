@@ -104,6 +104,12 @@ try {
   if (minha.state !== 'ENABLED') throw new Error('extensão Myn estado ' + minha.state + ': ' + JSON.stringify(minha));
   const idExt = minha.id;
   relatorio.extensao.id = idExt;
+  const aquecer = await alvo('chrome-extension://' + idExt + '/painel.html?base=' + encodeURIComponent(BASE), porta);
+  const ca = await CDP.conectar(aquecer.webSocketDebuggerUrl);
+  await ca.enviar('Runtime.enable');
+  await esperar(() => ca.avaliar('Boolean(chrome?.runtime?.sendMessage)'), 30000);
+  await ca.avaliar("chrome.runtime.sendMessage({tipo:'ping',origemPagina:'http://127.0.0.1:5188'})");
+  ca.fechar();
 
   relatorio.extensao.manifest = JSON.parse(await readFile(path.join(EXT, 'manifest.json'), 'utf8'));
   relatorio.extensao.sidePanel = relatorio.extensao.manifest.side_panel?.default_path || null;
@@ -113,6 +119,7 @@ try {
   cdp = await CDP.conectar(pagina.webSocketDebuggerUrl);
   await cdp.enviar('Page.enable'); await cdp.enviar('Runtime.enable');
   await esperar(() => cdp.avaliar('Boolean(window.myn?.cliente)'), 30000);
+  await esperar(() => cdp.avaliar("document.documentElement.dataset.mynExtensao==='1.3.0'"), 30000);
   relatorio.cliente.injecao = await cdp.avaliar("({dataset:document.documentElement.dataset.mynExtensao||null,scripts:[...document.scripts].map(s=>s.src)})");
   relatorio.cliente.mensagens = await cdp.avaliar(`(async()=>{const logs=[];const fn=e=>logs.push({canal:e.data?.canal,tipo:e.data?.tipo,ok:e.data?.ok,origem:e.origin,mesmaJanela:e.source===window});window.addEventListener('message',fn);window.postMessage({canal:'myn-recicla-extensao',id:'debug-ponte',tipo:'ping'},location.origin);await new Promise(r=>setTimeout(r,1500));window.removeEventListener('message',fn);return logs})()`);
   relatorio.cliente.ponte = await cdp.avaliar('window.myn.cliente.extensaoDisponivel()').catch((e) => String(e.message));
@@ -138,6 +145,13 @@ try {
     await cdp.avaliar("window.WORK.enviar('liste os chats')");
     try { relatorio.cliente.workCatalogo = await esperar(() => cdp.avaliar("[...document.querySelectorAll('#waMsgs .wa-msg.bot')].some(m=>m.textContent.includes('Perplexity')&&m.textContent.includes('Qwen'))"), 30000); }
     catch (e) { relatorio.cliente.erroWork = String(e.message); }
+    relatorio.cliente.lojaMapeada = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.mapearLoja('${BASE}/extensao/loja-teste.html'))`);
+    relatorio.cliente.pesquisaLoja = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.pesquisarLoja(${JSON.stringify(relatorio.cliente.lojaMapeada?.id || '')},'Quero um fone até 250 reais de presente'))`);
+    relatorio.cliente.observacaoLoja = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.observarLoja(${JSON.stringify(relatorio.cliente.lojaMapeada?.id || '')}))`);
+    relatorio.cliente.eventosLoja = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.listarEventosLoja())`);
+    relatorio.cliente.chatLoja = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.abrirChatLoja(${JSON.stringify(relatorio.cliente.lojaMapeada?.id || '')}))`);
+    relatorio.cliente.envioChatSemConfirmacao = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.enviarChatLoja(${JSON.stringify(relatorio.cliente.lojaMapeada?.id || '')},'Mensagem que não deve ser enviada'))`);
+    relatorio.cliente.respostaChatLoja = await cdp.avaliar(`import('/web/core/extensao.mjs').then(m=>m.enviarChatLoja(${JSON.stringify(relatorio.cliente.lojaMapeada?.id || '')},'Quero um fone até 250 reais',true))`);
   }
 
   try {
@@ -148,7 +162,7 @@ try {
   const home = await alvo(BASE + '/', porta);
   const ch = await CDP.conectar(home.webSocketDebuggerUrl);
   await ch.enviar('Page.enable');
-  await esperar(() => ch.avaliar("!document.getElementById('rotasChip')?.textContent.includes('carregando') && !document.getElementById('materialRotas')?.textContent.includes('carregando')"), 30000);
+  await esperar(() => ch.avaliar("document.getElementById('dataAtualizacao')?.textContent!=='—' && !document.getElementById('materialRotas')?.textContent.includes('carregando')"), 30000);
   await ch.foto(path.join(prints, 'extensao-home.png'));
   relatorio.prints.push('docs/prints/extensao-home.png'); ch.fechar();
 
@@ -172,12 +186,22 @@ try {
   relatorio.extensao.painel = await cp.avaliar("({rotas:document.querySelectorAll('#rotas .rota').length,manuais:document.querySelectorAll('#rotas button.manual').length,chats:document.querySelectorAll('#chats .chat-item').length,descoberta:!document.getElementById('relatorioDescoberta').hidden,iframe:document.getElementById('vm').src,status:document.getElementById('status').textContent})");
   relatorio.extensao.painelPing = await cp.avaliar("chrome.runtime.sendMessage({tipo:'ping',origemPagina:'http://127.0.0.1:5188'})").catch((e) => String(e.message));
   relatorio.extensao.sidePanelAberto = await cp.avaliar(`chrome.tabs.query({url:'http://127.0.0.1:5188/*'}).then(async(ts)=>{const t=ts.find(x=>x.url.includes('/playground.html'));if(!t)return false;await chrome.sidePanel.open({tabId:t.id});return true})`).catch((e) => String(e.message));
+  await cp.avaliar("(()=>{document.querySelector('.catalogo').open=true;document.querySelector('.catalogo').scrollIntoView({block:'start'});return true})()");
+  await cp.foto(path.join(prints, 'catalogo-provedores.png'), 1920, 1080);
+  relatorio.prints.push('docs/prints/catalogo-provedores.png');
+  await cp.avaliar("(()=>{window.scrollTo(0,0);return true})()");
   await cp.foto(path.join(prints, 'extensao-painel.png'), 440, 920);
   relatorio.prints.push('docs/prints/extensao-painel.png');
   await cp.foto(path.join(prints, 'extensao-descoberta.png'), 440, 1100);
   relatorio.prints.push('docs/prints/extensao-descoberta.png');
   await cp.avaliar(`chrome.storage.local.set({'myn-adaptadores-descobertos-v1':[{id:'descoberto-externo-teste',nome:'Externo temporário',url:'https://exemplo.com/',origem:'https://exemplo.com',versao:1,campos:['textarea'],envio:['button'],respostas:['pre'],descoberta:true,acesso:'activeTab'}]});location.reload()`);
   relatorio.extensao.acessoTemporario = await esperar(() => cp.avaliar(`(()=>{const r=[...document.querySelectorAll('#rotas .rota')].find(x=>x.querySelector('b')?.textContent==='Externo temporário');if(!r)return false;const b=r.querySelector('button');return b.textContent==='activeTab'&&b.disabled})()`), 30000);
+  const paginaRotas = await alvo(BASE + '/playground.html?extensao=1&vm=1', porta);
+  const cr = await CDP.conectar(paginaRotas.webSocketDebuggerUrl);
+  await cr.enviar('Page.enable'); await cr.enviar('Runtime.enable');
+  await esperar(() => cr.avaliar('Boolean(window.myn?.cliente)'), 30000);
+  relatorio.cliente.rotaDescobertaNoSeletor = await esperar(() => cr.avaliar("Boolean([...document.getElementById('rota').options].some(o=>o.value==='descoberto-externo-teste'))"), 30000);
+  cr.fechar();
   cp.fechar();
 } catch (e) {
   try {
@@ -210,6 +234,15 @@ const aceites = [
   relatorio.extensao.ativacaoDireta?.ok === true,
   relatorio.extensao.painel?.descoberta === true,
   relatorio.extensao.acessoTemporario === true,
+  relatorio.cliente.rotaDescobertaNoSeletor === true,
+  relatorio.cliente.lojaMapeada?.confianca >= .5,
+  relatorio.cliente.pesquisaLoja?.pedido?.termo === 'fone',
+  relatorio.cliente.pesquisaLoja?.matches?.some((p) => /Fone Bluetooth/.test(p.titulo)),
+  relatorio.cliente.observacaoLoja?.produtos?.length > 0,
+  relatorio.cliente.eventosLoja?.eventos?.length > 0,
+  relatorio.cliente.chatLoja?.chat?.campos?.campo === '#chatTexto',
+  relatorio.cliente.envioChatSemConfirmacao?.ok === false && relatorio.cliente.envioChatSemConfirmacao?.codigo === 'confirmacao_necessaria',
+  relatorio.cliente.respostaChatLoja?.texto?.includes('recebi seu pedido'),
   relatorio.extensao.painelPing?.rotas?.length === new Set(relatorio.extensao.painelPing?.rotas || []).size,
 ];
 relatorio.aceites = { total: aceites.length, aprovados: aceites.filter(Boolean).length };

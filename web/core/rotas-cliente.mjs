@@ -209,8 +209,17 @@ export async function* conversar({ texto, sessao = 'local', projeto = '', escopo
 }
 
 export async function extensaoDisponivel() { return extensao.disponivel(); }
+export async function listarRotasExtensao() { return extensao.listarRotas(); }
 export async function abrirVMExtensao() { return extensao.abrirVM(); }
 export async function descobrirRotaExtensao(url, signal) { return extensao.descobrirRota(url, 45000, signal); }
 export async function descobrirAbaAtualExtensao(signal) { return extensao.descobrirAbaAtual(45000, signal); }
 export async function ativarDescobertaExtensao(id, seletores = {}, signal) { return extensao.ativarDescoberta(id, seletores, 10000, signal); }
+export async function listarLojasExtensao(signal) { return extensao.listarLojas(5000, signal); }
+export async function mapearLojaExtensao(url, signal) { return extensao.mapearLoja(url, 45000, signal); }
+export async function mapearLojaAtualExtensao(signal) { return extensao.mapearLojaAtual(45000, signal); }
+export async function observarLojaExtensao(id, signal) { return extensao.observarLoja(id, 35000, signal); }
+export async function pesquisarLojaExtensao(id, termo, signal) { return extensao.pesquisarLoja(id, termo, 45000, signal); }
+export async function listarEventosLojaExtensao(signal) { return extensao.listarEventosLoja(5000, signal); }
+export async function abrirChatLojaExtensao(id, signal) { return extensao.abrirChatLoja(id, 35000, signal); }
+export async function enviarChatLojaExtensao(id, texto, confirmar, signal) { return extensao.enviarChatLoja(id, texto, confirmar, 45000, signal); }
 export { ESFORCOS, memoria, rag };

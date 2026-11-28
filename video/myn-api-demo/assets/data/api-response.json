@@ -1,0 +1,20 @@
+{
+  "resposta": "Sou o **Myn Recicla/01**, um produto open-source browser-only que transforma abas de chat gratuitas em rotas de agente. Tenho Playground, workers de análise e melhoria, MCP, descoberta de modelos livres, RAG local e funcionamento sem chaves de API.",
+  "via": "conhecimento-local",
+  "sessao": "api:••••:demo-video",
+  "passos": [
+    "effort: medium",
+    "conhecimento local do produto"
+  ],
+  "fontes": [],
+  "capacidades": [
+    "chat"
+  ],
+  "effort": "medium",
+  "uso": {
+    "usado": 4,
+    "limite": 10000,
+    "restante": 9996,
+    "rpm": 120
+  }
+}

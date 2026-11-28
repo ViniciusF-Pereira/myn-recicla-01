@@ -8,7 +8,7 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 
 | Tela | Print |
 |---|---|
-| Início (catalog, plugins, ciclo, sobre) | ![Início](docs/prints/01-home.jpg) |
+| Início comercial 1.3 (hero, prova, CTA) | ![Início](docs/prints/extensao-home.png) |
 | Playground (chat, streaming, mídia) | ![Playground](docs/prints/02-playground.png) |
 | Mapa de provedores com input/output | ![Mapeamento](docs/prints/03-mapeamento.png) |
 | Extensão com VM Web no painel lateral | ![Extensão](docs/prints/extensao-painel.png) |
@@ -23,9 +23,9 @@ Repo: **https://github.com/ViniciusF-Pereira/myn-Recicla-01**
 
 Baixe a extensão, instale no Chrome/Edge e clique no ícone para abrir a VM Web no painel lateral. As rotas de aba usam a sessão do próprio navegador, com permissão opcional por site.
 
-- Download: [`v1.2.0 · myn-recicla-extensao.zip`](https://github.com/ViniciusF-Pereira/myn-Recicla-01/releases/download/v1.2.0/myn-recicla-extensao.zip)
-- Guia completo: [`docs/EXTENSAO.md`](docs/EXTENSAO.md)
-- WORK caçador: catálogo de 23 chats, mapeamento do DOM e adaptadores descobertos
+- Download: [`v1.3.0 · myn-recicla-extensao.zip`](https://github.com/ViniciusF-Pereira/myn-Recicla-01/releases/download/v1.3.0/myn-recicla-extensao.zip)
+- Guia completo: [`docs/EXTENSAO.md`](docs/EXTENSAO.md) · [`docs/LOJAS_CHAT.md`](docs/LOJAS_CHAT.md) · [`docs/VARREDURA_WEB.md`](docs/VARREDURA_WEB.md)
+- WORK caçador: catálogo de 32 chats, mapeamento do DOM, adaptadores descobertos e mapeador de lojas
 - Rotas internas: ChatGPT Web, Claude Web, HuggingChat, OpenRouter :free e Z.ai/GLM
 - Sem `<all_urls>`, sem contorno de login/CAPTCHA/paywall
 
@@ -44,7 +44,8 @@ node scripts/testar-extensao.mjs
 - **Scoreboard**: score = 0,45·sucesso + 0,35·velocidade + 0,2·recência, com circuit breaker de 3 estados.
 - **MCP** JSON-RPC com 15 ferramentas para agentes externos.
 - **Memória/RAG local:** escopos sessão/projeto/global, busca híbrida, resumo persistido e exportação/importação em JSON.
-- **Extensão confiável:** adaptadores versionados, saúde por rota, diagnóstico de layout, modo manual e WORK caçador de chats com descoberta de novos adaptadores.
+- **Extensão confiável:** adaptadores versionados, saúde por rota, diagnóstico de layout, modo manual, WORK caçador de chats e mapeador de lojas com busca por pedido/orçamento.
+- **Varredura web retomável:** GitHub, Tranco, Open Page Rank (10 milhões) e Common Crawl; teste concorrente, proteção SSRF e classificação de chats, geradores, lojas, login, paywall e bloqueios. Meta: **9.000.000 tentativas reais**.
 - **Goal autônomo**: `/plan` → `/loop` → `/goal` com agendador usando a própria API.
 - **WEBdocker.NODEJS**: container com Chromium headless — as rotas rodam no aparelho de quem executa.
 
@@ -140,7 +141,7 @@ Validação executada em [`docs/DOCKER_VALIDACAO.md`](docs/DOCKER_VALIDACAO.md):
 node scripts/avaliar.mjs     # 15 baterias → docs/AVALIACAO.md
 node scripts/mapear.mjs      # grava input/output/print de cada provider
 ```
-Última bateria: **15/15 OK**. Detalhes em [`docs/AVALIACAO.md`](docs/AVALIACAO.md), evolução em [`docs/EVOLUCAO.md`](docs/EVOLUCAO.md), modelos por rota em [`docs/AGENTES_E_MODELOS.md`](docs/AGENTES_E_MODELOS.md) e arquitetura em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
+Última bateria: **15/15 OK**. Evidência atual da 1.3: **82/82 testes Node**, **25/25 aceites Chromium/Edge**, **19/19 testes offline da varredura** e `npm run check` do vídeo aprovado. Detalhes em [`docs/AVALIACAO.md`](docs/AVALIACAO.md), evolução em [`docs/EVOLUCAO.md`](docs/EVOLUCAO.md), modelos por rota em [`docs/AGENTES_E_MODELOS.md`](docs/AGENTES_E_MODELOS.md) e arquitetura em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 **Direção web-only:** [`docs/PLANEJAMENTO.md`](docs/PLANEJAMENTO.md) — evoluir o Myn para agente open-source tipo OpenCode/Claude Code/Codex usando **somente rotas free de navegador + WebGPU**, sem binário/local PC. Fase 0 item 3 já entregue: `/api/orquestrar?rapido=true` nunca escolhe rotas `*-local`.
 

@@ -21,7 +21,14 @@ if (podeUsarWindow()) {
     if (!p) return;
     pendentes.delete(dados.id);
     clearTimeout(p.timer);
-    dados.ok ? p.resolve(dados.resposta) : p.reject(new Error(dados.erro || 'extensão não respondeu'));
+    if (dados.ok) p.resolve(dados.resposta);
+    else {
+      const erro = new Error(dados.erro || 'extensão não respondeu');
+      erro.codigo = dados.resposta?.codigo || dados.codigo;
+      erro.etapa = dados.resposta?.etapa || dados.etapa;
+      erro.rota = dados.resposta?.rota || dados.rota;
+      p.reject(erro);
+    }
   });
 }
 
@@ -74,3 +81,11 @@ export function capturarManual(rotaId, timeoutMs = 35000) { return enviar('captu
 export function descobrirRota(url, timeoutMs = 45000, signal) { return enviar('descobrir_rota', { url }, timeoutMs, signal); }
 export function descobrirAbaAtual(timeoutMs = 45000, signal) { return enviar('descobrir_aba_atual', {}, timeoutMs, signal); }
 export function ativarDescoberta(id, seletores = {}, timeoutMs = 10000, signal) { return enviar('ativar_descoberta', { descobertaId: id, seletores }, timeoutMs, signal); }
+export function listarLojas(timeoutMs = 5000, signal) { return enviar('listar_lojas', {}, timeoutMs, signal); }
+export function mapearLoja(url, timeoutMs = 45000, signal) { return enviar('mapear_loja', { url }, timeoutMs, signal); }
+export function mapearLojaAtual(timeoutMs = 45000, signal) { return enviar('mapear_loja_atual', {}, timeoutMs, signal); }
+export function observarLoja(id, timeoutMs = 35000, signal) { return enviar('observar_loja', { lojaId: id }, timeoutMs, signal); }
+export function pesquisarLoja(id, termo, timeoutMs = 45000, signal) { return enviar('pesquisar_loja', { lojaId: id, termo }, timeoutMs, signal); }
+export function listarEventosLoja(timeoutMs = 5000, signal) { return enviar('listar_eventos_loja', {}, timeoutMs, signal); }
+export function abrirChatLoja(id, timeoutMs = 35000, signal) { return enviar('abrir_chat_loja', { lojaId: id }, timeoutMs, signal); }
+export function enviarChatLoja(id, texto, confirmar = false, timeoutMs = 45000, signal) { return enviar('enviar_chat_loja', { lojaId: id, texto, confirmar }, timeoutMs, signal); }

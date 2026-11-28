@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Myn · loja de teste</title>
+<style>body{font:16px/1.5 system-ui;max-width:960px;margin:40px auto;padding:20px;background:#f4efe3;color:#1b2430}form{display:flex;gap:8px;margin-bottom:24px}input{flex:1;padding:12px;border:1px solid #1f6fe0;border-radius:4px}button{padding:12px 18px;background:#1f6fe0;color:#fff;border:0;border-radius:4px;font-weight:700}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.card{background:#fff;border:1px solid #c9d2de;border-radius:6px;padding:16px}.card h2{font-size:1rem}.card a{color:#1f6fe0}.price{font-weight:700;color:#2e7d5b}.produto{display:none;background:#fff;padding:24px;border:1px solid #1b2430;border-radius:6px}.produto.on{display:block}#chatLoja{margin-top:24px;background:#fff;padding:20px;border:2px solid #1f6fe0;border-radius:6px}#chatMensagens p{padding:8px;background:#e8f1ff;border-radius:4px}#chatForm{display:flex;gap:8px;margin-top:12px}#chatForm textarea{flex:1;min-height:70px;padding:10px}@media(max-width:700px){.grid{grid-template-columns:1fr}#chatForm{flex-direction:column}}</style></head>
+<body><h1>Loja de teste do Myn</h1><p>Página inocente para validar descoberta de busca, produtos e navegação.</p>
+<form id="busca" role="search"><input id="termo" name="q" type="search" placeholder="Buscar produtos" aria-label="Buscar produtos"><button type="submit">Buscar</button></form>
+<div class="grid" id="produtos">
+<article class="card product" data-product-id="1"><h2>Fone Bluetooth</h2><div class="price">R$ 199,90</div><a href="?produto=1">Ver produto</a></article>
+<article class="card product" data-product-id="2"><h2>Teclado Mecânico</h2><div class="price">R$ 349,00</div><a href="?produto=2">Ver produto</a></article>
+<article class="card product" data-product-id="3"><h2>Mouse Sem Fio</h2><div class="price">R$ 89,90</div><a href="?produto=3">Ver produto</a></article>
+</div>
+<section class="produto" id="produto"><h2 id="produtoTitulo"></h2><p id="produtoPreco"></p><a href="loja-teste.html">Voltar aos produtos</a></section>
+<button id="abrirChat" type="button">Atendimento online</button>
+<section id="chatLoja" hidden><h2>Chat da loja</h2><div id="chatMensagens"></div><form id="chatForm"><textarea id="chatTexto" aria-label="Mensagem para a loja"></textarea><button id="chatEnviar" type="submit">Enviar</button></form></section>
+<script>
+const produtos=[{id:1,nome:'Fone Bluetooth',preco:'R$ 199,90'},{id:2,nome:'Teclado Mecânico',preco:'R$ 349,00'},{id:3,nome:'Mouse Sem Fio',preco:'R$ 89,90'}];
+const params=new URLSearchParams(location.search),id=Number(params.get('produto'));
+if(id){const p=produtos.find(x=>x.id===id);if(p){document.getElementById('produtos').style.display='none';document.getElementById('produto').classList.add('on');document.getElementById('produtoTitulo').textContent=p.nome;document.getElementById('produtoPreco').textContent=p.preco}}
+document.getElementById('busca').onsubmit=e=>{e.preventDefault();const q=document.getElementById('termo').value.trim();const u=new URL(location.href);q?u.searchParams.set('q',q):u.searchParams.delete('q');history.pushState({},'',u);document.querySelectorAll('.card').forEach(c=>c.style.display=!q||c.textContent.toLowerCase().includes(q.toLowerCase())?'block':'none')};
+document.getElementById('abrirChat').onclick=()=>{document.getElementById('chatLoja').hidden=false};
+document.getElementById('chatForm').onsubmit=e=>{e.preventDefault();const t=document.getElementById('chatTexto');const texto=t.value.trim();if(!texto)return;const area=document.getElementById('chatMensagens');const usuario=document.createElement('p');usuario.className='user';usuario.textContent='Você: '+texto;area.appendChild(usuario);const bot=document.createElement('p');bot.className='assistant';bot.textContent='Loja: recebi seu pedido sobre '+texto;area.appendChild(bot);t.value=''};
+</script></body></html>

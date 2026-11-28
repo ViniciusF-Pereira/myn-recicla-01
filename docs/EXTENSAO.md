@@ -43,7 +43,7 @@ Cada rota possui versão própria e listas alternativas de composer, envio e res
 
 ## WORK caçador de chats
 
-A versão `1.2.0` inclui um catálogo de **23 chats** e um motor local de descoberta. Ele lê o DOM de uma página autorizada, pontua candidatos de composer, envio e resposta, e mostra os seletores antes de criar um adaptador.
+A versão `1.3.0` inclui um catálogo de **32 chats** e um motor local de descoberta. Ele lê o DOM de uma página autorizada, pontua candidatos de composer, envio e resposta, e mostra os seletores antes de criar um adaptador.
 
 Use no WORK:
 
@@ -54,7 +54,11 @@ Use no WORK:
 
 No painel lateral, a seção **WORK · caçador de chats** permite filtrar provedores, autorizar um site, rastrear, escolher entre os candidatos e ativar o adaptador. O mapeamento **não envia mensagens**. A ativação também não envia: ela apenas salva a rota descoberta.
 
-O catálogo foi verificado por alcance HTTP em 27/11/2026. `http-200` não prova automação; `protegido`, `login` e `limitado` indicam que o site pode exigir navegador, autenticação ou aguardar cota. Sites fora do catálogo podem ser mapeados na aba atual, mas acesso permanente continua exigindo origem declarada na extensão.
+O catálogo foi verificado por alcance HTTP e páginas oficiais em 27/11/2026. `http-200` não prova automação; `protegido`, `login` e `limitado` indicam que o site pode exigir navegador, autenticação ou aguardar cota. Sites fora do catálogo podem ser mapeados na aba atual, mas acesso permanente continua exigindo origem declarada na extensão.
+
+### Mapeador de lojas
+
+A seção **WORK · mapeador de lojas** descobre campo de busca, formulário, botão, cards, links, títulos e preços. O comando interpreta pedidos como `quero um fone até 250 reais de presente`, pesquisa na loja e filtra resultados visíveis pelo orçamento. Abas de lojas mapeadas registram localmente até 200 eventos de navegação/observação. Nenhum dado sai do navegador.
 
 ## Como usar
 
@@ -72,7 +76,7 @@ Adaptadores internos iniciais:
 - OpenRouter :free;
 - Z.ai / GLM.
 
-O catálogo de descoberta inclui ainda Perplexity, Microsoft Copilot, Mistral, Grok, DeepSeek, Qwen, Meta AI, Pi, Poe, You.com, DuckDuckGo AI Chat, Blackbox AI, T3 Chat, Brave Leo, Ecosia, Phind, Writesonic e HIX. Esses entram como adaptadores descobertos após mapeamento e revisão.
+O catálogo de descoberta inclui ainda Perplexity, Microsoft Copilot, Mistral, Grok, DeepSeek, Qwen, Meta AI, Pi, Poe, You.com, DuckDuckGo AI Chat, Blackbox AI, T3 Chat, Brave Leo, Ecosia, Phind, Writesonic, HIX, Cloudflare AI Playground, WebLLM, PLAI, UncensoredLLM, Rewind, Ngini, Uncensored.chat, Ai2 Playground e NoFilterGPT. Esses entram como adaptadores descobertos após mapeamento e revisão.
 
 A automação é experimental. O Myn não contorna login, CAPTCHA, paywall ou controles do provedor.
 
@@ -149,15 +153,16 @@ O teste automatizado abre um Chromium isolado, instala a extensão descompactada
 - automação de uma rota local inocente;
 - descoberta dos seletores, ativação e execução do adaptador criado;
 - catálogo de chats respondido pelo WORK;
+- mapeamento de loja, pesquisa por orçamento e observação de produtos;
 - resposta real do Pollinations no navegador;
-- geração dos quatro prints.
+- geração dos cinco prints.
 
 Relatório detalhado em `outputs/extensao-teste.json`.
 
 ## Resultado executado
 
 - Chromium: Microsoft Edge `158.0.4370.45`;
-- extensão `1.2.0`: `ENABLED`, sem erros de manifesto ou runtime;
+- extensão `1.3.0`: `ENABLED`, sem erros de manifesto ou runtime;
 - adaptadores internos: versão 2;
 - ponte site ↔ extensão: `true`;
 - painel lateral aberto: `true`;
@@ -168,10 +173,13 @@ Relatório detalhado em `outputs/extensao-teste.json`.
 - captura manual: `OK local: teste de automação`;
 - descoberta local: confiança `87%`, composer/envio/resposta encontrados;
 - adaptador descoberto ativado e executado: `OK local: teste descoberto`;
-- WORK: catálogo com 23 chats retornado;
+- WORK: catálogo com 32 chats retornado;
+- loja de teste: busca `fone`, orçamento `R$ 250`, evento local e produto visível;
+- chat da loja: campo/envio/resposta mapeados e resposta `Loja: recebi seu pedido...`;
+- envio sem confirmação: bloqueado com `codigo=confirmacao_necessaria`;
 - Pollinations no navegador: `OK`;
-- aceite da extensão: **16/16**;
-- suíte Node: **74/74**.
+- aceite da extensão: **25/25**;
+- suíte Node: **82/82**.
 
 ## Produção
 

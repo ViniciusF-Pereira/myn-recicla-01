@@ -1,0 +1,25 @@
+<template>
+<style>
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600}
+#root{position:absolute;inset:0;overflow:hidden;background:#1f6fe0;font-family:Plex,sans-serif;color:#fffdf7}
+.frame{position:absolute;z-index:1;inset:5% 6% 12% 6%;border:3px solid #fffdf7;box-shadow:14px 16px 0 #14212b;overflow:hidden;background:#1f6fe0}
+.frame .anim{width:100%;height:100%;clip-path:circle(0% at 62% 48%)}
+.frame img{width:100%;height:100%;object-fit:cover;display:block}
+.caption{position:absolute;z-index:10;left:6%;right:6%;bottom:4%;display:flex;align-items:center;justify-content:space-between;font:600 28px Plex,sans-serif;letter-spacing:.1em;text-transform:uppercase}.caption b{color:#e6a52e}.caption span{color:#9fc7ff}
+.side-label{position:absolute;right:2%;top:50%;z-index:12;writing-mode:vertical-rl;transform:translateY(-50%);font:600 28px Plex,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:#9fc7ff}
+</style>
+<div id="root" data-composition-id="imagem" data-duration="5">
+  <div class="frame clip" data-start="0" data-duration="5" data-track-index="0" data-layout-allow-overflow><div class="anim"><img src="assets/images/myn-campaign.jpg" alt="Imagem abstrata realmente gerada pelo Myn"></div></div>
+  <div class="side-label clip" data-start="0.5" data-duration="4.5" data-track-index="1"><div class="anim">Pollinations · sem chave</div></div>
+  <div class="caption clip" data-start="0.35" data-duration="4.65" data-track-index="2"><div class="anim"><b>imagem gerada</b><span>uma chamada → um arquivo</span></div></div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('.frame .anim',{clipPath:'circle(0% at 62% 48%)'},{clipPath:'circle(78% at 62% 48%)',duration:.78,ease:'power3.inOut'},0);
+tl.fromTo('.frame img',{scale:1.08},{scale:1,duration:1.1,ease:'power3.out'},.2);
+tl.fromTo('.side-label .anim',{opacity:0,x:18},{opacity:1,x:0,duration:.4,ease:'power3.out'},.5);
+tl.fromTo('.caption .anim',{opacity:0,y:18},{opacity:1,y:0,duration:.45,ease:'power3.out'},.35);
+window.__timelines=window.__timelines||{};window.__timelines.imagem=tl;
+</script>
+</template>

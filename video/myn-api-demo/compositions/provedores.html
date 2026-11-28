@@ -1,0 +1,49 @@
+<template>
+<style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500.ttf') format('truetype');font-weight:500}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-400.ttf') format('truetype');font-weight:400}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600}
+#root{position:absolute;inset:0;overflow:hidden;background:#f3eddf;font-family:Plex,sans-serif;color:#14212b}
+.ground{position:absolute;inset:0;background:linear-gradient(90deg,#f3eddf 0 43%,#e7dfcf 43% 100%)}
+.num-wrap{position:absolute;left:7%;top:16%;width:36%;height:70%;display:flex;flex-direction:column;justify-content:center}
+.kicker{font:600 28px/1.2 Plex,sans-serif;letter-spacing:.16em;text-transform:uppercase;color:#1f6fe0}
+.big-num{font:500 400px/.8 Newsreader,serif;letter-spacing:-.08em;color:#1f6fe0;margin:18px 0 22px}
+.label{font:600 34px/1.1 Plex,sans-serif;letter-spacing:.04em;text-transform:uppercase;max-width:520px}
+.rule{width:120px;border-top:6px solid #e6a52e;margin-top:24px}
+.proof-pills{display:flex;gap:12px;margin-top:28px}.proof-pills b{display:block;font:500 44px/1 Newsreader,serif;color:#0d2a4a}.proof-pills span{display:block;margin-top:5px;font:600 28px Plex,sans-serif;text-transform:uppercase;letter-spacing:.06em;color:#66727a}.proof-pills div{padding:10px 16px;border:2px solid #14212b;background:#fffdf7;box-shadow:5px 5px 0 #e6a52e}
+.wipe{position:absolute;inset:0;z-index:20;background:#e6a52e;transform:scaleX(0);transform-origin:left center}
+.provider-wrap{position:absolute;left:46%;right:4%;top:13%;bottom:12%;display:grid;grid-template-columns:repeat(4,1fr);gap:10px 18px;align-content:center}
+.provider{font:500 28px/1.25 Plex,sans-serif;padding:12px 0;border-bottom:2px solid rgba(20,33,43,.18);white-space:nowrap}
+.provider b{color:#1f6fe0;font-weight:600;margin-right:10px}
+</style>
+<div id="root" data-composition-id="provedores" data-duration="4">
+  <div class="wipe clip" data-start="3.62" data-duration="0.38" data-track-index="10" data-layout-allow-overflow></div>
+  <div class="ground clip" data-start="0" data-duration="4" data-track-index="0"></div>
+  <div class="num-wrap clip" data-start="0" data-duration="4" data-track-index="1"><div class="anim"><span class="kicker">catálogo real · extensão 1.3</span><div class="big-num">32</div><div class="label">chats mapeáveis</div><div class="rule"></div><div class="proof-pills"><div><b>190</b><span>plugins</span></div><div><b>0</b><span>chaves</span></div></div></div></div>
+  <div class="provider-wrap clip" data-start="0.15" data-duration="3.85" data-track-index="2">
+    <div class="anim">
+      <div class="provider"><b>01</b>ChatGPT</div><div class="provider"><b>02</b>Claude</div><div class="provider"><b>03</b>HuggingChat</div><div class="provider"><b>04</b>OpenRouter</div><div class="provider"><b>05</b>Z.ai / GLM</div><div class="provider"><b>06</b>Perplexity</div><div class="provider"><b>07</b>Copilot</div><div class="provider"><b>08</b>Mistral</div>
+    </div>
+    <div class="anim">
+      <div class="provider"><b>09</b>Grok</div><div class="provider"><b>10</b>DeepSeek</div><div class="provider"><b>11</b>Qwen</div><div class="provider"><b>12</b>Meta AI</div><div class="provider"><b>13</b>Pi</div><div class="provider"><b>14</b>Poe</div><div class="provider"><b>15</b>You.com</div><div class="provider"><b>16</b>Duck.ai</div>
+    </div>
+    <div class="anim">
+      <div class="provider"><b>17</b>Blackbox AI</div><div class="provider"><b>18</b>T3 Chat</div><div class="provider"><b>19</b>Brave Leo</div><div class="provider"><b>20</b>Ecosia</div><div class="provider"><b>21</b>Phind</div><div class="provider"><b>22</b>Writesonic</div><div class="provider"><b>23</b>HIX</div>
+    </div>
+    <div class="anim">
+      <div class="provider"><b>24</b>Cloudflare</div><div class="provider"><b>25</b>WebLLM</div><div class="provider"><b>26</b>PLAI</div><div class="provider"><b>27</b>UncensoredLLM</div><div class="provider"><b>28</b>Rewind</div><div class="provider"><b>29</b>Ngini</div><div class="provider"><b>30</b>Uncensored</div><div class="provider"><b>31</b>Ai2</div><div class="provider"><b>32</b>NoFilter</div>
+    </div>
+  </div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+tl.fromTo('.kicker',{opacity:0,y:14},{opacity:1,y:0,duration:.3,ease:'power3.out'},0);
+tl.fromTo('.big-num',{opacity:1,scale:.82,rotation:-4},{opacity:1,scale:1,rotation:0,duration:.72,ease:'expo.out'},.04);
+tl.fromTo('.label',{opacity:0,y:22},{opacity:1,y:0,duration:.4,ease:'power4.out'},.24);
+tl.fromTo('.provider-wrap .anim',{opacity:0,y:26},{opacity:1,y:0,duration:.45,stagger:.09,ease:'power3.out'},.28);
+tl.fromTo('.rule',{scaleX:0},{scaleX:1,duration:.4,ease:'power2.out'},.5);
+tl.fromTo('.proof-pills div',{opacity:0,y:20,rotation:3},{opacity:1,y:0,rotation:0,duration:.42,stagger:.1,ease:'back.out(1.4)'},.72);
+tl.fromTo('.wipe',{scaleX:0},{scaleX:1,duration:.34,ease:'power3.in'},3.62);
+window.__timelines=window.__timelines||{};window.__timelines.provedores=tl;
+</script>
+</template>

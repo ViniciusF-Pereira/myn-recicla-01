@@ -1,0 +1,23 @@
+<template>
+<style>
+@font-face{font-family:Newsreader;src:url('assets/fonts/newsreader-500-italic.ttf') format('truetype');font-weight:500;font-style:italic}
+@font-face{font-family:Plex;src:url('assets/fonts/ibm-plex-sans-600.ttf') format('truetype');font-weight:600}
+#root{position:absolute;inset:0;overflow:hidden;pointer-events:none;font-family:Plex,sans-serif}
+.caption{position:absolute;left:10%;right:10%;bottom:6%;padding:18px 26px;background:rgba(13,42,74,.94);border-left:8px solid #e6a52e;color:#fffdf7;font:600 42px/1.15 Plex,sans-serif;letter-spacing:-.01em}
+.caption em{font:italic 500 62px/1 Newsreader,serif;color:#e6a52e;margin-left:8px}
+</style>
+<div id="root" data-composition-id="captions" data-duration="36">
+  <div class="caption clip" data-start="0.2" data-duration="4.632" data-track-index="0"><div class="anim">32 chats <em>mapeáveis.</em></div></div>
+  <div class="caption clip" data-start="4.9" data-duration="5.424" data-track-index="0"><div class="anim">WORK conhece <em>o caminho.</em></div></div>
+  <div class="caption clip" data-start="10.3" data-duration="5.112" data-track-index="0"><div class="anim">Uma chamada. <em>Resposta real.</em></div></div>
+  <div class="caption clip" data-start="16.2" data-duration="4.296" data-track-index="0"><div class="anim">Texto pronto <em>para usar.</em></div></div>
+  <div class="caption clip" data-start="21.2" data-duration="3.72" data-track-index="0"><div class="anim">Imagem <em>sem chave.</em></div></div>
+  <div class="caption clip" data-start="26.2" data-duration="3.84" data-track-index="0"><div class="anim">Voz gerada <em>no navegador.</em></div></div>
+  <div class="caption clip" data-start="31.7" data-duration="4.152" data-track-index="0"><div class="anim">Sua aba <em>vira agente.</em></div></div>
+</div>
+<script>
+const tl=gsap.timeline({paused:true});
+document.querySelectorAll('.caption').forEach((el,i)=>{const start=parseFloat(el.dataset.start);tl.fromTo(el.querySelector('.anim'),{opacity:0,y:16},{opacity:1,y:0,duration:.25,ease:'power3.out'},start);tl.to(el.querySelector('.anim'),{opacity:0,y:10,duration:.2,ease:'power2.in'},start+parseFloat(el.dataset.duration)-.2)});
+window.__timelines=window.__timelines||{};window.__timelines.captions=tl;
+</script>
+</template>

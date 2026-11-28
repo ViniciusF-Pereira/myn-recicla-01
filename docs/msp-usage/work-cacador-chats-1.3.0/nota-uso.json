@@ -1,0 +1,35 @@
+{
+  "schema": "MspUsageNote.v1",
+  "document_kind": "technical_usage_not_tax_invoice",
+  "project_id": "myn-Recicla-01",
+  "task_id": "work-cacador-chats-1.3.0",
+  "session_id": "ses_dfb7e44bbffepzBlwFy3j0hcSl",
+  "status": "in_progress",
+  "started_at": "2026-11-27T19:19:28Z",
+  "finished_at": null,
+  "letter_sha256": "40BED88B7D97CDD2BB25EA534572D60534CEBBC0D9AE3F4F99746647DF3DF5BC",
+  "receipts": [
+    {
+      "path": "receipts/validacao-local.md",
+      "sha256": "6C45B9650D42FF1FC862A572415BD700A5C07901E0734E32EE99053E12C728A8"
+    }
+  ],
+  "events": [
+    {
+      "id": "sha256:6C45B9650D42FF1FC862A572415BD700A5C07901E0734E32EE99053E12C728A8",
+      "route": "local:node-test+edge-acceptance+python-offline+video-check",
+      "status": "passed",
+      "receipt": "receipts/validacao-local.md"
+    }
+  ],
+  "metrics": {
+    "calls": { "value": 0, "unit": "chamadas MSP", "source": "nenhuma chamada MSP nesta tarefa", "state": "measured" },
+    "failed_attempts": { "value": 0, "unit": "tentativas MSP falhas", "source": "nenhuma chamada MSP nesta tarefa", "state": "measured" },
+    "input_tokens": { "value": null, "unit": "tokens", "source": "contador não exposto pelo harness", "state": "unknown" },
+    "output_tokens": { "value": null, "unit": "tokens", "source": "contador não exposto pelo harness", "state": "unknown" },
+    "total_tokens": { "value": null, "unit": "tokens", "source": "contador não exposto pelo harness", "state": "unknown" },
+    "cost": { "value": null, "unit": "USD", "source": "sem recibo de custo", "state": "unknown" }
+  },
+  "savings": null,
+  "notes": "Os 82 testes Node, 25 aceites da extensão, 19 testes Python e o check do vídeo são validação do produto, não chamadas MSP. A meta de 9.000.000 e o render do vídeo continuam em andamento; nenhuma conclusão foi afirmada."
+}

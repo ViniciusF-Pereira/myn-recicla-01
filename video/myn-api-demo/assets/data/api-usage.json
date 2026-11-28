@@ -1,0 +1,37 @@
+{
+  "chave": {
+    "id": "key_cc5c201bf73eb5d5",
+    "nome": "Demo vídeo Myn",
+    "plano": "pro"
+  },
+  "dia": "2026-11-27",
+  "usado": 4,
+  "limite": 10000,
+  "restante": 9996,
+  "rpm": 120,
+  "eventos": [
+    {
+      "id": "uso_5fcc8bd0818f11fb",
+      "tipo": "reserva",
+      "dia": "2026-11-27",
+      "t": "2026-11-27T22:38:21.863Z",
+      "chave": "key_cc5c201bf73eb5d5",
+      "plano": "pro",
+      "rota": "/v1/agent",
+      "effort": "medium"
+    },
+    {
+      "id": "fim_9752928286d24834",
+      "tipo": "fim",
+      "reserva": "uso_5fcc8bd0818f11fb",
+      "dia": "2026-11-27",
+      "t": "2026-11-27T22:38:24.919Z",
+      "chave": "key_cc5c201bf73eb5d5",
+      "plano": "pro",
+      "ok": true,
+      "latenciaMs": 1131,
+      "via": "conhecimento-local",
+      "erro": ""
+    }
+  ]
+}
