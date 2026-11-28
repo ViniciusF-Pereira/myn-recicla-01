@@ -7,16 +7,16 @@
   "status": "in_progress",
   "started_at": "2026-11-27T19:19:28Z",
   "finished_at": null,
-  "letter_sha256": "40BED88B7D97CDD2BB25EA534572D60534CEBBC0D9AE3F4F99746647DF3DF5BC",
+  "letter_sha256": "D0DE365545998300629505B70320F3A24200A51E779EA6A5E4499502ADEBD76A",
   "receipts": [
     {
       "path": "receipts/validacao-local.md",
-      "sha256": "6C45B9650D42FF1FC862A572415BD700A5C07901E0734E32EE99053E12C728A8"
+      "sha256": "1AF6E92CB3076AAFAC815331062B7267D4EED050A178862CB33DC26BD29408B1"
     }
   ],
   "events": [
     {
-      "id": "sha256:6C45B9650D42FF1FC862A572415BD700A5C07901E0734E32EE99053E12C728A8",
+      "id": "sha256:1AF6E92CB3076AAFAC815331062B7267D4EED050A178862CB33DC26BD29408B1",
       "route": "local:node-test+edge-acceptance+python-offline+video-check",
       "status": "passed",
       "receipt": "receipts/validacao-local.md"
@@ -31,5 +31,5 @@
     "cost": { "value": null, "unit": "USD", "source": "sem recibo de custo", "state": "unknown" }
   },
   "savings": null,
-  "notes": "Os 82 testes Node, 25 aceites da extensão, 19 testes Python e o check do vídeo são validação do produto, não chamadas MSP. A meta de 9.000.000 e o render do vídeo continuam em andamento; nenhuma conclusão foi afirmada."
+  "notes": "Os 85 testes Node, 25 aceites da extensão, 24 testes Python e o check do vídeo são validação do produto, não chamadas MSP. A coleta foi parada com 1.189.191 URLs e os testes continuam na fila existente; o render do vídeo aguarda aprovação. Nenhuma conclusão de 9.000.000 foi afirmada."
 }

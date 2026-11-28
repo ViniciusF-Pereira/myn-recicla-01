@@ -3,7 +3,8 @@
   "api": {
     "endpoint": "/v1/agent",
     "status": 200,
-    "session": "demo-video"
+    "session": "demo-video",
+    "request": { "message": "Explique o Myn em uma frase.", "effort": "medium", "rota": "auto" }
   },
   "image": {
     "fonte": "Desenho local por palavra-chave · free, sem chave · sem rede",

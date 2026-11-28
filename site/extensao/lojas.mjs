@@ -116,23 +116,24 @@ export function mapearPaginaLoja() {
   const linkProduto = (a) => /produto|product|\/p\/|\/item\/|\/dp\/|oferta|deal/i.test(a.href || '') && !/categoria|category|busca|search|login|conta/i.test(a.href || '');
   const todos = [...document.querySelectorAll('*')].filter(visivel).slice(0, 7000);
 
-  const buscas = todos.filter((el) => el.matches('input:not([type="password"]):not([type="hidden"]), [role="searchbox"]')).map((el) => {
+  const buscas = todos.filter((el) => el.matches('input[type="search"], input:not([type="password"]):not([type="hidden"]):not([type="email"]):not([type="tel"]):not([type="submit"]):not([type="button"]), [role="searchbox"]')).map((el) => {
     const alvo = (attr(el, 'type') + ' ' + attr(el, 'placeholder') + ' ' + attr(el, 'aria-label') + ' ' + attr(el, 'name')).toLowerCase();
-    let pontos = el.type === 'search' ? .7 : .35;
-    if (/buscar|busca|pesquis|search|procurar|find/.test(alvo)) pontos += .3;
-    if (el.form) pontos += .08;
-    return { seletor: unico(el), pontos: Math.min(.99, pontos), formulario: el.form ? unico(el.form) : null };
-  }).sort((a, b) => b.pontos - a.pontos);
+    const semantico = el.type === 'search' || el.getAttribute('role') === 'searchbox' || /buscar|busca|pesquis|search|procurar|find/.test(alvo);
+    if (!semantico) return null;
+    const pontos = Math.min(.99, .6 + (/buscar|busca|pesquis|search|procurar|find/.test(alvo) ? .25 : 0) + (el.form ? .1 : 0));
+    return { seletor: unico(el), pontos, formulario: el.form ? unico(el.form) : null };
+  }).filter(Boolean).sort((a, b) => b.pontos - a.pontos);
   const busca = buscas[0] || null;
   const campoBusca = busca ? document.querySelector(busca.seletor) : null;
   const formBusca = campoBusca?.form || document.querySelector('[role="search"]');
   const botoesBusca = todos.filter((el) => el.matches('button, input[type="submit"], [role="button"]')).map((el) => {
     const alvo = (texto(el) + ' ' + attr(el, 'aria-label') + ' ' + attr(el, 'title') + ' ' + attr(el, 'type')).toLowerCase();
-    let pontos = .25;
-    if (/buscar|busca|pesquis|search|procurar|find/.test(alvo)) pontos += .45;
-    if (formBusca && (el.form === formBusca || formBusca.contains(el))) pontos += .2;
-    return { seletor: unico(el), pontos: Math.min(.99, pontos) };
-  }).sort((a, b) => b.pontos - a.pontos);
+    const semantico = /buscar|busca|pesquis|search|procurar|find/.test(alvo);
+    if (!semantico) return null;
+    const mesmoForm = Boolean(formBusca && (el.form === formBusca || formBusca.contains(el)));
+    const pontos = Math.min(.99, .6 + (mesmoForm ? .3 : 0));
+    return { seletor: unico(el), pontos, valido: mesmoForm };
+  }).filter((x) => x?.valido).sort((a, b) => b.pontos - a.pontos);
   const botaoBusca = botoesBusca[0] || null;
 
   const cards = todos.filter((el) => {
@@ -188,28 +189,28 @@ export function observarPaginaLoja({ adaptador } = {}) {
 }
 
 export function preencherBuscaLoja({ busca, termo }) {
-  const campo = document.querySelector(busca?.campo || '');
-  if (!campo) return { ok: false, erro: 'campo de busca não encontrado' };
+  const unicoVisivel = (seletor) => { try { const els = [...document.querySelectorAll(seletor || '')].filter((el) => el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); return els.length === 1 ? els[0] : null; } catch { return null; } };
+  const campo = unicoVisivel(busca?.campo);
+  const form = unicoVisivel(busca?.formulario);
+  if (!campo || !form || campo.form !== form) return { ok: false, erro: 'campo de busca não encontrado ou não pertence ao formulário mapeado' };
+  const alvo = String((campo.getAttribute('type') || '') + ' ' + (campo.getAttribute('placeholder') || '') + ' ' + (campo.getAttribute('aria-label') || '') + ' ' + (campo.getAttribute('name') || '')).toLowerCase();
+  if (!campo.matches('input,[role="searchbox"]') || /^(?:email|tel|password|hidden|submit|button)$/.test(campo.type || '') || !(campo.type === 'search' || campo.getAttribute('role') === 'searchbox' || /buscar|busca|pesquis|search|procurar|find/.test(alvo))) return { ok: false, erro: 'o campo mapeado não é uma busca semântica' };
   campo.focus();
   const prototipo = campo.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
   Object.getOwnPropertyDescriptor(prototipo, 'value').set.call(campo, String(termo).slice(0, 300));
-  campo.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: String(termo) }));
+  campo.dispatchEvent(new InputEvent('input', { bubbles: true, inputType: 'insertText', data: String(termo).slice(0, 300) }));
   campo.dispatchEvent(new Event('change', { bubbles: true }));
   return { ok: true };
 }
 
 export function acionarBuscaLoja({ busca }) {
-  const botao = busca?.botao ? document.querySelector(busca.botao) : null;
-  if (botao && !botao.disabled) { botao.click(); return { ok: true }; }
-  const campo = document.querySelector(busca?.campo || '');
-  const form = campo?.form || (busca?.formulario ? document.querySelector(busca.formulario) : null);
-  if (form) { form.requestSubmit ? form.requestSubmit() : form.submit(); return { ok: true }; }
-  if (campo) {
-    campo.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true }));
-    campo.dispatchEvent(new KeyboardEvent('keyup', { key: 'Enter', code: 'Enter', bubbles: true }));
-    return { ok: true };
-  }
-  return { ok: false, erro: 'não foi possível acionar a busca' };
+  const unicoVisivel = (seletor) => { try { const els = [...document.querySelectorAll(seletor || '')].filter((el) => el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); return els.length === 1 ? els[0] : null; } catch { return null; } };
+  const campo = unicoVisivel(busca?.campo), botao = unicoVisivel(busca?.botao), form = unicoVisivel(busca?.formulario);
+  if (!campo || !botao || !form || campo.form !== form || (botao.form !== form && !form.contains(botao))) return { ok: false, erro: 'busca mapeada não tem campo e botão únicos no mesmo formulário' };
+  const alvo = String((botao.innerText || '') + ' ' + (botao.getAttribute('aria-label') || '') + ' ' + (botao.getAttribute('title') || '')).toLowerCase();
+  if (botao.disabled || botao.type === 'reset' || !/buscar|busca|pesquis|search|procurar|find/.test(alvo)) return { ok: false, erro: 'o botão mapeado não é uma busca segura' };
+  botao.click();
+  return { ok: true };
 }
 
 export function interpretarPedidoLoja(texto) {
@@ -351,13 +352,21 @@ export function acionarChatLoja({ envio, campo }) {
 export function lerRespostaChat({ resposta }) {
   const unicoVisivel = (seletor) => { try { const els = [...document.querySelectorAll(seletor || '')].filter((el) => el && (el.offsetWidth || el.offsetHeight || el.getClientRects().length)); return els.length === 1 ? els[0] : null; } catch { return null; } };
   const el = unicoVisivel(resposta);
-  if (!el) return { encontrado: false, texto: '' };
-  const usuario = '[data-message-author-role="user"], [data-role="user" i], [class~="user"], [class*="user-message" i], [class*="human" i]';
-  const copia = el.cloneNode(true);
-  copia.querySelectorAll(usuario).forEach((n) => n.remove());
-  if (copia.matches(usuario)) return { encontrado: true, texto: '' };
-  const t = copia.innerText || copia.textContent || '';
-  return { encontrado: true, texto: t.trim().slice(-4000) };
+  if (!el) return { encontrado: false, assistente: false, texto: '' };
+  const assistente = '[data-message-author-role="assistant"], [data-role="assistant" i], [data-testid*="assistant" i], [class~="assistant"], [class~="resposta"], [class*="assistant-message" i], [class*="bot-message" i], [class*="resposta-assistente" i], [class*="resposta-bot" i], [class*="bot-resposta" i]';
+  const usuario = '[data-message-author-role="user"], [data-role="user" i], [class~="user"], [class~="usuario"], [class*="user-message" i], [class*="mensagem-usuario" i], [class*="resposta-usuario" i], [class*="user-resposta" i], [class*="human" i]';
+  const nos = (el.matches(assistente) ? [el] : [...el.querySelectorAll(assistente)]).filter((no) => {
+    if (no.matches(usuario) || no.closest(usuario)) return false;
+    const marca = String((no.id || '') + ' ' + String(no.className || '') + ' ' + (no.getAttribute('role') || '') + ' ' + (no.getAttribute('data-message-author-role') || '') + ' ' + (no.getAttribute('data-role') || '')).toLowerCase();
+    return !/user|usuario|human|humano|cliente/.test(marca);
+  });
+  if (!nos.length) return { encontrado: true, assistente: false, texto: '' };
+  const textos = nos.map((no) => {
+    const copia = no.cloneNode(true);
+    copia.querySelectorAll(usuario).forEach((n) => n.remove());
+    return String(copia.innerText || copia.textContent || '').trim();
+  }).filter(Boolean);
+  return { encontrado: true, assistente: true, texto: textos.join('\n').slice(-4000) };
 }
 
 function hash(valor) {
@@ -368,13 +377,14 @@ function hash(valor) {
 
 export function criarAdaptadorLoja(relatorio, nome = '') {
   if (!relatorio?.busca?.campo) throw new Error('campo de busca não encontrado');
+  if (!relatorio?.busca?.botao || !(relatorio.busca.confianca >= .6)) throw new Error('busca semântica e botão do mesmo formulário não encontrados');
   if (!relatorio?.produtos?.cards) throw new Error('cards de produto não encontrados');
   if (relatorio.bloqueio) throw new Error('página bloqueada: ' + relatorio.bloqueio);
   if (relatorio.confianca < .5) throw new Error('confiança insuficiente para mapear a loja');
   return {
     id: 'loja-' + hash(relatorio.origem),
     nome: nome || relatorio.titulo || relatorio.origem,
-    url: relatorio.url,
+    url: urlSemParametros(relatorio.url),
     origem: relatorio.origem,
     versao: 1,
     tipo: 'loja',
@@ -382,7 +392,7 @@ export function criarAdaptadorLoja(relatorio, nome = '') {
     confianca: relatorio.confianca,
     busca: relatorio.busca,
     produtos: relatorio.produtos,
-    entradas: relatorio.entradas || [],
+    entradas: (relatorio.entradas || []).map((e) => ({ ...e, href: urlSemParametros(e.href || '') })),
     chat: relatorio.chat || null,
   };
 }

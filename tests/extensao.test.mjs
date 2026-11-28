@@ -45,6 +45,9 @@ test('ponte da extensão valida origem e máscara de canais', async () => {
   assert.match(fundo, /CATALOGO_CHATS/);
   assert.match(fundo, /LOJAS_CONHECIDAS/);
   assert.match(fundo, /pesquisar_loja/);
+  const ponte = await readFile('web/core/extensao.mjs', 'utf8');
+  assert.match(ponte, /operação cancelada por timeout da extensão/);
+  assert.match(ponte, /executarRota\(rotaId, texto, timeoutMs = 100000, signal\)/);
   const rotas = await readFile('site/extensao/rotas.js', 'utf8');
   assert.match(rotas, /myn-teste-local/);
   assert.match(rotas, /oculta: true/);

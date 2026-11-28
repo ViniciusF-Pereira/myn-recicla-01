@@ -13,15 +13,16 @@ Data: 27–28/11/2026. Teste somente leitura, sem cookies, credenciais ou envio 
 
 ## Mapeador implementado
 
-- Descobre campo/formulário/botão de busca.
+- Descobre campo/formulário/botão de busca com semântica mínima e vínculo ao mesmo formulário.
 - Descobre cards, links, títulos e preços.
 - Interpreta pedido, orçamento e ocasião.
 - Filtra resultados visíveis, relevantes para o pedido e dentro do orçamento.
 - Descobre entrada de chat e mapeia campo/envio/resposta únicos e semânticos.
 - Envio no chat exige `confirmar: true`; negações como “não confirmo” são rejeitadas.
 - O clique duplicado é bloqueado e o cancelamento interrompe a operação antes do envio.
-- O sucesso só é anunciado depois de uma resposta nova e diferente do estado anterior.
+- O sucesso só é anunciado depois de uma resposta nova do assistente, diferente do estado anterior; eco da mensagem do usuário não conta.
 - Registra até 200 eventos locais por 7 dias, sem prompt, resposta ou parâmetros de URL.
+- Sanitiza também adaptadores antigos na leitura, removendo query/hash de URLs e links.
 
 ## Limites
 

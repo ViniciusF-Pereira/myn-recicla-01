@@ -45,7 +45,11 @@ function enviar(tipo, dados = {}, timeoutMs = 1000, signal) {
       window.postMessage({ canal: CANAL, id: 'cancelar-' + id, tipo: 'cancelar_operacao', operacaoId: id }, location.origin);
       reject(new Error('operação cancelada'));
     };
-    const timer = setTimeout(() => { if (concluida) return; concluida = true; limpar(); reject(new Error('extensão não detectada')); }, timeoutMs);
+    const timer = setTimeout(() => {
+      if (concluida) return;
+      window.postMessage({ canal: CANAL, id: 'cancelar-' + id, tipo: 'cancelar_operacao', operacaoId: id }, location.origin);
+      concluida = true; limpar(); reject(new Error('operação cancelada por timeout da extensão'));
+    }, timeoutMs);
     pendentes.set(id, {
       timer,
       resolve: (valor) => { if (concluida) return; concluida = true; limpar(); resolve(valor); },
@@ -76,7 +80,7 @@ export function diagnostico() { return [...depura]; }
 export function abrirVM() { return enviar('abrir_vm', {}, 5000); }
 export function listarRotas() { return enviar('listar_rotas', {}, 3000); }
 export function diagnosticarRota(rotaId, timeoutMs = 35000) { return enviar('diagnosticar_rota', { rotaId }, timeoutMs); }
-export function executarRota(rotaId, texto, timeoutMs = 100000) { return enviar('executar_rota', { rotaId, texto }, timeoutMs); }
+export function executarRota(rotaId, texto, timeoutMs = 100000, signal) { return enviar('executar_rota', { rotaId, texto }, timeoutMs, signal); }
 export function capturarManual(rotaId, timeoutMs = 35000) { return enviar('capturar_manual', { rotaId }, timeoutMs); }
 export function descobrirRota(url, timeoutMs = 45000, signal) { return enviar('descobrir_rota', { url }, timeoutMs, signal); }
 export function descobrirAbaAtual(timeoutMs = 45000, signal) { return enviar('descobrir_aba_atual', {}, timeoutMs, signal); }

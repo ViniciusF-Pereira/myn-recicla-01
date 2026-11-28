@@ -175,11 +175,11 @@ Relatório detalhado em `outputs/extensao-teste.json`.
 - adaptador descoberto ativado e executado: `OK local: teste descoberto`;
 - WORK: catálogo com 32 chats retornado;
 - loja de teste: busca `fone`, orçamento `R$ 250`, evento local e produto visível;
-- chat da loja: campo/envio/resposta mapeados e resposta `Loja: recebi seu pedido...`;
+- chat da loja: campo/envio/resposta mapeados e resposta do assistente `Loja: recebi seu pedido...`;
 - envio sem confirmação: bloqueado com `codigo=confirmacao_necessaria`;
 - Pollinations no navegador: `OK`;
 - aceite da extensão: **25/25**;
-- suíte Node: **82/82**.
+- suíte Node: **85/85**.
 
 ## Produção
 

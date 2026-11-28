@@ -217,24 +217,27 @@ async function diagnosticar(rotaId) {
   const saude = await carregarSaude();
   return { ok: true, rota: rota.id, versaoAdaptador: rota.versao, layout, saude: pontuar(rota.id, saude[rota.id]), modoManual: !layout?.composer };
 }
-async function executarRota({ rotaId, texto }) {
+async function executarRota({ rotaId, texto, operacaoId }) {
+  verificarCancelamento(operacaoId);
   const rota = await obterRota(rotaId), inicio = Date.now();
   if (!rota) throw erroRota('rota_inexistente', 'rota não suportada pela extensão', null, 'validar');
   try {
     await exigirAcessoInicial(rota);
     const aba = await abrirAba(rota);
+    verificarCancelamento(operacaoId);
     const layout = await injetar(aba.id, diagnosticarLayout, [{ campos: rota.campos, respostas: rota.respostas, login: rota.login, unico: Boolean(rota.descoberta) }]);
     if (!layout?.composer) throw erroRota(layout?.login ? 'login_necessario' : 'layout_incompativel', layout?.login ? 'a rota exige login' : 'composer não encontrado; use o modo manual', rota, 'layout');
     const antes = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas, descoberta: Boolean(rota.descoberta) }]);
     const preparado = await injetar(aba.id, prepararEnvio, [{ campos: rota.campos, texto: String(texto).slice(0, 6000), unico: Boolean(rota.descoberta) }]);
     if (!preparado?.ok) throw erroRota('composer_indisponivel', preparado?.erro || 'composer indisponível', rota, 'preparar');
-    await new Promise((r) => setTimeout(r, 300));
+    await esperarCancelavel(300, operacaoId);
+    verificarCancelamento(operacaoId);
     const envio = await injetar(aba.id, acionarEnvio, [{ envio: rota.envio, campos: rota.campos, descoberta: Boolean(rota.descoberta) }]);
     if (!envio?.ok) throw erroRota('envio_falhou', envio?.erro || 'envio não confirmado', rota, 'enviar');
     const fim = Date.now() + 90000;
     let ultimo = '', estavel = 0;
     while (Date.now() < fim) {
-      await new Promise((r) => setTimeout(r, 1500));
+      await esperarCancelavel(1500, operacaoId);
       const atual = await injetar(aba.id, lerResposta, [{ respostas: rota.respostas, descoberta: Boolean(rota.descoberta) }]);
       const novidades = (atual?.textos || []).filter((t) => !(antes?.textos || []).includes(t));
       const candidato = novidades.at(-1) || (atual?.totalNos > (antes?.totalNos || 0) ? atual.ultimo : '');
@@ -327,8 +330,17 @@ async function ativarDescoberta(id, seletores = {}, operacaoId) {
     return { ok: true, adaptador };
   });
 }
+function urlLojaSegura(valor) {
+  try { const u = new URL(valor); u.username = ''; u.password = ''; u.search = ''; u.hash = ''; return u.href; } catch { return ''; }
+}
+function lojaSegura(loja) {
+  return { ...loja, url: urlLojaSegura(loja.url), entradas: (loja.entradas || []).map((e) => ({ ...e, href: urlLojaSegura(e.href || '') })) };
+}
 async function lojasDescobertas() {
-  return (await chrome.storage.local.get(CHAVE_LOJAS))[CHAVE_LOJAS] || [];
+  const brutas = (await chrome.storage.local.get(CHAVE_LOJAS))[CHAVE_LOJAS] || [];
+  const seguras = brutas.map(lojaSegura);
+  if (JSON.stringify(brutas) !== JSON.stringify(seguras)) await chrome.storage.local.set({ [CHAVE_LOJAS]: seguras });
+  return seguras;
 }
 async function obterLoja(id) {
   return (await lojasDescobertas()).find((l) => l.id === id) || null;
@@ -488,7 +500,7 @@ async function executarEnvioChatLoja({ id, texto, confirmar, operacaoId }) {
   await exigirAcessoInicial(loja);
   const aba = await abrirAba(loja);
   const antes = await injetar(aba.id, lerRespostaChat, [{ resposta: loja.chat.campos.resposta }]);
-  if (!antes?.encontrado) throw erroRota('chat_layout_incompativel', 'não foi possível isolar a resposta do chat', loja, 'chat');
+  if (!antes?.encontrado || (antes.texto && !antes.assistente)) throw erroRota('chat_layout_incompativel', 'não foi possível isolar uma resposta do assistente no chat', loja, 'chat');
   const preparado = await injetar(aba.id, prepararChatLoja, [{ campo: loja.chat.campos.campo, texto: String(texto).slice(0, 2000) }]);
   if (!preparado?.ok) throw erroRota('chat_envio_falhou', preparado?.erro || 'campo indisponível', loja, 'chat');
   await esperarCancelavel(200, operacaoId);
@@ -499,9 +511,9 @@ async function executarEnvioChatLoja({ id, texto, confirmar, operacaoId }) {
   for (let i = 0; i < 32; i++) {
     await esperarCancelavel(250, operacaoId);
     resposta = await injetar(aba.id, lerRespostaChat, [{ resposta: loja.chat.campos.resposta }]);
-    if (resposta?.encontrado && resposta.texto && resposta.texto !== antes.texto) break;
+    if (resposta?.encontrado && resposta.assistente && resposta.texto && resposta.texto !== antes.texto) break;
   }
-  if (!resposta?.encontrado || !resposta.texto || resposta.texto === antes.texto) throw erroRota('chat_sem_resposta', 'o clique não produziu uma resposta nova; nada foi confirmado como concluído', loja, 'chat');
+  if (!resposta?.encontrado || !resposta.assistente || !resposta.texto || resposta.texto === antes.texto) throw erroRota('chat_sem_resposta', 'o clique não produziu uma resposta nova do assistente; nada foi confirmado como concluído', loja, 'chat');
   const pagina = await injetar(aba.id, observarPaginaLoja, [{ adaptador: loja }]);
   await registrarEventoLoja({ tipo: 'chat-loja', loja: loja.id, texto: String(texto).slice(0, 500), resposta: resposta.texto, ...pagina });
   return { ok: true, texto: resposta.texto, loja: loja.id };

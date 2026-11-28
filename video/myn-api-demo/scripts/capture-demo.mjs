@@ -32,11 +32,11 @@ const criada = await json('/api/admin/chaves', {
 const chave = criada.chave;
 if (!chave) throw new Error('resposta sem chave');
 try {
-  const prompt = 'Crie uma campanha curta em português para o Myn Recicla/01. Promessa: transformar abas gratuitas em agentes, sem chave. Traga título, frase de apoio e chamada para ação.';
+  const prompt = 'Explique o Myn em uma frase.';
   const resposta = await json('/v1/agent', {
     method: 'POST',
     headers: { authorization: 'Bearer ' + chave, 'content-type': 'application/json' },
-    body: JSON.stringify({ message: prompt, session: 'demo-video', effort: 'medium', rota: 'pollinations-text-api' }),
+    body: JSON.stringify({ message: prompt, session: 'demo-video', effort: 'medium', rota: 'auto' }),
   });
   const uso = await json('/v1/usage', { headers: { authorization: 'Bearer ' + chave } });
   const respostaPublica = { ...resposta, sessao: 'api:••••:demo-video' };
@@ -53,7 +53,7 @@ try {
     'Se você tem uma aba, você tem um agente.',
     'Eu sou o WORK. Conheço as rotas, os limites e o caminho até o resultado.',
     'Uma chamada à API já conversa, lembra do contexto e escolhe a rota.',
-    'Você pede uma campanha. Recebe texto pronto para usar.',
+    'Você pede uma resposta. Recebe texto pronto para usar.',
     'Pede uma imagem. Ela é gerada sem chave.',
     'Pede voz. O mesmo agente entrega a narração.',
     'Myn Recicla. Sua aba vira agente.',
@@ -63,7 +63,7 @@ try {
 
   await writeFile(path.join(assets, 'data', 'provenance.json'), JSON.stringify({
     capturedAt: new Date().toISOString(),
-    api: { endpoint: '/v1/agent', status: 200, session: 'demo-video' },
+    api: { endpoint: '/v1/agent', status: 200, session: 'demo-video', request: { message: prompt, effort: 'medium', rota: 'auto' } },
     image: { fonte: imagem.fonte, prompt: imagem.prompt },
     audio: { fonte: prova.fonte, voz: prova.voz },
     narration: { fonte: voz.fonte, voz: voz.voz },

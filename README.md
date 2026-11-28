@@ -39,13 +39,13 @@ node scripts/testar-extensao.mjs
 - **Catálogo dinâmico de plugins** em 9 categorias: chat, imagem, vídeo, voz, agentes, mensageria, APIs, pesquisa e utilidade. Google/Gemini foram removidos do catálogo público.
 - **Descoberta de modelos livres** via Pollinations, OpenRouter e HuggingFace (endpoints públicos, sem chave), com filtro de preço e modalidade.
 - **Chat com streaming SSE** (primeiro token em ~15 ms), pesquisa com RAG + catálogo, anexos, tabelas markdown e arquivos.
-- **Mídia browser-only**: imagem (Pollinations/Canvas), voz (SpeechSynthesis), vídeo/animação (Canvas + MediaRecorder), OCR (Tesseract.js) e PDF (pdf.js).
+- **Mídia browser-only**: imagem (Pollinations/Canvas), voz (SpeechSynthesis), vídeo/animação (Canvas + MediaRecorder), OCR (Tesseract.js), PDF (pdf.js) e planilhas CSV locais.
 - **Myn-01 Auto**: escolhe rotas por capacidade e saúde, roda em paralelo e escolhe a melhor resposta.
 - **Scoreboard**: score = 0,45·sucesso + 0,35·velocidade + 0,2·recência, com circuit breaker de 3 estados.
 - **MCP** JSON-RPC com 15 ferramentas para agentes externos.
 - **Memória/RAG local:** escopos sessão/projeto/global, busca híbrida, resumo persistido e exportação/importação em JSON.
 - **Extensão confiável:** adaptadores versionados, saúde por rota, diagnóstico de layout, modo manual, WORK caçador de chats e mapeador de lojas com busca por pedido/orçamento.
-- **Varredura web retomável:** GitHub, Tranco, Open Page Rank (10 milhões) e Common Crawl; teste concorrente, proteção SSRF e classificação de chats, geradores, lojas, login, paywall e bloqueios. Meta: **9.000.000 tentativas reais**.
+- **Varredura web retomável:** GitHub, Tranco, Open Page Rank (10 milhões) e Common Crawl; teste concorrente com limite por origem, proteção SSRF e classificação de chats, geradores, lojas, login, paywall e bloqueios. Acervo atual: **1.189.191 URLs**; coleta parada por decisão do operador e testes continuando na fila existente.
 - **Goal autônomo**: `/plan` → `/loop` → `/goal` com agendador usando a própria API.
 - **WEBdocker.NODEJS**: container com Chromium headless — as rotas rodam no aparelho de quem executa.
 
@@ -141,7 +141,7 @@ Validação executada em [`docs/DOCKER_VALIDACAO.md`](docs/DOCKER_VALIDACAO.md):
 node scripts/avaliar.mjs     # 15 baterias → docs/AVALIACAO.md
 node scripts/mapear.mjs      # grava input/output/print de cada provider
 ```
-Última bateria: **15/15 OK**. Evidência atual da 1.3: **82/82 testes Node**, **25/25 aceites Chromium/Edge**, **19/19 testes offline da varredura** e `npm run check` do vídeo aprovado. Detalhes em [`docs/AVALIACAO.md`](docs/AVALIACAO.md), evolução em [`docs/EVOLUCAO.md`](docs/EVOLUCAO.md), modelos por rota em [`docs/AGENTES_E_MODELOS.md`](docs/AGENTES_E_MODELOS.md) e arquitetura em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
+Última bateria: **15/15 OK**. Evidência atual da 1.3: **85/85 testes Node**, **25/25 aceites Chromium/Edge**, **24/24 testes offline da varredura** e `npm run check` do vídeo aprovado. Detalhes em [`docs/AVALIACAO.md`](docs/AVALIACAO.md), evolução em [`docs/EVOLUCAO.md`](docs/EVOLUCAO.md), modelos por rota em [`docs/AGENTES_E_MODELOS.md`](docs/AGENTES_E_MODELOS.md) e arquitetura em [`docs/ARQUITETURA.md`](docs/ARQUITETURA.md).
 
 **Direção web-only:** [`docs/PLANEJAMENTO.md`](docs/PLANEJAMENTO.md) — evoluir o Myn para agente open-source tipo OpenCode/Claude Code/Codex usando **somente rotas free de navegador + WebGPU**, sem binário/local PC. Fase 0 item 3 já entregue: `/api/orquestrar?rapido=true` nunca escolhe rotas `*-local`.
 

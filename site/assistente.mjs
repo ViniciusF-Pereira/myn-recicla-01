@@ -287,7 +287,7 @@ function referenciaLoja(texto) {
 
 export function confirmacaoChatLoja(texto) {
   const t = String(texto || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
-  if (/nao (?:quero|desejo|preciso|vou|devo|posso)?\s*(?:enviar|mandar)|nao confirm|sem confirmar|cancelar|pare de|melhor nao|nao pode enviar/.test(t)) return false;
+  if (/nao (?:quero|desejo|preciso|vou|devo|posso)?\s*(?:enviar|mandar)|nao (?:autorizo|aprovo|confirmo)|sem confirmar|cancelar|pare de|melhor nao|nao pode enviar/.test(t)) return false;
   return /\bconfirmo\b|\bpode enviar\b|\bpode mandar\b|\bautorizo\b|^sim\b|\bsim,?\s*(?:pode )?(?:enviar|mandar)\b/.test(t);
 }
 

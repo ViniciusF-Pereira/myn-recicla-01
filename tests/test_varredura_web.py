@@ -4,6 +4,8 @@ import io
 import json
 import socket
 import tempfile
+import threading
+import time
 import unittest
 import urllib.error
 import urllib.request
@@ -99,6 +101,13 @@ class TestClassificacao(unittest.TestCase):
         self.assertEqual(classe, 'sem-sinal')
         self.assertFalse(any(sinais.values()))
 
+    def test_login_com_chat_ou_gerador_continua_login(self):
+        for texto in ('Login para usar o chat', 'Cadastre-se no gerador de imagens'):
+            with self.subTest(texto=texto):
+                classe, sinais = self.classificar(200, texto=texto)
+                self.assertEqual(classe, 'login')
+                self.assertTrue(sinais['login'])
+
     def test_scripts_estilos_e_tags_nao_geram_sinais(self):
         corpo = (
             '<html><head><style>.paywall{content:"captcha"}</style>'
@@ -116,6 +125,17 @@ class TestClassificacao(unittest.TestCase):
         classe, sinais = self.classificar(200, '<span>Paywall</span> premium', '')
         self.assertEqual(classe, 'paywall')
         self.assertTrue(sinais['paywall'])
+
+    def test_http_error_com_corpo_quebrado_nao_derruba_lote(self):
+        corpo = mock.Mock()
+        corpo.read.side_effect = OSError('corpo incompleto')
+        corpo.close.side_effect = OSError('falha ao fechar')
+        erro = urllib.error.HTTPError('https://example.com/', 403, 'erro', {'content-type': 'text/html'}, corpo)
+        with mock.patch.object(varredura, 'abrir_publica', side_effect=erro):
+            resultado = varredura.testar((1, 'https://example.com/'), 1)
+        self.assertEqual(resultado['ultimo_status'], 403)
+        self.assertEqual(resultado['classe'], 'bloqueado')
+        corpo.close.assert_called_once()
 
     def test_http_error_limpa_corpo_mas_nao_o_usa_como_sinal(self):
         for status, esperado in ((403, 'bloqueado'), (429, 'rate-limit'), (503, 'indisponivel')):
@@ -253,10 +273,52 @@ class TestMeta(unittest.TestCase):
         self.assertEqual(parser.parse_args(['--meta', '12000']).meta, 12000)
         self.assertTrue(parser.parse_args(['--openpagerank']).openpagerank)
         self.assertEqual(parser.parse_args(['--openpagerank-limit', '100']).openpagerank_limit, 100)
+        self.assertEqual(parser.parse_args(['--batch-size', '250']).batch_size, 250)
+        self.assertEqual(parser.parse_args(['--per-origin', '1']).per_origin, 1)
         for valor in ('0', '-1', 'abc'):
             with self.subTest(valor=valor), contextlib.redirect_stderr(io.StringIO()):
                 with self.assertRaises(SystemExit):
                     parser.parse_args(['--meta', valor])
+
+    def test_testes_processam_em_lotes_limitados(self):
+        for i in range(5):
+            self.assertTrue(varredura.inserir(self.con, f'https://example.com/{i}', 'teste'))
+        def falso_teste(linha, timeout):
+            return {'id': linha[0], 'estado': 'testado', 'classe': 'sem-sinal', 'verificado': 'agora'}
+        with mock.patch.object(varredura, 'testar', side_effect=falso_teste) as testar:
+            resultado = varredura.executar_testes(self.con, limite=5, workers=2, timeout=1, tamanho_lote=2)
+        self.assertEqual(testar.call_count, 5)
+        self.assertEqual(resultado['testados_nesta_rodada'], 5)
+        self.assertEqual(resultado['lotes'], 3)
+        self.assertEqual(resultado['fila_restante'], 0)
+        self.assertEqual(self.con.execute("SELECT COUNT(*) FROM urls WHERE estado='testado'").fetchone()[0], 5)
+
+    def test_excecao_em_future_vira_erro_sem_parar_lote(self):
+        self.assertTrue(varredura.inserir(self.con, 'https://example.com/falha', 'teste'))
+        with mock.patch.object(varredura, 'testar', side_effect=OSError('falha inesperada')):
+            resultado = varredura.executar_testes(self.con, limite=1, workers=1, timeout=1, tamanho_lote=1)
+        self.assertEqual(resultado['testados_nesta_rodada'], 1)
+        self.assertEqual(resultado['fila_restante'], 0)
+        linha = self.con.execute("SELECT estado,erro FROM urls WHERE estado='erro'").fetchone()
+        self.assertIsNotNone(linha)
+        self.assertIn('falha inesperada', linha[1])
+
+    def test_limita_concorrencia_por_origem(self):
+        for i in range(6):
+            self.assertTrue(varredura.inserir(self.con, f'https://example.com/{i}', 'teste'))
+        estado = {'ativo': 0, 'maximo': 0}
+        lock = threading.Lock()
+        def falso_teste(linha, timeout):
+            with lock:
+                estado['ativo'] += 1
+                estado['maximo'] = max(estado['maximo'], estado['ativo'])
+            time.sleep(0.02)
+            with lock:
+                estado['ativo'] -= 1
+            return {'id': linha[0], 'estado': 'testado', 'classe': 'sem-sinal', 'verificado': 'agora'}
+        with mock.patch.object(varredura, 'testar', side_effect=falso_teste):
+            varredura.executar_testes(self.con, limite=6, workers=6, timeout=1, tamanho_lote=6, por_origem=2)
+        self.assertLessEqual(estado['maximo'], 2)
 
     def test_resumo_nao_finge_conclusao_sem_tentativas(self):
         vazio = varredura.resumir(self.con)
@@ -273,17 +335,21 @@ class TestMeta(unittest.TestCase):
         self.assertEqual(parcial['tentativas'], 0)
         self.assertFalse(parcial['meta_atingida'])
 
-        self.con.execute("UPDATE urls SET estado='testado' WHERE id=1")
+        self.con.execute("UPDATE urls SET estado='testado',tentativas=1 WHERE id=1")
         self.con.commit()
         parcial = varredura.resumir(self.con, meta=2)
         self.assertEqual(parcial['tentativas'], 1)
+        self.assertEqual(parcial['sites_testados'], 1)
         self.assertEqual(parcial['progresso_percent'], 50)
+        self.con.execute("UPDATE urls SET tentativas=3 WHERE id=1")
+        self.con.commit()
+        self.assertEqual(varredura.resumir(self.con, meta=2)['tentativas'], 3)
         self.assertFalse(parcial['meta_atingida'])
 
         self.con.execute("UPDATE urls SET estado='erro' WHERE id=2")
         self.con.commit()
         concluido = varredura.resumir(self.con, meta=2)
-        self.assertEqual(concluido['tentativas'], 2)
+        self.assertEqual(concluido['tentativas'], 3)
         self.assertEqual(concluido['progresso_percent'], 100)
         self.assertTrue(concluido['meta_atingida'])
 

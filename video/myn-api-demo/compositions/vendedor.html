@@ -15,17 +15,17 @@ h1{font:500 102px/.92 Newsreader,serif;letter-spacing:-.05em;margin:0 0 26px}h1 
 .ui-bar{height:58px;background:#fffdf7;border-bottom:2px solid #14212b;display:flex;align-items:center;gap:10px;padding:0 18px}.ui-bar i{width:13px;height:13px;border-radius:50%;background:#e9654f}.ui-bar i:nth-child(2){background:#e6a52e}.ui-bar i:nth-child(3){background:#0d8f87}.ui-bar span{margin-left:12px;font:600 28px Plex,sans-serif;color:#14212b}
 .ui-wrap img{display:block;width:100%;height:calc(100% - 58px);object-fit:cover;object-position:top left}
 .ui-badge{position:absolute;right:22px;bottom:22px;z-index:3;display:flex;align-items:center;gap:14px;padding:13px 17px;background:#e6a52e;color:#14212b;border:2px solid #14212b;box-shadow:6px 6px 0 #14212b;font:600 28px Plex,sans-serif;text-transform:uppercase;letter-spacing:.05em;transform:rotate(-3deg)}
-.ui-badge b{font:500 38px/1 Newsreader,serif}.wipe{position:absolute;inset:0;z-index:30;background:#e6a52e;transform-origin:right center}
+.ui-badge b{font:500 38px/1 Newsreader,serif}.wipe{position:absolute;inset:0;z-index:30;pointer-events:none}.wipe .anim{position:absolute;inset:0;background:#e6a52e;transform-origin:right center}
 </style>
 <div id="root" data-composition-id="vendedor" data-duration="6">
   <div class="ground clip" data-start="0" data-duration="6" data-track-index="0"></div>
-  <div class="wipe clip" data-start="0" data-duration="0.36" data-track-index="15" data-layout-allow-overflow></div>
+  <div class="wipe clip" data-start="0" data-duration="0.36" data-track-index="15" data-layout-allow-overflow><div class="anim"></div></div>
   <div class="copy clip" data-start="0.1" data-duration="5.9" data-track-index="1"><div class="anim"><div class="work-row"><img src="assets/images/myn-logo.svg" alt="Símbolo real do Myn"><span>WORK · agente vendedor</span></div><h1>Eu sei o<br><em>caminho.</em></h1><p class="promise">Conheço as rotas, os limites e o resultado. Você pede; eu mostro onde o Myn pode chegar.</p><div class="proof-line">API · provedores · mídia · memória</div><div class="route-line"></div></div></div>
   <div class="ui-wrap clip" data-start="0.25" data-duration="5.75" data-track-index="2" data-layout-allow-overflow><div class="anim"><div class="ui-bar"><i></i><i></i><i></i><span>Myn · Playground real</span></div><img src="assets/images/playground-real.png" alt="Playground real do Myn"><div class="ui-badge"><b>190</b> plugins públicos</div></div></div>
 </div>
 <script>
 const tl=gsap.timeline({paused:true});
-tl.fromTo('.wipe',{scaleX:1},{scaleX:0,duration:.34,ease:'power3.inOut'},0);
+tl.fromTo('.wipe .anim',{scaleX:1},{scaleX:0,duration:.34,ease:'power3.inOut'},0);
 tl.fromTo('.work-row',{opacity:0,y:18},{opacity:1,y:0,duration:.4,ease:'power3.out'},.12);
 tl.fromTo('h1',{opacity:0,y:38},{opacity:1,y:0,duration:.62,ease:'power4.out'},.2);
 tl.fromTo('.promise',{opacity:0,y:22},{opacity:1,y:0,duration:.48,ease:'power3.out'},.38);

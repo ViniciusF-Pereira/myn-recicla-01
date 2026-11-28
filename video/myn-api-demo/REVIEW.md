@@ -12,7 +12,7 @@ Data: 28/11/2026 (UTC). Revisão da versão com reforço comercial, antes do ren
   - Craft: 0 erros, 0 avisos.
   - Áudio: 0 erros, 0 avisos.
 - `npx hyperframes snapshot --review`: **44 snapshots**.
-  - Beat sheet: `.hyperframes/artifacts/snapshots/8276d4bf-2e77-49a4-a4bd-425b4550138a/review-beats.jpg`.
+  - Beat sheet: `.hyperframes/artifacts/snapshots/cbdf2de5-cc59-44a3-952a-0b5712dd5b2c/review-beats.jpg`.
   - Telefone: `review-phone.jpg`.
   - Costuras 1–6: `review-seam-01.jpg` … `review-seam-06.jpg`.
 - Revisão adicional do final: `snapshots/b319ead8-c874-466a-8bcf-5f5d05a011fb/contact-sheet.jpg` em 31,0 s, 31,2 s e 33,5 s.
@@ -22,9 +22,9 @@ Data: 28/11/2026 (UTC). Revisão da versão com reforço comercial, antes do ren
 
 - **Provedores:** 32 gigante, 190 plugins e zero chaves; lista real legível; pincel amarelo conecta a primeira cena ao WORK.
 - **WORK:** UI real em destaque, selo 190 e linha de rota; nenhuma tela inventada.
-- **API:** painel real com chave mascarada; request/response revelado linha a linha; status 200 com pulso curto.
+- **API:** painel real com chave mascarada; request exato `Explique o Myn em uma frase.` e response revelados linha a linha; status 200 com pulso curto.
 - **Texto:** resposta real, aspas, marca-texto e transição azul; sem texto repetido em excesso.
-- **Imagem:** revelação iris preservando os pixels do arquivo realmente gerado.
+- **Imagem:** revelação iris preservando os pixels da ilustração local, atribuída como “sem rede”.
 - **Voz:** waveform real, playhead sincronizado e duração de 3,8 s.
 - **Final:** marca visível já no corte, CTA e URL com hold superior a 3 s.
 
@@ -34,6 +34,7 @@ Data: 28/11/2026 (UTC). Revisão da versão com reforço comercial, antes do ren
 - Ajustado contraste das aspas para **3:1**.
 - Eliminado `first_frame_empty`, `dead_stretch` e `line_unread`.
 - Corrigido alvo GSAP de pseudo-elemento inexistente.
+- Wipes, flood e aspas agora animam filhos internos, não elementos `.clip` diretamente.
 - Final ajustado para não começar com papel vazio após a cena de voz.
 
 ## Avisos restantes

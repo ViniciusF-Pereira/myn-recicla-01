@@ -123,6 +123,11 @@ function artifact(d){
  if(d.tipo==='gif')return '<figure class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+' · animação WebM</figcaption></figure>';
  if(d.tipo==='audio')return d.semUrl ? '<div class="arte-chat">🔊 '+esc(d.fonte)+' · '+esc(d.voz||'')+'<figcaption>voz reproduzida no navegador</figcaption></div>' : '<div class="arte-chat"><audio controls src="'+d.url+'"></audio><figcaption>'+esc(d.fonte)+' · '+esc(d.voz||'')+'</figcaption></div>';
  if(d.tipo==='video')return '<div class="arte-chat"><video controls src="'+d.url+'"></video><figcaption>'+esc(d.fonte)+'</figcaption></div>';
+ if(d.tipo==='planilha'){
+  const cab=d.colunas.map(c=>'<th>'+esc(c)+'</th>').join('');
+  const rows=d.linhas.slice(0,12).map(r=>'<tr>'+r.map(c=>'<td>'+esc(c)+'</td>').join('')+'</tr>').join('');
+  return '<div class="tabela-wrap"><table><thead><tr>'+cab+'</tr></thead><tbody>'+rows+'</tbody></table></div><a class="btn sec" href="'+d.url+'" download="'+esc(d.nome)+'">Baixar '+esc(d.nome)+'</a><div class="meta-chat">'+esc(d.aviso)+'</div>';
+ }
  return '<a href="'+d.url+'" target="_blank">'+esc(d.nome)+'</a>';
 }
 let modoMidiaPendente=null;
@@ -132,6 +137,15 @@ async function gerarMidia(tipo,prompt,origem){
   try{const m=window.myn?.midia;if(!m)throw new Error('mídia web não inicializou');let d;if(tipo==='imagem')d=await m.gerarImagem(prompt);else if(tipo==='audio')d=await m.narrar(prompt);else if(tipo==='video')d=await m.gerarVideo(prompt,{segundos:6});else d=await m.gerarGif(prompt,{segundos:4});espera.innerHTML=artifact(d);$('texto').value=''}
  catch(er){espera.className='msg err';espera.textContent='Não gerou: '+er.message}
  finally{if(b)b.disabled=false}
+}
+async function gerarPlanilhaLocal(prompt){
+ const espera=add('montando planilha local...','ele');
+ try{
+  if(!window.myn?.planilha?.gerar)throw new Error('gerador de planilha não inicializou');
+  const d=await window.myn.planilha.gerar(prompt);
+  espera.innerHTML=artifact(d);
+  $('texto').value='';
+ }catch(er){espera.className='msg err';espera.textContent='Não gerou a planilha: '+er.message}
 }
 document.querySelectorAll('.ferr[data-midia]').forEach(b=>b.onclick=async()=>{
  const prompt=$('texto').value.trim();
@@ -152,6 +166,14 @@ async function enviar(pesquisa=false){
  if(modoMidiaPendente){const tipo=modoMidiaPendente;modoMidiaPendente=null;add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,bruto);return}
  const aliasMidia=/^\/(imagem|audio|áudio|video|vídeo)\s+([\s\S]+)$/i.exec(bruto);
  if(aliasMidia){const tipo=/v/i.test(aliasMidia[1])&&/v/.test(aliasMidia[1])?'video':(/^a/i.test(aliasMidia[1])?'audio':'imagem');add(esc(bruto),'eu');$('texto').value='';await gerarMidia(tipo,aliasMidia[2]);return}
+ const querPlanilha=/\b(planilha|spreadsheet|csv|xlsx)\b/i.test(bruto)
+  && /\b(gere|gera|gerar|crie|cria|criar|fa[çc]a|faz|quero|preciso|monte|montar)\b/i.test(bruto);
+ if(querPlanilha){
+  add(esc(bruto)+' <small class="meta-chat">planilha local</small>','eu');
+  $('texto').value='';
+  await gerarPlanilhaLocal(bruto);
+  return;
+ }
  const querImagem=/\b(imagem|foto|desenho|ilustrac[ãa]o|retrato|picture|image)\b/i.test(bruto)
    && /\b(gere|gerar|crie|criar|fa[çc]a|faz|quero|mostre|desenhe|pinta|produza|de|com)\b/i.test(bruto);
   if(querImagem){

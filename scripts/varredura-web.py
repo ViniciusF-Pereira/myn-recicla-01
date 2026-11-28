@@ -17,6 +17,7 @@ import re
 import shutil
 import sqlite3
 import sys
+import threading
 import time
 import urllib.error
 import urllib.parse
@@ -419,7 +420,7 @@ def classificar(status: int, final: str, tipo: str, titulo: str, texto: str) -> 
             classe = 'bloqueado'
         elif sinais['paywall']:
             classe = 'paywall'
-        elif sinais['login'] and not (sinais['chat'] or sinais['gerador']):
+        elif sinais['login']:
             classe = 'login'
         elif sinais['loja'] and sinais['atendimento']:
             classe = 'loja-atendimento'
@@ -459,8 +460,13 @@ def testar(linha: tuple, timeout: int) -> dict:
         tipo = e.headers.get('content-type', '') if e.headers else ''
         try:
             bytes_ = e.read(100000)
+        except Exception:
+            bytes_ = b''
         finally:
-            e.close()
+            try:
+                e.close()
+            except Exception:
+                pass
         if 'html' in tipo.lower() or 'text' in tipo.lower() or not tipo:
             texto = bytes_.decode('utf-8', 'ignore')
             titulo = extrair_titulo(texto)
@@ -473,26 +479,44 @@ def testar(linha: tuple, timeout: int) -> dict:
     classe, sinais = classificar(status, final, tipo, titulo, texto)
     return {'id': id_, 'estado': 'testado', 'ultimo_status': status, 'final': final, 'tipo': tipo[:120], 'titulo': titulo, 'sinais': json.dumps(sinais, ensure_ascii=False), 'classe': classe, 'duracao': duracao, 'verificado': agora(), 'erro': erro}
 
-def executar_testes(con: sqlite3.Connection, limite: int, workers: int, timeout: int) -> dict:
-    fila = con.execute("SELECT id,url FROM urls WHERE estado='fila' ORDER BY prioridade DESC,id LIMIT ?", (limite,)).fetchall()
-    if not fila:
-        return {'testados_nesta_rodada': 0, 'fila_restante': con.execute("SELECT COUNT(*) FROM urls WHERE estado='fila'").fetchone()[0]}
+def executar_testes(con: sqlite3.Connection, limite: int, workers: int, timeout: int, tamanho_lote: int = 5000, por_origem: int = 2) -> dict:
+    if limite <= 0 or tamanho_lote <= 0 or por_origem <= 0:
+        raise ValueError('limite, tamanho do lote e concorrência por origem devem ser positivos')
     concluidos = 0
+    lotes = 0
+    semaforos = {}
+    bloqueio = threading.Lock()
+    def executar_limitado(linha):
+        host = urllib.parse.urlsplit(linha[1]).hostname or ''
+        with bloqueio:
+            semaforo = semaforos.setdefault(host, threading.BoundedSemaphore(por_origem))
+        with semaforo:
+            return testar(linha, timeout)
     inicio = time.monotonic()
     with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-        futuros = {pool.submit(testar, linha, timeout): linha for linha in fila}
-        for futuro in concurrent.futures.as_completed(futuros):
-            resultado = futuro.result()
-            campos = {k: v for k, v in resultado.items() if k != 'id'}
-            con.execute('UPDATE urls SET ' + ','.join(k + '=?' for k in campos) + ',tentativas=tentativas+1 WHERE id=?', (*campos.values(), resultado['id']))
-            concluidos += 1
-            if concluidos % 500 == 0:
-                con.commit()
-                resumo = con.execute('SELECT estado,classe,COUNT(*) FROM urls GROUP BY estado,classe').fetchall()
-                print(json.dumps({'fase':'teste','concluidos':concluidos,'lote':len(fila),'segundos':round(time.monotonic()-inicio,1),'grupos':resumo}, ensure_ascii=False), flush=True)
-    con.commit()
+        while concluidos < limite:
+            restante = limite - concluidos
+            fila = con.execute("SELECT id,url FROM urls WHERE estado='fila' ORDER BY prioridade DESC,id LIMIT ?", (min(restante, tamanho_lote),)).fetchall()
+            if not fila:
+                break
+            lotes += 1
+            futuros = {pool.submit(executar_limitado, linha): linha for linha in fila}
+            for futuro in concurrent.futures.as_completed(futuros):
+                try:
+                    resultado = futuro.result()
+                except Exception as exc:
+                    resultado = {'id': futuros[futuro][0], 'estado': 'erro', 'erro': str(exc)[:500], 'duracao': 0, 'verificado': agora()}
+                campos = {k: v for k, v in resultado.items() if k != 'id'}
+                con.execute('UPDATE urls SET ' + ','.join(k + '=?' for k in campos) + ',tentativas=tentativas+1 WHERE id=?', (*campos.values(), resultado['id']))
+                concluidos += 1
+                if concluidos % 500 == 0:
+                    con.commit()
+                    resumo = con.execute('SELECT estado,classe,COUNT(*) FROM urls GROUP BY estado,classe').fetchall()
+                    print(json.dumps({'fase':'teste','concluidos':concluidos,'lote':len(fila),'lotes':lotes,'segundos':round(time.monotonic()-inicio,1),'grupos':resumo}, ensure_ascii=False), flush=True)
+            con.commit()
+            semaforos.clear()
     resumo = con.execute('SELECT estado,classe,COUNT(*) FROM urls GROUP BY estado,classe').fetchall()
-    return {'testados_nesta_rodada': concluidos, 'lote': len(fila), 'segundos': round(time.monotonic() - inicio, 1), 'grupos': resumo, 'fila_restante': con.execute("SELECT COUNT(*) FROM urls WHERE estado='fila'").fetchone()[0]}
+    return {'testados_nesta_rodada': concluidos, 'lotes': lotes, 'segundos': round(time.monotonic() - inicio, 1), 'grupos': resumo, 'fila_restante': con.execute("SELECT COUNT(*) FROM urls WHERE estado='fila'").fetchone()[0]}
 
 def resumir(con: sqlite3.Connection, meta: int = META_PADRAO) -> dict:
     if meta <= 0:
@@ -500,12 +524,13 @@ def resumir(con: sqlite3.Connection, meta: int = META_PADRAO) -> dict:
     totais = con.execute('SELECT estado,COUNT(*) FROM urls GROUP BY estado').fetchall()
     classes = con.execute('SELECT classe,COUNT(*) FROM urls WHERE estado=\'testado\' GROUP BY classe ORDER BY COUNT(*) DESC').fetchall()
     estados = dict(totais)
-    tentativas = estados.get('testado', 0) + estados.get('erro', 0)
+    tentativas = con.execute("SELECT COALESCE(SUM(tentativas),0) FROM urls WHERE estado IN ('testado','erro')").fetchone()[0]
+    sites_testados = estados.get('testado', 0) + estados.get('erro', 0)
     total_urls = con.execute('SELECT COUNT(*) FROM urls').fetchone()[0]
     return {
-        'atualizado': agora(), 'meta': meta, 'tentativas': tentativas,
-        'progresso_percent': round(tentativas / meta * 100, 2),
-        'meta_atingida': total_urls > 0 and tentativas >= meta,
+        'atualizado': agora(), 'meta': meta, 'tentativas': tentativas, 'sites_testados': sites_testados,
+        'progresso_percent': round(sites_testados / meta * 100, 2),
+        'meta_atingida': total_urls > 0 and sites_testados >= meta,
         'total_urls': total_urls, 'estados': estados, 'classes': dict(classes), 'db': str(DB),
     }
 
@@ -531,7 +556,9 @@ def criar_parser() -> argparse.ArgumentParser:
     p.add_argument('--cc-page-size', type=int, default=5000)
     p.add_argument('--test', action='store_true')
     p.add_argument('--limit', type=int, default=1000)
+    p.add_argument('--batch-size', type=int, default=5000)
     p.add_argument('--workers', type=int, default=64)
+    p.add_argument('--per-origin', type=int, default=2)
     p.add_argument('--timeout', type=int, default=10)
     p.add_argument('--max-repos', type=int, default=120)
     p.add_argument('--meta', type=meta_positiva, default=META_PADRAO,
@@ -551,7 +578,7 @@ def main() -> int:
     if args.commoncrawl:
         resultado['commoncrawl'] = coletar_commoncrawl(con, args.cc_tlds.split(','), args.cc_pages, args.cc_page_size)
     if args.test:
-        resultado['teste'] = executar_testes(con, args.limit, args.workers, args.timeout)
+        resultado['teste'] = executar_testes(con, args.limit, args.workers, args.timeout, args.batch_size, args.per_origin)
     if not args.collect and not args.tranco and not args.openpagerank and not args.commoncrawl and not args.test:
         resultado = resumir(con, args.meta)
     else:

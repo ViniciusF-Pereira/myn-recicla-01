@@ -1,6 +1,6 @@
 # Varredura web testável
 
-Meta ajustada pelo operador: **9.000.000 sites** (`--meta`, padrão `9000000`).
+Meta histórica solicitada: **9.000.000 sites** (`--meta`, padrão `9000000`). Decisão atual do operador: **coleta de novas URLs encerrada**; os testes continuam na fila existente.
 
 ## O que existe
 
@@ -17,9 +17,13 @@ Meta ajustada pelo operador: **9.000.000 sites** (`--meta`, padrão `9000000`).
 - Coleta ampliada: 29.003 URLs únicas.
 - Segundo lote: 20.003 tentativas em 934 s.
 - Tranco `947L2`: 500.000 domínios processados, 499.985 URLs novas.
-- Total coletado: **534.203 URLs únicas**.
+- Total coletado antes da Open Page Rank: **534.203 URLs únicas**.
+- Open Page Rank processou 880.000 domínios antes da parada; total final do acervo: **1.189.191 URLs únicas**.
+- Snapshot em 28/11/2026 02:31 UTC: **116.503 sites testados**, **1.072.688 na fila**, **41.092 erros de rede** e **75.411 respostas HTTP classificadas**.
 - Lote de 500.000 testes iniciado com 128 workers e timeout de 6 s.
 - Último total concluído antes desse lote: **29.003 tentativas**, sendo **24.749 respostas HTTP classificadas** e **4.254 erros de rede**.
+- O lote antigo foi interrompido após **76.500 novas tentativas**; total acumulado documentado: **105.503 tentativas**.
+- Novo teste em lotes de 5.000 iniciado com 96 workers globais e limite de 2 por origem.
 - Classes: 9.490 sem sinal; 5.750 loja/atendimento; 2.821 paywall; 2.562 bloqueados; 1.481 chats sem login; 1.359 login; 769 geradores; 517 indisponíveis.
 
 > Esses números são o registro anterior à correção da classificação e das proteções SSRF. O lote em andamento não foi revalidado nesta alteração; as classes históricas não devem ser comparadas diretamente com resultados novos.
@@ -31,7 +35,7 @@ python scripts/varredura-web.py --collect --max-repos 600 --meta 9000000
 python scripts/varredura-web.py --tranco --tranco-limit 500000 --meta 9000000
 python scripts/varredura-web.py --openpagerank --openpagerank-limit 9000000 --meta 9000000
 python scripts/varredura-web.py --commoncrawl --cc-tlds com,net,org --cc-pages 100 --cc-page-size 100 --meta 9000000
-python scripts/varredura-web.py --test --limit 20000 --workers 96 --timeout 8 --meta 9000000
+python scripts/varredura-web.py --test --limit 20000 --batch-size 5000 --workers 96 --per-origin 2 --timeout 8 --meta 9000000
 python scripts/varredura-web.py --meta 9000000
 ```
 
@@ -53,8 +57,9 @@ Os testes usam SQLite temporário e DNS simulado; não fazem coleta nem requisi�
 - **Heurística somente em sucesso:** o corpo só alimenta sinais em respostas `2xx`. Scripts, estilos, comentários, templates e tags são removidos antes das heurísticas; corpos de `HTTPError` não geram paywall/login/captcha.
 - **SSRF nas entradas:** somente HTTP(S), sem credenciais; localhost, nomes sem domínio, sufixos internos/reservados e literais IP não públicos são recusados.
 - **SSRF no DNS e nos saltos:** todos os endereços resolvidos precisam ser públicos; falha de resolução bloqueia o pedido. Cada redirecionamento é validado antes de abrir o destino seguinte, inclusive nas coletas.
-- **Progresso verificável:** `tentativas` conta registros reais em estado `testado` ou `erro`. `meta_atingida` só é verdadeiro com URL no banco e tentativas suficientes; estar na fila não conta como concluído.
-- **Retomada:** `--limit`, `--tranco-limit`, `--cc-pages` e `--cc-page-size` continuam limitando cada rodada. O SQLite com WAL preserva fila e resultados; a meta não elimina esses limites nem simula um lote.
+- **Progresso verificável:** `tentativas` soma a coluna `tentativas` (inclui reexecuções); `sites_testados` conta URLs únicas em estado `testado` ou `erro`. A meta de sites usa `sites_testados`; estar na fila não conta como concluído.
+- **Concorrência por origem:** `--per-origin` limita requisições simultâneas ao mesmo host (padrão 2), além do teto global de `--workers`.
+- **Retomada:** `--limit`, `--batch-size`, `--tranco-limit`, `--cc-pages` e `--cc-page-size` continuam limitando cada rodada. O teste processa a fila em lotes internos (padrão 5.000), evitando criar milhões de futures na memória. O SQLite com WAL preserva fila e resultados; a meta não elimina esses limites nem simula um lote.
 
 ## Fontes
 
@@ -70,3 +75,4 @@ Os testes usam SQLite temporário e DNS simulado; não fazem coleta nem requisi�
 - Sites podem mudar layout, exigir login ou impor cota depois do teste.
 - O Common Crawl pode responder 503/limitar requisições; o banco permite retomar depois.
 - A validação DNS é fail-closed, mas não elimina uma corrida de rebinding entre a validação e a conexão nem o comportamento de um proxy de ambiente. Não execute o script em rede sem confiar no resolvedor/proxy local.
+- O limite por origem usa o host da URL da fila; um redirect validado pode mudar o destino, e a concorrência nesse segundo host não tem semáforo próprio.

@@ -143,7 +143,7 @@ async function* executarWebGPU(prompt) {
 async function* executarPorRota(rota, prompt, signal) {
   if (rota === 'pollinations-text-api') { yield* streamPollinations(prompt, signal); return; }
   if (rota === 'webgpu-local') { yield* executarWebGPU(prompt); return; }
-  const d = await extensao.executarRota(rota, prompt);
+  const d = await extensao.executarRota(rota, prompt, 100000, signal);
   if (!d?.ok) throw new Error(d?.erro || 'extensão não concluiu a rota');
   const texto = String(d.texto || '').trim();
   if (!texto) throw new Error('a aba devolveu resposta vazia');
