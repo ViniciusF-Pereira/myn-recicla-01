@@ -23,6 +23,8 @@ Data: 2026-11-28 (UTC).
 - Home: 190 plugins, sticky header, sem imagens quebradas ou falhas de rede.
 - QA de navegador: `qa-home.mjs`, `qa-playground-studio.mjs`, `qa-sse-widgets.mjs`, `qa-sse-reconnect.mjs` e `qa-planilha.mjs`.
 - Os `net::ERR_FAILED` do estúdio e da reconexão são abortos provocados pelo próprio QA para testar fallback e repetição.
+- GitHub Actions: `Validar Myn Recicla` e `Extensão e testes` concluíram com sucesso para o commit `5c31580`.
+- Release `v1.3.1` publicada; download do ZIP respondeu HTTP 200 com 133.944 bytes e SHA256 igual ao artefato local.
 
 ## Artefatos
 

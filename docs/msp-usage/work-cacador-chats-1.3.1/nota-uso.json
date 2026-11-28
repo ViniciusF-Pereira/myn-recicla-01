@@ -6,17 +6,17 @@
   "session_id": "ses_dfb7e44bbffepzBlwFy3j0hcSl",
   "status": "completed",
   "started_at": "2026-11-28T03:29:06Z",
-  "finished_at": "2026-11-28T05:38:09Z",
+  "finished_at": "2026-11-28T05:46:07Z",
   "letter_sha256": "b3d928283df699be813d175a4ba490b187997bd78542727c6a4dd1fc38fe2745",
   "receipts": [
     {
       "path": "receipts/validacao-local.md",
-      "sha256": "936514ae4d9edfab40e4fb26080654abe9113eaa45b3efb280ab1000d996ba4b"
+      "sha256": "4d86b54b8d5d37558284040806132e13ad0cee241964512cf6f6cf9af8155e2c"
     }
   ],
   "events": [
     {
-      "id": "sha256:936514ae4d9edfab40e4fb26080654abe9113eaa45b3efb280ab1000d996ba4b",
+      "id": "sha256:4d86b54b8d5d37558284040806132e13ad0cee241964512cf6f6cf9af8155e2c",
       "route": "local:node-test+edge-acceptance+python-offline+browser-qa+benchmark",
       "status": "passed",
       "receipt": "receipts/validacao-local.md"
@@ -31,5 +31,5 @@
     "cost": { "value": null, "unit": "USD", "source": "sem recibo de custo MSP", "state": "unknown" }
   },
   "savings": null,
-  "notes": "Os 89 testes Node, 25 aceites da extensão, 24 testes Python, QA de navegador e benchmark são validação local do produto, não chamadas MSP. O benchmark é baseline do Myn, sem comparação direta paga com o ChatGPT. A coleta de novas URLs não foi retomada; o acervo permanece em 1.189.191 URLs. O render do vídeo promocional continua aguardando aprovação."
+  "notes": "Os 89 testes Node, 25 aceites da extensão, 24 testes Python, QA de navegador e benchmark são validação local do produto, não chamadas MSP. O benchmark é baseline do Myn, sem comparação direta paga com o ChatGPT. A coleta de novas URLs não foi retomada; o acervo permanece em 1.189.191 URLs. A release v1.3.1 foi publicada com CI verde e ZIP verificável. O render do vídeo promocional continua aguardando aprovação."
 }
